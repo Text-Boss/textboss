@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TEXT BOSS / BLACK</title>
+
+<style>
+:root{
+  --bg:#0b0e14;
+  --panel:#0f1320;
+  --panel2:#14182a;
+  --text:#c9d1d9;
+  --muted:#8b949e;
+  --accent:#7ee787;
+  --accent2:#58a6ff;
+  --shadow: 0 20px 60px rgba(0,0,0,.6);
+  --radius: 10px;
+  --mono: Consolas, Monaco, 'Courier New', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);font-family:var(--mono);color:var(--text)}
+a{color:inherit;text-decoration:none}
+
+.container{width:min(820px, calc(100% - 36px)); margin: 60px auto 120px;}
+.editor{background:var(--panel);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;border:1px solid rgba(255,255,255,.05);}
+.topbar{background:#161b2b;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.05);}
+.left{display:flex;align-items:center;gap:14px;}
+.dots span{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;}
+.red{background:#ff5f56}.yellow{background:#ffbd2e}.green{background:#27c93f}
+.title{font-weight:700;letter-spacing:1px;color:var(--accent2)}
+.nav{display:flex;gap:10px;align-items:center}
+.pill{border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.18);padding:7px 10px;border-radius:999px;font-size:12px;color:var(--muted)}
+.pill b{color:var(--accent)}
+.content{padding:24px;line-height:1.65}
+.keyword{color:var(--accent2)} .string{color:var(--accent)} .comment{color:var(--muted)}
+hr.sep{border:0;border-top:1px dashed rgba(88,166,255,.35);margin:18px 0}
+
+.console{background:rgba(0,0,0,.20);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;margin-top:14px}
+.line{display:flex;gap:10px;align-items:flex-start;font-size:13px}
+.prompt{color:var(--accent)} .cmd{color:var(--text)} .out{color:var(--muted)} .out b{color:var(--text)}
+
+.cursor{display:inline-block;width:10px;height:16px;margin-left:6px;vertical-align:-2px;background:var(--accent);opacity:1;animation:blink 1s steps(1) infinite;border-radius:2px}
+@keyframes blink{50%{opacity:0}}
+
+.priceRow{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:14px;border-radius:10px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.06);margin-top:12px}
+.priceBox{text-align:right;min-width:160px}
+.price{font-size:18px;color:var(--text)}
+.per{font-size:12px;color:var(--muted)}
+
+.btn{display:inline-block;margin-top:10px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.10);background:rgba(20,24,42,.9);font-size:12px;color:var(--text);cursor:pointer;transition:border-color .15s ease, transform .15s ease;user-select:none}
+.btn:hover{border-color:rgba(126,231,135,.45);transform:translateY(-1px)}
+.btn.primary{border-color:rgba(126,231,135,.35)}
+.btn.primary:hover{border-color:rgba(126,231,135,.75)}
+
+.sticky{position:fixed;left:0;right:0;bottom:0;background:rgba(15,19,32,.92);border-top:1px solid rgba(88,166,255,.25);backdrop-filter:blur(10px);padding:12px 14px;z-index:999}
+.stickyInner{width:min(820px, calc(100% - 36px));margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stickyText{font-size:12px;color:var(--muted)} .stickyText b{color:var(--text)}
+.stickyActions{display:flex;gap:10px;flex-wrap:wrap}
+
+@media (max-width: 820px){
+  .priceRow{flex-direction:column;align-items:flex-start}
+  .priceBox{text-align:left}
+  .stickyInner{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <div class="editor">
+    <div class="topbar">
+      <div class="left">
+        <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
+        <div class="title">TEXT BOSS / BLACK</div>
+      </div>
+      <div class="nav">
+        <a class="pill" href="index.html">← home</a>
+        <span class="pill">tier: <b>black</b></span>
+      </div>
+    </div>
+
+    <div class="content">
+      <p class="comment">// BLACK — For High-Risk, No-Margin-for-Error Moments</p>
+
+      <div class="console">
+        <div class="line">
+          <span class="prompt">$</span>
+          <span class="cmd" data-typewriter data-speed="9">textboss black --purpose</span>
+          <span class="cursor" aria-hidden="true"></span>
+        </div>
+        <div class="line"><span class="out">→</span><span class="out"><b>BLACK isn’t about communication style. It’s about exposure.</b> The moment a client becomes hostile. The signal that a dispute may escalate. The message that feels like it could be forwarded, quoted, or misinterpreted later.</span></div>
+        <div class="line"><span class="out">→</span><span class="out">Text Boss BLACK exists for situations where wording, tone, and restraint matter more than speed or persuasion. Built for moments where one sentence can cost revenue or reputation.</span></div>
+        <div class="line"><span class="out">→</span><span class="out">Every response is designed to: reduce interpretive risk, maintain professional records, avoid unnecessary statements, and close engagement cleanly.</span></div>
+        <div class="line"><span class="out">→</span><span class="out">No escalation. No emotional language. No loose phrasing.</span></div>
+      </div>
+
+      <hr class="sep">
+
+      <p><span class="keyword">Who it’s for:</span> high-ticket operators and leaders who need calm authority under pressure and zero ambiguity in communication. For business owners who understand that one poorly chosen message can create more risk than silence ever would.</p>
+
+      <p><span class="keyword">What it does:</span> provides high-restraint responses, premium positioning language, and controlled-urgency messaging responses designed to close conversations cleanly and prevent further escalation.</p>
+
+      <p><span class="keyword">Why users benefit:</span> you keep the frame, limit interpretive risk, and prevent clients from steering conversations through emotion or manufactured urgency. Fewer high-stakes missteps, calmer responses under pressure, and language that closes situations without escalation or unnecessary statements.</p>
+
+      <hr class="sep">
+
+      <p class="comment">// What you get (includes everything in Core + Pro)</p>
+      <div class="console">
+        <div class="line"><span class="out">→</span><span class="out"><b>Premium dominance</b> high-ticket certainty without over-explaining or discount spirals</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>Hard resets</b> language to restate/rewrite terms, reset expectations, and close reopened discussions to regain leverage</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>Conflict enders</b> calm, surgical, final. Designed to conclude—not prolong—tense exchanges</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>Reputation protection</b> professional, defensible tone under attack (when communication is under scrutiny)</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>Silence discipline</b> guidance on what not to say when saying less is the safest move</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>Screenshot-safe language</b> responses designed to hold up when forwarded, quoted, or read out of context</span></div>
+      </div>
+
+      <hr class="sep">
+
+      <div class="priceRow">
+        <div>
+          <h4><span class="string">Black</span> — $199/month</h4>
+          <p class="comment" style="margin:0;">Best for: high-ticket, high-stakes situations where precision and restraint matter more than performative politeness.</p>
+        </div>
+        <div class="priceBox">
+          <div class="price">$199 <span class="per">/mo</span></div>
+          <button type="button" class="btn primary" data-checkout="https://buy.stripe.com/test_9B6eVe6EGbxT4C9eUyebu02">Buy Black</button>
+          <div class="per" style="margin-top:8px;">Secure checkout via Stripe</div>
+        </div>
+      </div>
+
+      <hr class="sep">
+
+      <p class="comment">// PRO vs BLACK — The Line Most People Don’t See Until They Cross It</p>
+      <div class="console">
+        <div class="line"><span class="out">→</span><span class="out"><b>PRO</b> helps you manage conversations. <b>BLACK</b> exists for when conversations become liabilities.</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>PRO handles:</b> scope creep, routine pushback, ongoing negotiations, keeping things professional.</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>BLACK handles:</b> hostility, pressure, escalation, screenshot-risk situations, emotional manipulation, ending engagement without reopening doors.</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>PRO</b> keeps things orderly. <b>BLACK</b> prevents things from becoming evidence.</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>The difference that matters:</b> PRO helps you say the right thing. BLACK helps you avoid saying the wrong thing.</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>PRO:</b> Variants, follow-ups, boundary language. <b>BLACK:</b> High-restraint wording, no explanations, no emotional leakage.</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>PRO</b> optimizes communication. <b>BLACK</b> minimizes damage.</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>PRO</b> assumes good intent. <b>BLACK</b> assumes nothing.</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>PRO</b> works early, while relationships still matter. <b>BLACK</b> works under pressure, when restraint matters more than resolution.</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>PRO</b> is proactive. <b>BLACK</b> is protective.</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>PRO</b> helps you move forward. <b>BLACK</b> helps you stop.</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>PRO:</b> “Here’s what to send next.” <b>BLACK:</b> “This ends here.”</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>PRO</b> keeps momentum. <b>BLACK</b> creates finality.</span></div>
+        <div class="line"><span class="out">→</span><span class="out">Most businesses don’t start with BLACK. They upgrade when: a message gets reread too carefully, a reply feels screenshot-worthy, and silence suddenly feels safer than responding.</span></div>
+        <div class="line"><span class="out">→</span><span class="out">That’s not a feature gap. That’s a risk shift.</span></div>
+      </div>
+
+      <p class="comment" style="margin-top:14px;">
+        // Want to compare again? <a href="index.html#pricing" class="string">Pricing</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="sticky">
+  <div class="stickyInner">
+    <div class="stickyText"><b>Black</b> is for “this ends here” conversations.</div>
+    <div class="stickyActions">
+      <button type="button" class="btn primary" data-checkout="https://buy.stripe.com/test_9B6eVe6EGbxT4C9eUyebu02">Buy Black</button>
+      <a class="btn" href="index.html#pricing">Compare tiers</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const nodes = document.querySelectorAll("[data-typewriter]");
+  nodes.forEach((el) => {
+    const full = el.textContent;
+    const speed = Number(el.getAttribute("data-speed") || 14);
+    el.textContent = "";
+    let i = 0;
+    const tick = () => {
+      el.textContent = full.slice(0, i);
+      i++;
+      if (i <= full.length) setTimeout(tick, speed);
+    };
+    tick();
+  });
+})();
+
+(function () {
+  const btns = document.querySelectorAll("[data-checkout]");
+  btns.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const url = (btn.getAttribute("data-checkout") || "").trim();
+      if (!url) {
+        e.preventDefault();
+        alert("Checkout link missing. Add a Stripe Checkout URL to data-checkout.");
+        return;
+      }
+      window.location.href = url;
+    });
+  });
+})();
+</script>
+</body>
+</html>
