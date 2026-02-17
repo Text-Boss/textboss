@@ -1,0 +1,25 @@
+{
+  "name": "textboss",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Text-Boss/textboss.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Text-Boss/textboss/issues"
+  },
+  "homepage": "https://github.com/Text-Boss/textboss#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
+    "stripe": "^20.3.1"
+  }
+}
