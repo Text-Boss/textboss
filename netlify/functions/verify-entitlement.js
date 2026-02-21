@@ -1,26 +1,34 @@
+const { createClient } = require("@supabase/supabase-js");
+
+function json(statusCode, obj) {
+  return {
+    statusCode,
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store",
+    },
+    body: JSON.stringify(obj),
+  };
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      body: "Method Not Allowed"
-    };
+    return json(405, { ok: false, error: "method_not_allowed" });
   }
 
-  const body = JSON.parse(event.body || "{}");
-
-  // MCP sends arguments inside params.arguments
-  const email = body?.params?.arguments?.email;
-
-  if (!email) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({
-        error: "Email is required"
-      })
-    };
+  let body;
+  try {
+    body = event.body ? JSON.parse(event.body) : {};
+  } catch {
+    return json(400, { ok: false, error: "invalid_json" });
   }
 
-  const { createClient } = require("@supabase/supabase-js");
+  const emailRaw = (body.email || "").toString().trim();
+  if (!emailRaw) {
+    return json(400, { ok: false, error: "missing_email" });
+  }
+
+  const email = emailRaw.toLowerCase();
 
   const supabase = createClient(
     process.env.SUPABASE_URL,
@@ -28,31 +36,32 @@ exports.handler = async (event) => {
   );
 
   const { data, error } = await supabase
-    .from("subscriptions")
-    .select("*")
+    .from("entitlements")
+    .select("email, entitled_tier, subscription_status, current_period_end, updated_at")
     .eq("email", email)
-    .eq("subscription_status", "active")
-    .single();
+    .maybeSingle();
 
-  if (error || !data) {
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        result: {
-          ok: false,
-          tier: null
-        }
-      })
-    };
+  if (error) {
+    return json(200, { ok: false, error: "db_error", detail: error.message });
   }
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      result: {
-        ok: true,
-        tier: data.tier
-      }
-    })
-  };
+  if (!data) {
+    return json(200, { ok: false, error: "not_found" });
+  }
+
+  const status = (data.subscription_status || "").toLowerCase();
+  const allowed = new Set(["active", "trialing"]);
+
+  if (!allowed.has(status)) {
+    return json(200, { ok: false, error: "not_active", subscription_status: data.subscription_status });
+  }
+
+  return json(200, {
+    ok: true,
+    email: data.email,
+    tier: data.entitled_tier,
+    subscription_status: data.subscription_status,
+    current_period_end: data.current_period_end,
+    updated_at: data.updated_at,
+  });
 };
