@@ -5,21 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TEXT BOSS</title>
 
-<link rel="icon" href="/favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="/favicon.png">
-
 <style>
 :root{
   --bg:#0b0e14;
   --panel:#0f1320;
   --panel2:#14182a;
-  --panel3:#0c1220;
   --border: rgba(255,255,255,.07);
 
   --text:#e5e7eb;
   --muted:#9aa4b2;
 
-  /* Terminal palette (tight + premium) */
   --green:#22c55e;
   --amber:#f59e0b;
   --cyan:#22d3ee;
@@ -30,48 +25,72 @@
   --shadow: 0 20px 60px rgba(0,0,0,.6);
   --radius: 12px;
   --mono: Consolas, Monaco, 'Courier New', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --pad: clamp(14px, 2.5vw, 24px);
+  --gap: clamp(10px, 2vw, 16px);
+  --container: min(980px, calc(100% - 28px));
 }
 
 *{box-sizing:border-box}
 html,body{height:100%}
+
 body{
   margin:0;
-  background: radial-gradient(1200px 600px at 10% 0%, rgba(34,211,238,.07), transparent 60%),
-              radial-gradient(900px 500px at 90% 10%, rgba(167,139,250,.06), transparent 55%),
-              var(--bg);
+  background:
+    radial-gradient(1200px 600px at 10% 0%, rgba(34,211,238,.07), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(167,139,250,.06), transparent 55%),
+    var(--bg);
   font-family: var(--mono);
   color: var(--text);
+  overflow-x:hidden;
+  padding-bottom: 92px;
 }
 
 a{color:inherit;text-decoration:none}
+
 .container{
-  width:min(980px, calc(100% - 36px));
-  margin: 54px auto 120px;
+  width:var(--container);
+  margin: clamp(18px, 4vw, 54px) auto 120px;
 }
 
 .editor{
   background: var(--panel);
   border-radius: 10px;
   box-shadow: var(--shadow);
-  overflow:hidden;
+  overflow: hidden;
   border: 1px solid var(--border);
 }
 
 .topbar{
   background: #111827;
-  padding: 10px 16px;
+  padding: 10px 14px;
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:space-between;
   gap:12px;
   border-bottom: 1px solid var(--border);
+  flex-wrap:wrap;
 }
 
-.left{display:flex;align-items:center;gap:14px;min-width:0}
-.dots{display:flex;align-items:center}
+.left{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  min-width:0;
+  flex: 1 1 360px;
+}
+
+.dots{
+  display:flex;
+  align-items:center;
+  flex:0 0 auto;
+  margin-top:3px;
+}
 .dots span{
   display:inline-block;
-  width:10px;height:10px;border-radius:50%;
+  width:10px;
+  height:10px;
+  border-radius:50%;
   margin-right:6px;
 }
 .red{background:#ff5f56}
@@ -85,19 +104,24 @@ a{color:inherit;text-decoration:none}
   flex-wrap:wrap;
   min-width:0;
 }
+
 .title{
-  font-weight:800;
+  font-weight:900;
   letter-spacing:1px;
   color: var(--text);
+  font-size: clamp(14px, 2.2vw, 16px);
   white-space:nowrap;
 }
+
 .subtitle{
   font-weight:700;
   color: var(--muted);
-  font-size: 12px;
+  font-size: clamp(10px, 1.8vw, 12px);
   letter-spacing:.4px;
-  white-space:nowrap;
+  line-height:1.3;
+  white-space:normal;
 }
+
 .tok-green{color: var(--green)}
 .tok-amber{color: var(--amber)}
 .tok-cyan{color: var(--cyan)}
@@ -106,7 +130,15 @@ a{color:inherit;text-decoration:none}
 .tok-muted{color: var(--muted)}
 .tok-danger{color: var(--danger)}
 
-.nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.nav{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  flex: 0 1 auto;
+}
+
 .pill{
   border:1px solid rgba(255,255,255,.10);
   background: rgba(0,0,0,.20);
@@ -114,29 +146,33 @@ a{color:inherit;text-decoration:none}
   border-radius: 999px;
   font-size: 12px;
   color: var(--muted);
+  white-space:nowrap;
 }
 .pill b{color:var(--green)}
 
 .content{
-  padding: 22px 24px 28px;
+  padding: var(--pad);
   line-height:1.65;
 }
 
 .section{
-  margin-top: 18px;
-  padding: 18px;
+  margin-top: 14px;
+  padding: clamp(14px, 2vw, 16px);
   border-radius: var(--radius);
   background: rgba(0,0,0,.18);
   border: 1px solid var(--border);
 }
-.section.tight{padding: 16px}
+.section.tight{padding: clamp(12px, 1.8vw, 14px)}
+
 .sectionHeader{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:space-between;
   gap:12px;
   margin-bottom: 10px;
+  flex-wrap:wrap;
 }
+
 .hlabel{
   font-size: 12px;
   color: var(--muted);
@@ -146,27 +182,24 @@ a{color:inherit;text-decoration:none}
 .hlabel b{color: var(--text)}
 .hlabel .tag{color: var(--cyan)}
 
-h1,h2,h3{margin:0}
+h1,h2,h3,h4{margin:0}
 h1{
-  font-size: 22px;
+  font-size: clamp(20px, 4vw, 26px);
   line-height: 1.25;
   letter-spacing: .2px;
 }
 h2{
-  font-size: 16px;
+  font-size: clamp(15px, 3vw, 18px);
   color: var(--text);
+}
+h3{
+  font-size: clamp(14px, 2.6vw, 15px);
 }
 p{margin: 10px 0}
 .small{font-size:12px;color:var(--muted)}
 .kicker{
   color: var(--muted);
-  font-size: 12px;
-}
-
-hr.sep{
-  border:0;
-  border-top: 1px dashed rgba(34,211,238,.25);
-  margin: 18px 0;
+  font-size: clamp(12px, 2vw, 13px);
 }
 
 .console{
@@ -175,11 +208,21 @@ hr.sep{
   border-radius: 12px;
   padding: 14px;
 }
-.line{display:flex;gap:10px;align-items:flex-start;font-size:13px}
+
+.line{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  font-size: clamp(11px, 2vw, 13px);
+  word-break: break-word;
+  overflow-wrap:anywhere;
+}
+
 .prompt{color: var(--green)}
 .cmd{color: var(--text)}
 .out{color: var(--muted)}
 .out b{color: var(--text)}
+
 .cursor{
   display:inline-block;
   width: 10px;
@@ -196,11 +239,8 @@ hr.sep{
 .grid2{
   display:grid;
   grid-template-columns: 1.15fr .85fr;
-  gap: 14px;
+  gap: var(--gap);
   align-items: start;
-}
-@media (max-width: 900px){
-  .grid2{grid-template-columns:1fr}
 }
 
 .bullets{
@@ -212,13 +252,14 @@ hr.sep{
   display:flex;
   gap:10px;
   align-items:flex-start;
-  font-size: 13px;
+  font-size: clamp(12px, 2vw, 13px);
   color: var(--muted);
   margin: 8px 0;
 }
 .bullets .dot{
   flex:0 0 auto;
-  width: 8px; height: 8px;
+  width: 8px;
+  height: 8px;
   border-radius: 2px;
   margin-top: 6px;
   background: rgba(34,211,238,.9);
@@ -231,6 +272,7 @@ hr.sep{
   flex-wrap:wrap;
   margin-top: 12px;
 }
+
 .btn{
   display:inline-block;
   padding: 10px 12px;
@@ -242,8 +284,13 @@ hr.sep{
   cursor:pointer;
   transition: border-color .15s ease, transform .15s ease, filter .15s ease;
   user-select:none;
+  text-align:center;
 }
-.btn:hover{border-color: rgba(34,211,238,.55);transform: translateY(-1px);filter: brightness(1.02)}
+.btn:hover{
+  border-color: rgba(34,211,238,.55);
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
 .btn.primary{
   border-color: rgba(34,211,238,.35);
   background: linear-gradient(180deg, rgba(34,211,238,.12), rgba(20,24,42,.92));
@@ -254,26 +301,20 @@ hr.sep{
   background: linear-gradient(180deg, rgba(34,197,94,.12), rgba(20,24,42,.92));
 }
 .btn.green:hover{border-color: rgba(34,197,94,.75)}
-.btn.ghost{
-  background: rgba(0,0,0,.18);
-}
+.btn.ghost{background: rgba(0,0,0,.18)}
 .btn:focus-visible{
   outline:none;
   box-shadow: 0 0 0 3px rgba(34,211,238,.18);
 }
 
 .cards{
-  display:flex;
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap:12px;
   margin-top: 12px;
 }
-@media (max-width: 900px){
-  .cards{flex-direction:column}
-}
 
-/* CLICKABLE CARD HARDENING */
 .card{
-  flex:1;
   background: rgba(20,24,42,.85);
   border-radius: var(--radius);
   padding: 16px;
@@ -284,7 +325,7 @@ hr.sep{
     0 0 0 rgba(34,211,238,0);
   transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, filter .15s ease;
   position:relative;
-  min-height: 160px;
+  min-height: 170px;
   outline: none;
   display:block;
 }
@@ -303,8 +344,11 @@ hr.sep{
     inset 0 -3px 0 rgba(34,211,238,.75),
     0 0 0 3px rgba(34,197,94,.18);
 }
-.card h3{margin:0 0 8px;font-size:15px}
-.card p{margin:0;font-size:12px;color:var(--muted)}
+.card p{
+  margin:0;
+  font-size:12px;
+  color:var(--muted);
+}
 .card .meta{
   margin-top: 10px;
   font-size: 12px;
@@ -330,9 +374,7 @@ hr.sep{
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
-@media (max-width: 900px){
-  .split{grid-template-columns:1fr}
-}
+
 .box{
   background: rgba(0,0,0,.18);
   border: 1px solid rgba(255,255,255,.08);
@@ -349,23 +391,20 @@ hr.sep{
   color: var(--muted);
   white-space: pre-wrap;
   margin:0;
+  word-break: break-word;
 }
 
 .how{
   display:grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin-top: 12px;
-}
-@media (max-width: 900px){
-  .how{grid-template-columns:1fr}
 }
 .step{
   background: rgba(0,0,0,.18);
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 12px;
   padding: 14px;
-  min-height: 120px;
 }
 .step .n{
   font-size: 12px;
@@ -384,14 +423,16 @@ hr.sep{
 }
 
 .tableWrap{
-  overflow:auto;
+  overflow-x:auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,.08);
 }
+
 table{
   width:100%;
-  border-collapse: collapse;
   min-width: 720px;
+  border-collapse: collapse;
   background: rgba(0,0,0,.12);
 }
 th, td{
@@ -426,12 +467,22 @@ td b{color: var(--text)}
   border-radius: 12px;
   background: rgba(0,0,0,.18);
   border: 1px solid rgba(255,255,255,.08);
+  flex-wrap:wrap;
 }
 .priceRow h4{margin:0 0 6px;font-size:13px}
-.priceRow .desc{margin:0;font-size:12px;color: var(--muted);max-width: 70ch}
-.priceBox{text-align:right;min-width: 180px}
+.priceRow .desc{
+  margin:0;
+  font-size:12px;
+  color: var(--muted);
+  max-width: 70ch;
+}
+.priceBox{
+  text-align:right;
+  min-width: 180px;
+}
 .price{font-size:18px;color: var(--text)}
 .per{font-size:12px;color: var(--muted)}
+
 .badge{
   display:inline-flex;
   align-items:center;
@@ -443,7 +494,10 @@ td b{color: var(--text)}
   background: rgba(0,0,0,.18);
   color: var(--muted);
 }
-.badge .k{color: rgba(34,211,238,.95); font-weight: 800}
+.badge .k{
+  color: rgba(34,211,238,.95);
+  font-weight: 800;
+}
 
 .faq{
   display:grid;
@@ -470,29 +524,80 @@ details p{
 
 .sticky{
   position: fixed;
-  left: 0; right: 0; bottom: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(15,19,32,.92);
   border-top: 1px solid rgba(34,211,238,.20);
   backdrop-filter: blur(10px);
-  padding: 12px 14px;
+  padding: 10px 14px;
   z-index: 999;
 }
 .stickyInner{
-  width:min(980px, calc(100% - 36px));
+  width:var(--container);
   margin:0 auto;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap:wrap;
 }
-.stickyText{font-size:12px;color: var(--muted)}
+.stickyText{
+  font-size:12px;
+  color: var(--muted);
+}
 .stickyText b{color: var(--text)}
-.stickyActions{display:flex;gap:10px;flex-wrap:wrap}
+.stickyActions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
 
-@media (max-width: 900px){
-  .priceRow{flex-direction:column; align-items:flex-start}
-  .priceBox{text-align:left;min-width:auto}
-  .stickyInner{flex-direction:column;align-items:flex-start}
+/* -------------------
+   Breakpoints
+------------------- */
+
+@media (max-width: 960px){
+  .grid2{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr}
+  .how{grid-template-columns:1fr}
+  .split{grid-template-columns:1fr}
+}
+
+@media (max-width: 700px){
+  .priceBox{
+    min-width: auto;
+    text-align:left;
+    width:100%;
+  }
+  .priceRow .desc{max-width:none}
+}
+
+@media (max-width: 600px){
+  .stickyActions{width:100%}
+  .stickyActions a,
+  .stickyActions button{
+    flex:1 1 calc(50% - 10px);
+  }
+}
+
+@media (max-width: 520px){
+  .container{
+    width:min(980px, calc(100% - 20px));
+  }
+  .content{padding: 14px}
+  .section{padding: 14px}
+  .btn,
+  .ctaRow .btn{
+    width:100%;
+  }
+  .nav{width:100%; justify-content:flex-start}
+  .left{flex-basis:100%}
+  .stickyInner{align-items:flex-start}
+  .stickyActions a,
+  .stickyActions button{
+    flex:1 1 100%;
+  }
 }
 </style>
 </head>
@@ -565,26 +670,18 @@ details p{
             </div>
             <div class="line">
               <span class="out">→</span>
-              <span class="out">
-                A <b>communication control system</b> for businesses that can’t afford message mistakes.
-              </span>
+              <span class="out"><b>A communication control system</b> for businesses that can’t afford message mistakes.</span>
             </div>
             <div class="line">
               <span class="out">→</span>
-              <span class="out">
-                Templates for known patterns + a tier-gated AI for real-time decisions.
-              </span>
+              <span class="out">Templates for known patterns + a tier-gated AI for real-time decisions.</span>
             </div>
             <div class="line">
               <span class="out">→</span>
-              <span class="out">
-                Built for: pricing, scope creep, timelines, pushback, escalation, conflict.
-              </span>
+              <span class="out">Built for: pricing, scope creep, timelines, pushback, escalation, conflict.</span>
             </div>
             <div class="line">
-              <span class="out tok-purple" style="font-weight:700;">
-                // say less. control more. protect everything.
-              </span>
+              <span class="out tok-purple" style="font-weight:700;">// say less. control more. protect everything.</span>
             </div>
           </div>
         </div>
@@ -728,7 +825,7 @@ details p{
         </p>
       </div>
 
-      <!-- TIERS: CLICKABLE CARDS (kept, tightened) -->
+      <!-- TIERS: CLICKABLE CARDS -->
       <div class="section tight">
         <div class="sectionHeader">
           <div class="hlabel"><span class="slashes">//</span> <b>Explore tiers</b> <span class="tag">click a card</span></div>
@@ -761,7 +858,7 @@ details p{
         </div>
       </div>
 
-      <!-- PRICING (Stripe buttons preserved) -->
+      <!-- PRICING -->
       <div class="section" id="pricing">
         <div class="sectionHeader">
           <div class="hlabel"><span class="slashes">//</span> <b>Pricing</b> <span class="tag">choose your control level</span></div>
@@ -801,10 +898,6 @@ details p{
             </div>
           </div>
         </div>
-
-        <p class="small" style="margin-top:12px;">
-          <span class="tok-muted">//</span> Stripe Checkout routes directly from these buttons.
-        </p>
       </div>
 
       <!-- FAQ -->
@@ -842,9 +935,7 @@ details p{
           <div class="hlabel"><span class="slashes">//</span> <b>Final</b> <span class="tag">stop improvising</span></div>
         </div>
         <h2>Stop negotiating against yourself.</h2>
-        <p class="kicker">
-          Choose your level of control. Use templates for patterns. Use the tier AI when it gets real.
-        </p>
+        <p class="kicker">Choose your level of control. Use templates for patterns. Use the tier AI when it gets real.</p>
         <div class="ctaRow">
           <a class="btn green" href="#pricing">View plans</a>
           <a class="btn ghost" href="#compare">Compare tiers</a>
