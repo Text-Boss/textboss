@@ -1,0 +1,1279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Text Boss - Black Prompt Templates</title>
+  <style>
+    :root {
+      --bg: #020203;
+      --surface: #0c0e11;
+      --surface2: #0f1216;
+      --line: #191d22;
+      --line-hi: #232830;
+      --text: #e4ecf2;
+      --muted: #52606d;
+      --muted-hi: #8896a4;
+      --accent: #a78bfa;
+      --accent-dim: rgba(167,139,250,.12);
+      --accent-border: rgba(167,139,250,.25);
+      --mono: Consolas, Monaco, 'Courier New', ui-monospace, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.6 var(--mono);
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 70% 25% at 50% 0%,
+          rgba(167,139,250,.06),
+          transparent);
+      padding-bottom: 80px;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      text-align: center;
+      padding: 48px 24px 32px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 32px;
+    }
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .page-header .tier-badge {
+      display: inline-block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--bg);
+      background: var(--accent);
+      padding: 3px 14px;
+      border-radius: 3px;
+      margin-bottom: 10px;
+    }
+    .page-header .meta {
+      color: var(--muted-hi);
+      font-size: 13px;
+    }
+
+    /* ── Your Details Panel ── */
+    .details-panel {
+      max-width: 780px;
+      margin: 0 auto 40px;
+      background: var(--surface);
+      border: 1px solid var(--line-hi);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .details-panel .panel-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+    }
+    .details-panel .panel-bar::before {
+      content: '>';
+      color: var(--muted);
+    }
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 20px;
+      padding: 20px;
+    }
+    .details-grid label {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted-hi);
+      margin-bottom: 4px;
+    }
+    .details-grid label .optional {
+      color: var(--muted);
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 11px;
+    }
+    .details-grid input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--line-hi);
+      border-radius: 4px;
+      padding: 8px 12px;
+      color: var(--text);
+      font: 14px var(--mono);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .details-grid input:focus {
+      border-color: var(--accent);
+    }
+    .details-grid input::placeholder {
+      color: var(--muted);
+    }
+
+    @media (max-width: 600px) {
+      .details-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Prompt Content ── */
+    .prompt-container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* Section Headers */
+    .section-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 0 10px;
+      margin-top: 36px;
+      margin-bottom: 16px;
+    }
+    .section-header:first-child { margin-top: 0; }
+    .section-header h2 {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+    }
+    .section-header .count {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+
+    /* Prompt Cards */
+    .prompt-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      margin-bottom: 14px;
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+    .prompt-card:hover {
+      border-color: var(--line-hi);
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface2);
+    }
+    .card-head .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .card-head .card-num {
+      font-size: 11px;
+      color: var(--muted);
+      margin-right: 10px;
+    }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--line-hi);
+      color: var(--muted-hi);
+      font: 11px var(--mono);
+      padding: 4px 12px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all .15s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .copy-btn.copied {
+      border-color: var(--accent);
+      color: var(--bg);
+      background: var(--accent);
+    }
+    .card-body {
+      padding: 14px 16px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+    .card-body .placeholder {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: var(--bg);
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all .2s;
+      pointer-events: none;
+      z-index: 100;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="tier-badge">Black</div>
+  <h1>Text Boss - Black Prompts</h1>
+  <div class="meta">150 send-ready templates for total client communication control</div>
+</div>
+
+<div class="details-panel">
+  <div class="panel-bar">Your Details</div>
+  <div class="details-grid">
+    <div><label>Business Name</label><input type="text" data-field="BUSINESS_NAME" placeholder="e.g. Bright Side Design"></div>
+    <div><label>Your First Name</label><input type="text" data-field="YOUR_FIRST_NAME" placeholder="e.g. Sarah"></div>
+    <div><label>Your Full Name</label><input type="text" data-field="YOUR_FULL_NAME" placeholder="e.g. Sarah Mitchell"></div>
+    <div><label>Client / Customer Name</label><input type="text" data-field="CLIENT_NAME" placeholder="e.g. James"></div>
+    <div><label>Business Phone</label><input type="text" data-field="BUSINESS_PHONE" placeholder="e.g. 0412 345 678"></div>
+    <div><label>Business Email</label><input type="text" data-field="BUSINESS_EMAIL" placeholder="e.g. hello@brightside.com"></div>
+    <div><label>Website <span class="optional">(optional)</span></label><input type="text" data-field="WEBSITE" placeholder="e.g. www.brightside.com"></div>
+    <div><label>ABN / Business Number <span class="optional">(optional)</span></label><input type="text" data-field="ABN" placeholder="e.g. 12 345 678 901"></div>
+    <div><label>City / Location <span class="optional">(optional)</span></label><input type="text" data-field="CITY" placeholder="e.g. Melbourne"></div>
+  </div>
+</div>
+
+<div class="prompt-container" id="prompts">
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- CORE: APPOINTMENT SCHEDULING (8)            -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Appointment Scheduling &amp; Confirmation<span class="count">8 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Appointment Scheduling">
+    <div class="card-head"><span><span class="card-num">#1</span><span class="card-title">Offering Two Time Slots</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, {{YOUR_FIRST_NAME}} here from {{BUSINESS_NAME}}. I can meet on [DATE] at [TIME] or [DATE] at [TIME]. Let me know which one works and I'll confirm your booking. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Appointment Scheduling">
+    <div class="card-head"><span><span class="card-num">#2</span><span class="card-title">Confirming an In-Home Service Call</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, this confirms your in-home service appointment with {{BUSINESS_NAME}} on [DATE] at [TIME]. Please ensure the [AREA] is accessible when I arrive. If you need to cancel or reschedule, let me know at {{BUSINESS_PHONE}} with at least 24 hours notice. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Appointment Scheduling">
+    <div class="card-head"><span><span class="card-num">#3</span><span class="card-title">Appointment Reminder - 48 Hours</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, this is a reminder that your appointment with {{BUSINESS_NAME}} is in two days, on [DATE] at [TIME]. Please reply to confirm you'll be there. If you need to change the time, contact me before [CUTOFF TIME] tomorrow. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Appointment Scheduling">
+    <div class="card-head"><span><span class="card-num">#4</span><span class="card-title">Rescheduling Due to Weather</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, due to weather conditions, I need to reschedule our outdoor appointment originally set for [DATE]. I'm proposing [NEW DATE] at [TIME] instead. Let me know if that works for you and I'll confirm it. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Appointment Scheduling">
+    <div class="card-head"><span><span class="card-num">#5</span><span class="card-title">Client Requesting Last-Minute Booking</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, thanks for reaching out. My schedule at {{BUSINESS_NAME}} is full today, but I have an opening tomorrow at [TIME]. I require a minimum of [HOURS] notice for bookings. Would tomorrow work? - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Appointment Scheduling">
+    <div class="card-head"><span><span class="card-num">#6</span><span class="card-title">Group Session Booking Confirmation</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, your group session at {{BUSINESS_NAME}} is confirmed for [DATE] at [TIME]. The session accommodates up to [NUMBER] participants. Please confirm your final headcount by [DATE] so I can prepare accordingly. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Appointment Scheduling">
+    <div class="card-head"><span><span class="card-num">#7</span><span class="card-title">Follow-Up After Client Cancelled Twice</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, I noticed this is the second time we've needed to reschedule. I understand things come up. My next available slot is [DATE] at [TIME]. If that works, I'll lock it in. Please note that future late cancellations may incur a fee as outlined in my booking terms. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Appointment Scheduling">
+    <div class="card-head"><span><span class="card-num">#8</span><span class="card-title">Sending Calendar Invite</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, I've sent a calendar invite for our meeting on [DATE] at [TIME]. Please accept it so we're both locked in. If you don't see it, check your spam folder or let me know and I'll resend to a different email. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- CORE: PAYMENT REMINDERS (8)                 -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Payment Reminders<span class="count">8 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Payment Reminders">
+    <div class="card-head"><span><span class="card-num">#9</span><span class="card-title">First Invoice Notification</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, invoice [#INVOICE] for [AMOUNT] has been sent to your email. Payment is due on [DUE DATE]. You can pay via bank transfer or the payment link in the invoice. Let me know if you have questions. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Reminders">
+    <div class="card-head"><span><span class="card-num">#10</span><span class="card-title">Payment Due Tomorrow</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, just a reminder that your payment of [AMOUNT] is due tomorrow, [DUE DATE]. If you've already arranged payment, thank you. If not, please take care of it before end of day tomorrow. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Reminders">
+    <div class="card-head"><span><span class="card-num">#11</span><span class="card-title">Payment Overdue - 10 Days</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, invoice [#INVOICE] for [AMOUNT] is now 10 days past due. Please arrange payment at your earliest convenience. If there's a problem with the invoice or a reason for the delay, let me know and we'll sort it out. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Reminders">
+    <div class="card-head"><span><span class="card-num">#12</span><span class="card-title">Confirming Payment Received</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, confirming receipt of your payment of [AMOUNT] for invoice [#INVOICE]. Everything is squared away. If you need a receipt for your records, let me know and I'll send one through. Thanks for your promptness. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Reminders">
+    <div class="card-head"><span><span class="card-num">#13</span><span class="card-title">Requesting Upfront Payment for Materials</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, before I can order materials for your project, I need a materials deposit of [AMOUNT]. This covers [MATERIALS LIST]. Once received, I'll place the order and confirm the timeline. Payment details are in the invoice I've sent to your email. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Reminders">
+    <div class="card-head"><span><span class="card-num">#14</span><span class="card-title">Work Paused Until Payment Received</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, I've paused work on your project as the milestone payment of [AMOUNT] is now overdue. I'll resume as soon as payment is received. If you're experiencing a delay, let me know and we can discuss options. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Reminders">
+    <div class="card-head"><span><span class="card-num">#15</span><span class="card-title">Subscription Renewal Reminder</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, your [SERVICE] subscription with {{BUSINESS_NAME}} renews on [DATE] for [AMOUNT]. If you'd like to make changes to your plan before renewal, let me know by [DATE]. Otherwise, it will auto-renew at the current rate. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Reminders">
+    <div class="card-head"><span><span class="card-num">#16</span><span class="card-title">Split Payment Arrangement Confirmation</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, as discussed, we've arranged a split payment for your project: [AMOUNT 1] due on [DATE 1] and [AMOUNT 2] due on [DATE 2]. I've sent separate invoices for each installment. Please make sure each one is paid by the due date. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- CORE: FOLLOW-UP AFTER NO RESPONSE (6)       -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Follow-Up After No Response<span class="count">6 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Follow-Up">
+    <div class="card-head"><span><span class="card-num">#17</span><span class="card-title">First Follow-Up After Inquiry</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, following up on your inquiry from [DATE]. I'd love to help with your project. Are you still interested in moving forward? If so, I'm available this week to discuss next steps. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Follow-Up">
+    <div class="card-head"><span><span class="card-num">#18</span><span class="card-title">Follow-Up After Sending Portfolio</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, I sent through my portfolio and some relevant examples on [DATE]. I wanted to check if you had a chance to look through them and if they're in line with what you're looking for. Happy to discuss any of the pieces in more detail. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Follow-Up">
+    <div class="card-head"><span><span class="card-num">#19</span><span class="card-title">Follow-Up on Unsigned Contract</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, checking in on the contract I sent on [DATE]. I'm holding your spot in my schedule until [DATE], but I'll need the signed agreement back before then to guarantee it. Let me know if you have any questions. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Follow-Up">
+    <div class="card-head"><span><span class="card-num">#20</span><span class="card-title">Follow-Up After Voicemail</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, I left a voicemail earlier today regarding [TOPIC]. I know phone calls aren't always convenient, so I'm following up by text. Let me know a good time to connect or just reply here with your thoughts. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Follow-Up">
+    <div class="card-head"><span><span class="card-num">#21</span><span class="card-title">Follow-Up - Feedback Overdue on Draft</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, the draft I sent on [DATE] is still awaiting your feedback. Your review is needed before I can finalize. Please send through your notes by [DATE] so we stay on schedule. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Follow-Up">
+    <div class="card-head"><span><span class="card-num">#22</span><span class="card-title">Final Attempt Before Archiving</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, this is my final follow-up regarding [TOPIC]. If I don't hear back by [DATE], I'll archive your project file. There's no pressure, and you're welcome to reach out in the future if things change. Contact me anytime at {{BUSINESS_EMAIL}}. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- CORE: SCOPE CLARIFICATION (6)               -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Scope Clarification<span class="count">6 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Scope Clarification">
+    <div class="card-head"><span><span class="card-num">#23</span><span class="card-title">Outlining What's Included in the Quote</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, to confirm, your quote from {{BUSINESS_NAME}} covers: [INCLUSIONS]. Anything not listed here would be additional and quoted separately. Please review and let me know if you'd like any changes before we start. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Clarification">
+    <div class="card-head"><span><span class="card-num">#24</span><span class="card-title">Clarifying What "Unlimited" Means</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, I want to clarify what's covered under your plan. "Unlimited" refers to [SPECIFIC ITEMS] within normal business use. It does not include [EXCLUSIONS]. If you're unsure whether something falls within scope, just ask and I'll let you know. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Clarification">
+    <div class="card-head"><span><span class="card-num">#25</span><span class="card-title">Distinguishing Between Phases of Work</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, your project has [NUMBER] phases. Phase 1 covers [PHASE 1 SCOPE]. Phase 2 covers [PHASE 2 SCOPE]. Each phase is invoiced separately. We move to the next phase after you approve the current one and payment is received. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Clarification">
+    <div class="card-head"><span><span class="card-num">#26</span><span class="card-title">Specifying What Counts as a Revision</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, a revision round at {{BUSINESS_NAME}} includes all feedback submitted in a single batch. Sending changes one at a time across multiple messages counts as multiple rounds. Please consolidate your feedback into one list per round to make the most of your included revisions. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Clarification">
+    <div class="card-head"><span><span class="card-num">#27</span><span class="card-title">Explaining the Difference Between Support and Development</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, the request you've sent is development work, not support. Support covers troubleshooting, minor text updates, and bug fixes. Building new functionality or redesigning sections requires a development quote. I can send one through if you'd like. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Clarification">
+    <div class="card-head"><span><span class="card-num">#28</span><span class="card-title">Written Scope Summary Before Starting</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, before work begins, here's a written summary of the agreed scope: [SCOPE ITEMS]. Delivery by [DATE]. Total cost: [AMOUNT]. Revisions: [NUMBER] rounds. Please reply with "confirmed" so I can start on [START DATE]. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- CORE: POLITELY DECLINING REQUESTS (6)       -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Politely Declining Requests<span class="count">6 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Declining Requests">
+    <div class="card-head"><span><span class="card-num">#29</span><span class="card-title">Declining Work During Your Leave</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, I'm currently on leave and not taking on new work until [DATE]. If your project can wait until then, I'd be happy to discuss it when I'm back. Otherwise, I can recommend a colleague. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Declining Requests">
+    <div class="card-head"><span><span class="card-num">#30</span><span class="card-title">Declining a Project That's Too Small</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, thanks for reaching out. The minimum project size at {{BUSINESS_NAME}} is [MINIMUM AMOUNT/SCOPE]. The work you've described falls below that threshold. I'd recommend [ALTERNATIVE SUGGESTION] for smaller jobs like this. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Declining Requests">
+    <div class="card-head"><span><span class="card-num">#31</span><span class="card-title">Declining to Use a Platform You Don't Support</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, I appreciate the request. I don't work on [PLATFORM/TOOL] at {{BUSINESS_NAME}}. My expertise is in [YOUR PLATFORMS]. If you'd like to discuss alternatives that I can support, I'm happy to help. Otherwise, I'd suggest finding a specialist in that platform. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Declining Requests">
+    <div class="card-head"><span><span class="card-num">#32</span><span class="card-title">Declining a Request to Work for Equity</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, I appreciate the opportunity. At this stage, {{BUSINESS_NAME}} only takes on paid engagements. I'm not in a position to accept equity or deferred compensation. If your budget allows for a paid arrangement in the future, I'd welcome the conversation. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Declining Requests">
+    <div class="card-head"><span><span class="card-num">#33</span><span class="card-title">Declining a Client Who Is Not a Good Fit</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, after reviewing your project requirements, I don't think {{BUSINESS_NAME}} is the best fit for what you need. I'd recommend reaching out to someone who specializes in [AREA]. I want to make sure you get the best result possible. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Declining Requests">
+    <div class="card-head"><span><span class="card-num">#34</span><span class="card-title">Declining a Request for Source Files Not in Agreement</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, your agreement includes the final deliverables in [FORMAT]. Source files are not included at this price point. If you'd like to purchase the source files, I can provide them for an additional [AMOUNT]. Let me know how you'd like to proceed. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- CORE: DELIVERY / TIMELINE UPDATES (6)       -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Delivery / Timeline Updates<span class="count">6 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Delivery Updates">
+    <div class="card-head"><span><span class="card-num">#35</span><span class="card-title">Confirming Start After Deposit Clears</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, your deposit has cleared and I'm starting work on your project today. First deliverable is expected by [DATE]. I'll be in touch with updates along the way. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Delivery Updates">
+    <div class="card-head"><span><span class="card-num">#36</span><span class="card-title">Weekly Progress Update</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, here's your weekly update. This week I completed [COMPLETED ITEMS]. Next week I'll be working on [UPCOMING ITEMS]. We're on track for the [DATE] deadline. No action needed from your end right now. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Delivery Updates">
+    <div class="card-head"><span><span class="card-num">#37</span><span class="card-title">Delay Due to Illness</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, I'm unwell and need to push your delivery date from [ORIGINAL DATE] to [NEW DATE]. I want to make sure the quality of work meets the standard you expect. I'll keep you updated on my progress once I'm back. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Delivery Updates">
+    <div class="card-head"><span><span class="card-num">#38</span><span class="card-title">Requesting Client Sign-Off to Proceed</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, I've completed [PHASE/SECTION] and need your sign-off before moving to the next step. Please review what I've sent and reply with your approval or any changes by [DATE]. I can't proceed until I have your go-ahead. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Delivery Updates">
+    <div class="card-head"><span><span class="card-num">#39</span><span class="card-title">Notifying of Ahead-of-Schedule Progress</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, things are moving faster than expected. I should have your [DELIVERABLE] ready by [EARLIER DATE] instead of [ORIGINAL DATE]. I'll send it over as soon as it's ready for review. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Delivery Updates">
+    <div class="card-head"><span><span class="card-num">#40</span><span class="card-title">Delivery Held Pending Client Materials</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, I'm still waiting on [ITEM] from you to continue with your project. The original deadline of [DATE] assumes I receive it by [REQUIRED DATE]. Any delay on your end will push the final delivery date forward. Please send it through as soon as you can. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- CORE: END-OF-PROJECT WRAP-UP (5)            -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="section-header"><h2>End-of-Project Wrap-Up<span class="count">5 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Wrap-Up">
+    <div class="card-head"><span><span class="card-num">#41</span><span class="card-title">Final Files Sent + Backup Reminder</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, all final files have been sent to your email. Please download and back them up within [TIMEFRAME]. After that, I won't be responsible for hosting or storing your project files. Let me know if anything is missing. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Wrap-Up">
+    <div class="card-head"><span><span class="card-num">#42</span><span class="card-title">Asking for Social Media Tag</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, now that your project is live, if you share it online I'd appreciate a tag or mention of {{BUSINESS_NAME}}. It helps me reach new clients and I'd love to share your project on my pages too, with your permission. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Wrap-Up">
+    <div class="card-head"><span><span class="card-num">#43</span><span class="card-title">Closing Retainer Engagement</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, as discussed, your retainer with {{BUSINESS_NAME}} will conclude on [END DATE]. I'll complete any outstanding tasks before then. If you'd like to re-engage in the future, I'd be happy to set up a new arrangement. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Wrap-Up">
+    <div class="card-head"><span><span class="card-num">#44</span><span class="card-title">Project Retrospective Summary</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, your project is complete. Here's a quick summary: [DELIVERABLES COMPLETED]. Total investment: [AMOUNT]. If you'd like a follow-up project or ongoing support, I'd be glad to discuss it. Thanks for the opportunity. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Wrap-Up">
+    <div class="card-head"><span><span class="card-num">#45</span><span class="card-title">Seasonal Re-Engagement Offer</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, it's been a while since our last project together. If you have any upcoming needs for [SERVICE], I have availability opening up in [MONTH]. Past clients get priority booking. Let me know if you'd like to chat. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- CORE: NEW CLIENT ONBOARDING (5)             -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="section-header"><h2>New Client Onboarding<span class="count">5 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Onboarding">
+    <div class="card-head"><span><span class="card-num">#46</span><span class="card-title">Welcome + What to Expect</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, welcome to {{BUSINESS_NAME}}. I'm {{YOUR_FIRST_NAME}} and I'll be working with you on this project. Here's what happens next: you'll receive a questionnaire, then a scope document for approval, and once your deposit clears, we start. Expect each step to take [TIMEFRAME]. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Onboarding">
+    <div class="card-head"><span><span class="card-num">#47</span><span class="card-title">Requesting Existing Materials</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, if you have any existing materials related to this project (logos, brand guidelines, photos, copy, login details), please send them to {{BUSINESS_EMAIL}} by [DATE]. The more I have upfront, the smoother the process. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Onboarding">
+    <div class="card-head"><span><span class="card-num">#48</span><span class="card-title">Confirming Preferred Communication Channel</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, how would you prefer to communicate during the project? I typically use email for formal updates and text for quick questions. All project decisions should be documented in writing via email to {{BUSINESS_EMAIL}}. Let me know your preference. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Onboarding">
+    <div class="card-head"><span><span class="card-num">#49</span><span class="card-title">Sending Welcome Pack / Intro Guide</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, I've sent a welcome guide to your email. It covers my process, timelines, communication expectations, and FAQ. Please read through it before our kickoff meeting. It'll help us hit the ground running. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Onboarding">
+    <div class="card-head"><span><span class="card-num">#50</span><span class="card-title">Scheduling Kickoff Call</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">Hi {{CLIENT_NAME}}, now that the paperwork is sorted, I'd like to schedule a kickoff call. I have availability on [DATE] at [TIME] or [DATE] at [TIME]. The call will take about [DURATION] and we'll cover goals, timeline, and deliverables. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- PRO: SCOPE CREEP — FIRST BOUNDARY ENFORCEMENT (8)      -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Scope Creep &mdash; First Boundary Enforcement<span class="count">8 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Scope Creep">
+    <div class="card-head"><span><span class="card-num">#51</span><span class="card-title">Client Adding Social Posts to Website Build (Agency)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the social media content you've requested is a separate service from the website build. Your current agreement covers [WEBSITE SCOPE]. I can provide a separate quote for social content if you'd like to add it. It won't be absorbed into the existing project budget. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep">
+    <div class="card-head"><span><span class="card-num">#52</span><span class="card-title">Client Requesting Additional Event Coverage (Videographer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, your booking covers [ORIGINAL HOURS] of coverage. The additional segments you've requested would extend the shoot by [EXTRA TIME]. That's an additional [AMOUNT]. Let me know if you'd like to extend and I'll confirm the updated schedule. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep">
+    <div class="card-head"><span><span class="card-num">#53</span><span class="card-title">Client Asking for More Rooms Than Quoted (Interior Designer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the design plan covers [ORIGINAL ROOMS] as per our agreement. The additional rooms you've mentioned will require a scope extension with separate pricing. I can have an updated proposal to you by [DATE] if you'd like to expand the project. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep">
+    <div class="card-head"><span><span class="card-num">#54</span><span class="card-title">Client Requesting Detailed Reporting Not in Scope (Accountant)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the reporting you've requested goes beyond standard [BAS/TAX] preparation. Custom financial reports and analysis are available as advisory services at [RATE/HOUR]. If you'd like me to prepare these, I'll need your approval before I begin. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep">
+    <div class="card-head"><span><span class="card-num">#55</span><span class="card-title">Client Expecting Copywriting with Design (Graphic Designer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, my agreement covers design only. The copy and messaging need to be provided by you or a copywriter. If you'd like me to source copy for the project, I can arrange it through a partner, but that's an additional cost of approximately [AMOUNT]. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep">
+    <div class="card-head"><span><span class="card-num">#56</span><span class="card-title">Client Asking for Additional Fixtures Not Quoted (Plumber)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the quote covers [ORIGINAL FIXTURES/WORK]. The extra work you've asked about on [ADDITIONAL ITEMS] will need a separate quote. I can inspect and provide one on-site, but I won't include it in the current job without your written approval and an updated price. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep">
+    <div class="card-head"><span><span class="card-num">#57</span><span class="card-title">Client Requesting Meal Plans with Training (Personal Trainer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, your training package covers [INCLUDED SERVICES]. Personalised meal plans are a separate service at [RATE]. I can add it to your program if you'd like, but it's not included in the current arrangement. Let me know and I'll send the details. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep">
+    <div class="card-head"><span><span class="card-num">#58</span><span class="card-title">Client Adding SEO to a Web Design Project (Web Dev)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the website project covers design and development. SEO is a separate, ongoing service that involves keyword research, content strategy, and monthly optimization. I offer SEO packages starting at [AMOUNT/MONTH]. This can begin after the site launches. Shall I send a proposal? - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- PRO: SCOPE CREEP — ESCALATION SEQUENCES (8)            -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Scope Creep &mdash; Escalation Sequences<span class="count">8 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Scope Creep Escalation">
+    <div class="card-head"><span><span class="card-num">#59</span><span class="card-title">Client Continuously Expanding Brief (Graphic Designer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">// Step 1 — Flag the Pattern
+{{CLIENT_NAME}}, I've noticed the brief has expanded significantly since we started. The original scope covered [ORIGINAL SCOPE]. The additions now include [ADDITIONS]. I'll need to revise the quote before continuing with the new items.
+
+// Step 2 — Enforce the Boundary
+{{CLIENT_NAME}}, I sent the revised quote on [DATE] and the brief has continued to grow since then. I need to pause all new requests until the current scope amendment is approved and paid. I'll complete the original deliverables in the meantime.
+
+// Step 3 — Final Position
+{{CLIENT_NAME}}, moving forward, any request outside the signed scope must be submitted as a formal change order with separate approval and payment. I will not begin additional work without this process being followed. This protects both your budget and my timeline. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep Escalation">
+    <div class="card-head"><span><span class="card-num">#60</span><span class="card-title">Contractor Client Adding Work During the Job (Contractor)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">// Step 1 — On-Site Redirect
+{{CLIENT_NAME}}, you've mentioned a few additional items while I'm on site. I'm happy to look at them, but they'll need to be quoted separately. The current job covers [ORIGINAL SCOPE] only. I'll send a follow-up quote for the extras.
+
+// Step 2 — Firm Boundary
+{{CLIENT_NAME}}, I've received several additional requests since starting. I need to complete the original scope first. All extras will be quoted, approved, and scheduled separately. I can't add work to the current job mid-way without a formal agreement.
+
+// Step 3 — Clear Terms
+{{CLIENT_NAME}}, to be direct: all additional work requires a written quote and your signed approval before I begin. Verbal requests on-site will be noted but not actioned until the process is followed. This is how I operate at {{BUSINESS_NAME}} and it's non-negotiable. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep Escalation">
+    <div class="card-head"><span><span class="card-num">#61</span><span class="card-title">Coach Client Expecting Between-Session Support (Coach)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">// Step 1 — Gentle Redirect
+{{CLIENT_NAME}}, I appreciate your engagement between sessions. Your package includes [NUMBER] sessions per [PERIOD]. Support between sessions is available through my extended package at [RATE]. For now, please bring your questions to our next session.
+
+// Step 2 — Firm Boundary
+{{CLIENT_NAME}}, I've received several messages between our sessions this week. I need to set a clear boundary here: between-session communication is reserved for scheduling only, unless you upgrade to the extended package. I'll address all coaching topics in our next session.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep Escalation">
+    <div class="card-head"><span><span class="card-num">#62</span><span class="card-title">Agency Client Piling On Campaign Deliverables (Agency)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">// Step 1 — Identify the Creep
+{{CLIENT_NAME}}, the campaign scope has grown beyond the original agreement. We started with [ORIGINAL DELIVERABLES] and you've since added [ADDITIONAL ITEMS]. I need to revise the scope and budget before continuing with the additions.
+
+// Step 2 — Require Sign-Off
+{{CLIENT_NAME}}, I sent the revised scope on [DATE]. No further additions can be actioned until it's signed and the deposit is received. The original deliverables remain on schedule and unaffected.
+
+// Step 3 — Lock It Down
+{{CLIENT_NAME}}, I'm drawing a clear line here. The campaign scope is now locked. Any further additions will be handled as a separate phase with its own budget and timeline. I need this boundary in place so I can deliver quality work on what's been agreed. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep Escalation">
+    <div class="card-head"><span><span class="card-num">#63</span><span class="card-title">Web Dev Client Requesting App Features Mid-Build (Web Dev)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">// Step 1 — Redirect
+{{CLIENT_NAME}}, the features you're describing are app-level functionality, not part of the website build. The current scope covers [WEBSITE SCOPE]. App features require a separate discovery phase and quote. I can discuss this after the website is delivered.
+
+// Step 2 — Firm Hold
+{{CLIENT_NAME}}, I understand the vision is evolving. However, mixing app development into a website build will compromise both. I need to complete the website as scoped. We can plan a phase two for the app features after delivery and final payment.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep Escalation">
+    <div class="card-head"><span><span class="card-num">#64</span><span class="card-title">Photographer Client Adding Locations (Photographer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">// Step 1 — Scope Check
+{{CLIENT_NAME}}, the shoot is booked for [ORIGINAL LOCATION]. Adding [NEW LOCATION] means additional travel time, setup, and shooting. This changes the session fee. I'll send a revised quote today that reflects the multi-location shoot.
+
+// Step 2 — Enforce Before Shoot Day
+{{CLIENT_NAME}}, the revised quote for the multi-location shoot was sent on [DATE]. I need it approved and paid before the shoot date. If I don't receive approval by [DATE], I'll plan for the original single location only.
+
+// Step 3 — Day-Of Clarity
+{{CLIENT_NAME}}, as we haven't confirmed the additional location, today's shoot will cover [ORIGINAL LOCATION] only. If you'd like to book a separate session for [NEW LOCATION], I can arrange that as a follow-up. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep Escalation">
+    <div class="card-head"><span><span class="card-num">#65</span><span class="card-title">Accountant Client Expecting Tax Planning with Lodgement (Accountant)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">// Step 1 — Distinguish the Services
+{{CLIENT_NAME}}, tax planning and strategic advice are separate from tax return preparation. Your engagement covers lodgement only. If you'd like tax planning, I offer that as a standalone advisory service at [RATE]. I can schedule a planning session if you're interested.
+
+// Step 2 — Hold Firm on Scope
+{{CLIENT_NAME}}, I've addressed this a couple of times now. Tax planning questions will be handled in a paid advisory session only. During our lodgement appointment, I need to focus on completing your return accurately and on time. Let me know if you'd like to book a separate planning session. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Scope Creep Escalation">
+    <div class="card-head"><span><span class="card-num">#66</span><span class="card-title">Personal Trainer Client Expecting Partner Included Free (Trainer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">// Step 1 — Clarify the Policy
+{{CLIENT_NAME}}, your sessions are booked as individual training. If you'd like your partner to join, I offer couples/duo sessions at [RATE]. The individual rate covers one participant only. Let me know if you'd like to switch to a duo arrangement.
+
+// Step 2 — Enforce the Policy
+{{CLIENT_NAME}}, as I mentioned, individual sessions are for one person. I noticed your partner joined again at the last session. Going forward, if a second person participates, I'll charge the duo rate for that session. I need this confirmed before our next appointment. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- PRO: RETAINER BOUNDARY RESETS (8)                      -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Retainer Boundary Resets<span class="count">8 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Retainer Boundaries">
+    <div class="card-head"><span><span class="card-num">#67</span><span class="card-title">Retainer Hours Used in First Week (Web Dev)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, you've used all [NUMBER] retainer hours within the first week of the month. This leaves no capacity for the remaining [WEEKS]. I can increase your retainer to [NEW HOURS] at [NEW RATE], or you can prioritize tasks for the rest of the month. Let me know how you'd like to handle it. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Retainer Boundaries">
+    <div class="card-head"><span><span class="card-num">#68</span><span class="card-title">Retainer Client Requesting Weekend Work (Graphic Designer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, retainer work is performed during business hours, Monday to Friday. Weekend work is not included and would be charged at [WEEKEND RATE] per hour. If the task is urgent, I can schedule it for first thing Monday. Let me know your preference. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Retainer Boundaries">
+    <div class="card-head"><span><span class="card-num">#69</span><span class="card-title">Retainer Doesn't Include Physical Presence (Consultant)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, your retainer covers remote advisory services. On-site visits and in-person meetings are available but billed separately at [RATE] plus travel. If you'd like to include regular on-site days, I can adjust your retainer to reflect that. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Retainer Boundaries">
+    <div class="card-head"><span><span class="card-num">#70</span><span class="card-title">Retainer Does Not Cover Sub-Contractors (Agency)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the work you've requested requires a specialist sub-contractor (e.g. [SPECIALIST TYPE]). Sub-contractor costs are not included in your retainer and are billed at cost plus [MARGIN]%. I'll get a quote and send it through for your approval before engaging anyone. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Retainer Boundaries">
+    <div class="card-head"><span><span class="card-num">#71</span><span class="card-title">Client Treating Retainer as On-Call (Web Dev)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, your retainer gives you [NUMBER] hours of scheduled work per month. It's not an on-call arrangement. Tasks are queued and completed during business hours in the order received. If you need same-day turnaround, I offer an urgent response add-on at [RATE]. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Retainer Boundaries">
+    <div class="card-head"><span><span class="card-num">#72</span><span class="card-title">Retainer Downgrade Confirmation</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, as requested, I'm downgrading your retainer from [CURRENT PLAN] to [NEW PLAN] effective [DATE]. The new plan includes [NEW HOURS] hours per month. Any work beyond that will be billed at [OVERAGE RATE]. I'll send the updated agreement for your signature. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Retainer Boundaries">
+    <div class="card-head"><span><span class="card-num">#73</span><span class="card-title">Retainer Overage Invoice Sent</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, you exceeded your retainer hours by [OVERAGE HOURS] this month. I've sent an overage invoice for [AMOUNT] at the agreed rate of [RATE/HOUR]. If this is becoming a pattern, I'd recommend upgrading to the [HIGHER PLAN] to avoid overage charges. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Retainer Boundaries">
+    <div class="card-head"><span><span class="card-num">#74</span><span class="card-title">Retainer Price Increase Notice</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I'm writing to let you know that retainer rates at {{BUSINESS_NAME}} will increase effective [DATE]. Your new monthly rate will be [NEW RATE], up from [OLD RATE]. This reflects increased costs and the value delivered. If you'd like to discuss options or adjust your plan, let me know before [DATE]. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- PRO: PERSISTENT OBJECTIONS AFTER A DECISION (8)        -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Persistent Objections After a Decision<span class="count">8 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Persistent Objections">
+    <div class="card-head"><span><span class="card-num">#75</span><span class="card-title">Client Rehashing a Settled Timeline (Contractor)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the timeline was agreed on [DATE] and work is already in progress. Reopening this discussion would disrupt the current schedule and potentially affect other clients. The completion date remains [DATE]. I need us to move forward as planned. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Persistent Objections">
+    <div class="card-head"><span><span class="card-num">#76</span><span class="card-title">Client Refusing to Pay Agreed Deposit (Photographer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the deposit requirement was outlined in the agreement you signed. It's a standard part of my booking process at {{BUSINESS_NAME}} and applies to all clients. I'm not able to hold your date or begin work without it. If you'd like to proceed, the deposit of [AMOUNT] must be received by [DATE]. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Persistent Objections">
+    <div class="card-head"><span><span class="card-num">#77</span><span class="card-title">Client Questioning Your Method After Results Were Delivered (Coach)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I understand you have questions about the approach. The method I used is based on [PROFESSIONAL BASIS] and has been effective across many clients. The results delivered align with what was agreed. If you'd like to explore a different direction, I'm open to it in a new engagement, but I stand by the work completed. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Persistent Objections">
+    <div class="card-head"><span><span class="card-num">#78</span><span class="card-title">Client Wanting Exceptions to a Standard Policy (Agency)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I understand the policy doesn't suit your preference. However, it exists for a reason and applies equally to all clients at {{BUSINESS_NAME}}. Making an exception here would set a precedent I can't maintain. The policy on [POLICY] stands as stated. I'm happy to answer any questions about how it works. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Persistent Objections">
+    <div class="card-head"><span><span class="card-num">#79</span><span class="card-title">Client Insisting Verbal Agreement Overrides Written Contract (Consultant)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I understand you recall a conversation about [TOPIC]. The signed contract is the binding document and supersedes any prior verbal discussion. The terms we're operating under are those in the agreement signed on [DATE]. I'm happy to discuss amending the contract for future work if needed. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Persistent Objections">
+    <div class="card-head"><span><span class="card-num">#80</span><span class="card-title">Client Demanding a Different Deliverable Format (Videographer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the deliverables were completed in the format specified in our agreement ([FORMAT]). Converting to a different format at this stage would require additional editing time at [RATE]. If you need a specific format going forward, we should include that in the brief for the next project. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Persistent Objections">
+    <div class="card-head"><span><span class="card-num">#81</span><span class="card-title">Client Repeatedly Requesting Faster Turnaround (Plumber)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I understand you'd like the work done sooner. The timeline I've quoted accounts for proper workmanship and drying/curing times that can't be shortened. Cutting corners to speed things up would compromise the result. The completion date of [DATE] is firm and ensures the job is done right. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Persistent Objections">
+    <div class="card-head"><span><span class="card-num">#82</span><span class="card-title">Client Pushing Back on Cancellation Fee (Personal Trainer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the cancellation fee of [AMOUNT] applies because less than [HOURS] hours notice was provided. This policy is in the agreement you signed and it's enforced consistently. The fee covers the reserved time slot that could have been offered to another client. I'm not able to waive it. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- PRO: ENTITLEMENT BEHAVIOR (8)                          -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Entitlement Behavior<span class="count">8 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Entitlement">
+    <div class="card-head"><span><span class="card-num">#83</span><span class="card-title">Client Expecting You to Be Available on Demand (Graphic Designer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I operate on a scheduled workflow at {{BUSINESS_NAME}}. Tasks are completed in the order they're received during business hours. I'm not available for on-demand requests unless you're on a priority retainer at [RATE/MONTH]. Your current turnaround time is [TIMEFRAME]. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Entitlement">
+    <div class="card-head"><span><span class="card-num">#84</span><span class="card-title">Client Telling You How to Do Your Job (Interior Designer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I value your input on preferences and goals. However, the technical and design decisions are part of what you've hired me for. My recommendations are based on [YEARS] years of experience. If you'd prefer to direct the process yourself, we'd need to adjust the engagement to a consulting-only arrangement. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Entitlement">
+    <div class="card-head"><span><span class="card-num">#85</span><span class="card-title">Client Expecting Personal Errands (Virtual Assistant/Agency)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, my services at {{BUSINESS_NAME}} cover professional and business tasks only. Personal errands and non-business requests are outside my scope. I'm happy to recommend a personal assistant service if you need one. Let's keep our engagement focused on [BUSINESS SERVICES]. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Entitlement">
+    <div class="card-head"><span><span class="card-num">#86</span><span class="card-title">Client Name-Dropping Other Professionals (Photographer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I respect other professionals in the industry. My pricing and policies at {{BUSINESS_NAME}} are based on my own standards, expertise, and business model. What another photographer offers or charges doesn't change how I operate. My terms for this engagement are as quoted. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Entitlement">
+    <div class="card-head"><span><span class="card-num">#87</span><span class="card-title">Client Expecting You to Drop Everything (Contractor)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I understand this feels urgent to you. I have commitments to other clients that were scheduled before your request. I'll get to your job on [DATE] as planned. If you need emergency service before that, the emergency callout fee is [AMOUNT]. Let me know how you'd like to proceed. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Entitlement">
+    <div class="card-head"><span><span class="card-num">#88</span><span class="card-title">Client Assuming Referral Earns Free Work (Coach)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I appreciate the referrals. They genuinely help {{BUSINESS_NAME}} grow. However, referrals don't create credit toward free sessions or services. If you'd like, I can set up a formal referral program with defined rewards. But each engagement and payment stands on its own. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Entitlement">
+    <div class="card-head"><span><span class="card-num">#89</span><span class="card-title">Client Calling Your Personal Number (Accountant)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I noticed you've been calling my personal number. Please direct all communications to my business line at {{BUSINESS_PHONE}} or email at {{BUSINESS_EMAIL}} during business hours. My personal number is not for client use and I won't be responding to business queries through it. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Entitlement">
+    <div class="card-head"><span><span class="card-num">#90</span><span class="card-title">Client Expecting You to Train Their Replacement (Consultant)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, training your incoming team member or replacement provider was not part of our engagement. I'm happy to offer a paid handover session at [RATE] per hour, or I can prepare written documentation for [AMOUNT]. Let me know which option works and I'll schedule it. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- PRO: PROFESSIONAL RELATIONSHIP RESET (5)               -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Professional Relationship Reset<span class="count">5 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Relationship Reset">
+    <div class="card-head"><span><span class="card-num">#91</span><span class="card-title">Transitioning a Casual Client to Formal Terms</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, as {{BUSINESS_NAME}} grows, I'm formalizing all client arrangements. Starting [DATE], all projects will follow a standard process: written scope, signed agreement, deposit, then start. I'll send your updated terms this week. This change ensures better outcomes for both of us. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Relationship Reset">
+    <div class="card-head"><span><span class="card-num">#92</span><span class="card-title">Ending Ad-Hoc Availability</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I've been accommodating ad-hoc requests outside our agreed scope and schedule. That needs to change. Going forward, all work must be submitted through [PROCESS] and will be scheduled within my normal workflow. Spontaneous requests won't be actioned. This takes effect from [DATE]. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Relationship Reset">
+    <div class="card-head"><span><span class="card-num">#93</span><span class="card-title">Enforcing Payment Terms After Leniency</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I've been flexible with payment timing in the past, but I need to enforce standard payment terms going forward. All invoices are due within [DAYS] days of issue. Late payments will incur a [FEE/PERCENTAGE] charge. This starts with your next invoice. I appreciate your understanding. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Relationship Reset">
+    <div class="card-head"><span><span class="card-num">#94</span><span class="card-title">Setting Boundaries After Overstepping</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I need to address something directly. The tone and frequency of recent communications have gone beyond what I consider a healthy professional dynamic. I'm committed to delivering great work, but I need our interactions to remain professional, scheduled, and within agreed channels. Let's reset from here. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Relationship Reset">
+    <div class="card-head"><span><span class="card-num">#95</span><span class="card-title">Offering a Clean Break or New Terms</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, given the challenges we've had, I want to offer two options. Option 1: we continue under updated terms that I'll send this week. Option 2: we wrap up the current project and part ways professionally. Either way, I'll ensure a clean handover. Let me know your preference by [DATE]. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- PRO: PRICING PUSHBACK — FIRM REFUSAL SEQUENCES (5)     -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Pricing Pushback &mdash; Firm Refusal Sequences<span class="count">5 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Pricing Pushback">
+    <div class="card-head"><span><span class="card-num">#96</span><span class="card-title">Client Wanting to Pay After Seeing Results (Coach)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">// Step 1 — Decline the Terms
+{{CLIENT_NAME}}, I understand you'd like to see results first. My payment terms at {{BUSINESS_NAME}} require payment before sessions begin. This is non-negotiable and consistent across all clients. Once payment is received, I'll schedule your first session.
+
+// Step 2 — Final Word
+{{CLIENT_NAME}}, my terms haven't changed. Payment in advance is how I operate. If you'd like to proceed, the investment is [AMOUNT] due before [DATE]. Otherwise, I wish you well and hope you find the right fit. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Pricing Pushback">
+    <div class="card-head"><span><span class="card-num">#97</span><span class="card-title">Client Negotiating Down After Quote Was Accepted (Interior Designer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">// Step 1 — Hold the Price
+{{CLIENT_NAME}}, you accepted the quote of [AMOUNT] on [DATE]. Renegotiating after acceptance isn't something I do at {{BUSINESS_NAME}}. The price was set based on scope, materials, and time involved. I need to proceed at the agreed rate.
+
+// Step 2 — Clear Position
+{{CLIENT_NAME}}, the quote stands as accepted. If you'd like to reduce cost, the only option is reducing scope. I can revise the scope document to reflect a smaller project. Otherwise, the original agreement remains in effect. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Pricing Pushback">
+    <div class="card-head"><span><span class="card-num">#98</span><span class="card-title">Client Pressuring for Mates Rates (Plumber)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">// Step 1 — Friendly But Firm
+{{CLIENT_NAME}}, I appreciate the relationship. I keep my pricing at {{BUSINESS_NAME}} consistent for everyone. The quote of [AMOUNT] is fair for the work involved and I'm not able to offer a discount. I'd rather be straight with you than give you a lower price and a lower standard.
+
+// Step 2 — Final Position
+{{CLIENT_NAME}}, my rate is my rate. It covers materials, labor, and guarantee. If you'd like to go ahead at the quoted price, I can start on [DATE]. Otherwise, no hard feelings. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Pricing Pushback">
+    <div class="card-head"><span><span class="card-num">#99</span><span class="card-title">Client Threatening to Leave Over Price (Web Dev)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">// Step 1 — Acknowledge Without Caving
+{{CLIENT_NAME}}, I understand my pricing may not work for your budget. I respect your right to explore other options. My rate at {{BUSINESS_NAME}} is [AMOUNT] and it reflects the value, reliability, and quality I deliver. I won't lower it, but I'm here if you'd like to continue.
+
+// Step 2 — Leave the Door Open
+{{CLIENT_NAME}}, I'd hate to lose you as a client, but I'm not able to compromise on pricing. If budget is the issue, I can propose a reduced-scope option at a lower cost. Otherwise, if you decide to return in the future, you'll always be welcome. - {{YOUR_FIRST_NAME}}</div>
+  </div>
+
+  <div class="prompt-card" data-category="Pricing Pushback">
+    <div class="card-head"><span><span class="card-num">#100</span><span class="card-title">Client Claiming They Were Quoted Less (Videographer)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">// Step 1 — Refer to Documentation
+{{CLIENT_NAME}}, I've reviewed my records and the quote sent on [DATE] was for [AMOUNT]. I have it documented in the email/proposal. If you have a different version, please send it through and I'll reconcile. My pricing is based on written quotes only.
+
+// Step 2 — Hold Firm
+{{CLIENT_NAME}}, the written quote is the definitive record. The price for your project is [AMOUNT] as documented. I'm not able to honor a verbal figure that differs from the written quote. Let me know if you'd like to proceed at the quoted rate. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- BLACK: ACTIVE PAYMENT DISPUTE — CONTAINMENT (8)        -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Active Payment Dispute &mdash; Containment Messages<span class="count">8 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Payment Dispute">
+    <div class="card-head"><span><span class="card-num">#101</span><span class="card-title">Client Claiming They Were Overcharged</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the amount invoiced matches the signed agreement dated [DATE]. The agreed fee is [AMOUNT] for [SCOPE]. I have the documentation on file. If you believe there is a discrepancy, provide specifics in writing and I will review.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Dispute">
+    <div class="card-head"><span><span class="card-num">#102</span><span class="card-title">Client Refusing to Pay Final Invoice</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the work outlined in our agreement has been completed and delivered. The final invoice of [AMOUNT] is due per the signed terms. Non-payment does not release you from the agreed obligation. Please arrange payment by [DATE].</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Dispute">
+    <div class="card-head"><span><span class="card-num">#103</span><span class="card-title">Client Disputing Quality to Avoid Payment</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the deliverables were completed per the agreed scope and approved by you on [DATE]. Quality concerns were not raised during the review period. Payment remains due. If you have specific documented concerns, submit them in writing.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Dispute">
+    <div class="card-head"><span><span class="card-num">#104</span><span class="card-title">Client Claiming Work Was Not Completed</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, all deliverables listed in the agreement dated [DATE] have been completed and delivered to you on [DELIVERY DATE]. I have records confirming delivery. If you believe an item is missing, identify it in writing and I will verify against the scope.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Dispute">
+    <div class="card-head"><span><span class="card-num">#105</span><span class="card-title">Responding to a Client Who Stopped Payment</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I've been notified that payment has been stopped on invoice [#INVOICE]. The work was delivered as agreed. Please contact me at {{BUSINESS_EMAIL}} within [TIMEFRAME] to resolve this. All further communication on this matter should be in writing.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Dispute">
+    <div class="card-head"><span><span class="card-num">#106</span><span class="card-title">Client Demanding Partial Refund Mid-Project</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the deposit paid covers work already completed. A partial refund is not available for completed deliverables. The terms of our agreement address this. If you wish to discontinue the project, the cancellation terms in the signed agreement apply.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Dispute">
+    <div class="card-head"><span><span class="card-num">#107</span><span class="card-title">Client Contesting Invoice Line Items</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, each line item on the invoice corresponds to deliverables specified in our signed scope of work. I can provide a detailed reconciliation if needed. Please submit your specific objections in writing so I can address them precisely.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Payment Dispute">
+    <div class="card-head"><span><span class="card-num">#108</span><span class="card-title">Client Claiming Verbal Promise of Discount</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the signed agreement is the binding record of our arrangement. It reflects a total of [AMOUNT]. No discount was documented or agreed in writing. The invoiced amount stands. Please arrange payment by [DATE].</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- BLACK: CHARGEBACK THREAT RESPONSE (7)                  -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Chargeback Threat Response<span class="count">7 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Chargeback">
+    <div class="card-head"><span><span class="card-num">#109</span><span class="card-title">Client Threatening Chargeback on Completed Work</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I have a signed agreement, delivery confirmation, and your approval on record. Filing a chargeback on completed and accepted work may be treated as a fraudulent dispute. I recommend resolving this directly. Contact me at {{BUSINESS_EMAIL}} in writing.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Chargeback">
+    <div class="card-head"><span><span class="card-num">#110</span><span class="card-title">Client Filed a Chargeback — Acknowledging Receipt</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I have been notified of the chargeback filed on [DATE]. I will be submitting documentation to the payment processor including the signed agreement, scope of work, delivery records, and your written approval. No further direct discussion is needed on this matter.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Chargeback">
+    <div class="card-head"><span><span class="card-num">#111</span><span class="card-title">Chargeback Threat as Leverage</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, threatening a chargeback to negotiate terms is not an appropriate resolution method. The agreed terms are documented. If you have a legitimate concern, submit it in writing. Otherwise, the invoice stands as issued.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Chargeback">
+    <div class="card-head"><span><span class="card-num">#112</span><span class="card-title">Post-Chargeback Communication Boundary</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, given the chargeback filing, all further communication will be handled in writing through {{BUSINESS_EMAIL}} only. I will not discuss this matter by phone or in person. My records are complete and will be submitted to the processor.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Chargeback">
+    <div class="card-head"><span><span class="card-num">#113</span><span class="card-title">Client Claiming Service Not Rendered (Chargeback Basis)</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the service was rendered on [DATE] at [LOCATION/VIA]. I have records confirming attendance, delivery, and completion. The claim that service was not rendered is contradicted by documentation. This will be included in my response to the payment processor.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Chargeback">
+    <div class="card-head"><span><span class="card-num">#114</span><span class="card-title">Client Requesting Refund After Chargeback Filed</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, a refund cannot be processed while a chargeback is active. The dispute is now being handled through the payment processor. Once that process concludes, I can assess next steps. All communication should go through {{BUSINESS_EMAIL}}.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Chargeback">
+    <div class="card-head"><span><span class="card-num">#115</span><span class="card-title">Chargeback Won — Closing the File</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the payment processor has resolved the dispute in my favour. The charge stands. Your account with {{BUSINESS_NAME}} is now closed. No further services will be provided. I wish you well.</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- BLACK: HOSTILE CLIENT — DE-ESCALATION (8)              -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Hostile Client &mdash; De-Escalation Without Concession<span class="count">8 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Hostile Client">
+    <div class="card-head"><span><span class="card-num">#116</span><span class="card-title">Client Sending Angry Messages</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I've received your messages. I'm willing to address any specific concerns you have, provided they are communicated professionally and in writing. I will not respond to messages sent in an aggressive tone. Please email {{BUSINESS_EMAIL}} with the specifics.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Hostile Client">
+    <div class="card-head"><span><span class="card-num">#117</span><span class="card-title">Client Making Personal Attacks</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, personal remarks are not something I will engage with. If you have a professional concern related to our agreement, submit it in writing to {{BUSINESS_EMAIL}}. Further communication in this tone will not receive a response.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Hostile Client">
+    <div class="card-head"><span><span class="card-num">#118</span><span class="card-title">Client Escalating Through Multiple Channels</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I'm aware of your messages across multiple channels. All communication regarding this matter must go through {{BUSINESS_EMAIL}}. Messages sent through other channels will not be actioned. One channel, in writing, is how this will be handled.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Hostile Client">
+    <div class="card-head"><span><span class="card-num">#119</span><span class="card-title">Client Demanding Immediate Resolution</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I will review your concerns and respond within [TIMEFRAME]. I do not make decisions under pressure and will not commit to a resolution before I've reviewed the facts. Please submit your position in writing to {{BUSINESS_EMAIL}}.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Hostile Client">
+    <div class="card-head"><span><span class="card-num">#120</span><span class="card-title">Client Involving Third Parties to Pressure You</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, my engagement is with you, not with third parties acting on your behalf. If you'd like to appoint a representative to communicate with me, please provide written authorization. Until then, I will only communicate directly with you at {{BUSINESS_EMAIL}}.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Hostile Client">
+    <div class="card-head"><span><span class="card-num">#121</span><span class="card-title">Client Claiming They Will "Ruin Your Business"</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I've noted your statement. I operate with full documentation and stand behind my work. If you have a specific, professional concern, please put it in writing. Threats do not influence my position or my process.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Hostile Client">
+    <div class="card-head"><span><span class="card-num">#122</span><span class="card-title">Client Refusing to Communicate in Writing</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I require all communication on this matter in writing via {{BUSINESS_EMAIL}}. This is for accurate record-keeping and to ensure both parties are protected. I will not discuss this matter by phone or in person. Written communication only.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Hostile Client">
+    <div class="card-head"><span><span class="card-num">#123</span><span class="card-title">Client Showing Up Unannounced</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, unannounced visits are not acceptable. All meetings must be scheduled in advance through {{BUSINESS_EMAIL}}. If this occurs again, I will not engage and may need to reconsider the professional relationship. Contact me in writing to schedule a meeting.</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- BLACK: NO-SHOW DOCUMENTATION (7)                       -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>No-Show Documentation<span class="count">7 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="No-Show">
+    <div class="card-head"><span><span class="card-num">#124</span><span class="card-title">Recording a No-Show — First Instance</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, you did not attend the scheduled appointment on [DATE] at [TIME]. No cancellation was received. A no-show fee of [AMOUNT] has been applied as per the signed agreement. Please contact {{BUSINESS_EMAIL}} to reschedule.</div>
+  </div>
+
+  <div class="prompt-card" data-category="No-Show">
+    <div class="card-head"><span><span class="card-num">#125</span><span class="card-title">Second No-Show Warning</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, this is the second missed appointment without notice. A no-show fee of [AMOUNT] has been applied. Per our policy, a third no-show may result in termination of services. Future bookings require prepayment. Contact {{BUSINESS_EMAIL}} to discuss.</div>
+  </div>
+
+  <div class="prompt-card" data-category="No-Show">
+    <div class="card-head"><span><span class="card-num">#126</span><span class="card-title">No-Show on a Paid Session — Session Forfeited</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, you did not attend your session on [DATE] at [TIME]. As per the agreement, missed sessions are not refunded or rescheduled. The session has been marked as used. Your next session is on [DATE].</div>
+  </div>
+
+  <div class="prompt-card" data-category="No-Show">
+    <div class="card-head"><span><span class="card-num">#127</span><span class="card-title">No-Show on Site Visit — Wasted Trip Fee</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I arrived at your property on [DATE] at [TIME] as scheduled. No one was available to provide access. A wasted trip fee of [AMOUNT] has been applied. Please arrange a new appointment via {{BUSINESS_EMAIL}} and ensure access is available.</div>
+  </div>
+
+  <div class="prompt-card" data-category="No-Show">
+    <div class="card-head"><span><span class="card-num">#128</span><span class="card-title">Client Disputing No-Show Fee</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the no-show fee was applied because no cancellation was received before the [HOURS]-hour cutoff. The policy is outlined in Section [X] of the signed agreement. The fee stands. If you have evidence of a cancellation sent before the deadline, please forward it to {{BUSINESS_EMAIL}}.</div>
+  </div>
+
+  <div class="prompt-card" data-category="No-Show">
+    <div class="card-head"><span><span class="card-num">#129</span><span class="card-title">No-Show After Reminder Was Sent</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, a reminder was sent on [REMINDER DATE] for your appointment on [DATE] at [TIME]. No response or cancellation was received. The appointment was held and the no-show fee applies. Contact {{BUSINESS_EMAIL}} to rebook.</div>
+  </div>
+
+  <div class="prompt-card" data-category="No-Show">
+    <div class="card-head"><span><span class="card-num">#130</span><span class="card-title">Third No-Show — Service Terminated</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, this is the third no-show. As per the terms of our agreement, services with {{BUSINESS_NAME}} are now terminated. Outstanding fees of [AMOUNT] remain due. No further appointments will be scheduled. Contact {{BUSINESS_EMAIL}} regarding your final balance.</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- BLACK: RELATIONSHIP TERMINATION (7)                    -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Relationship Termination &mdash; Clean Final Messages<span class="count">7 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Termination">
+    <div class="card-head"><span><span class="card-num">#131</span><span class="card-title">Ending Services Due to Repeated Non-Payment</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, due to repeated non-payment, {{BUSINESS_NAME}} is discontinuing services effective immediately. Outstanding invoices totalling [AMOUNT] remain due. All deliverables will be withheld until the balance is resolved. Contact {{BUSINESS_EMAIL}} for final account details.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Termination">
+    <div class="card-head"><span><span class="card-num">#132</span><span class="card-title">Ending Services Due to Abusive Conduct</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, {{BUSINESS_NAME}} reserves the right to discontinue services where professional conduct is not maintained. Effective immediately, your engagement is terminated. Any outstanding balance is due within [DAYS] days. No further services will be provided.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Termination">
+    <div class="card-head"><span><span class="card-num">#133</span><span class="card-title">Ending Services — General Incompatibility</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, after careful consideration, I've decided to conclude our engagement at {{BUSINESS_NAME}}. I will complete all work through [DATE] and provide a full handover of materials. Any outstanding balance is due on completion. I wish you well with future projects.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Termination">
+    <div class="card-head"><span><span class="card-num">#134</span><span class="card-title">Retainer Termination — Non-Renewal</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I'm writing to confirm that your retainer with {{BUSINESS_NAME}} will not be renewed after the current period ending [DATE]. All retainer work will be completed before then. This is a final decision. Outstanding invoices are due by [DATE].</div>
+  </div>
+
+  <div class="prompt-card" data-category="Termination">
+    <div class="card-head"><span><span class="card-num">#135</span><span class="card-title">Mid-Project Termination with Handover</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I am terminating this engagement as of [DATE]. Work completed to date will be delivered. Work not yet begun will not be started. A final invoice for work completed will be sent. Handover materials will be provided to your nominated contact within [TIMEFRAME].</div>
+  </div>
+
+  <div class="prompt-card" data-category="Termination">
+    <div class="card-head"><span><span class="card-num">#136</span><span class="card-title">Declining Future Work After Termination</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I've received your inquiry about new work. Based on our previous engagement, I've decided not to take on further projects. This decision is final. I wish you the best in finding a provider that's the right fit.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Termination">
+    <div class="card-head"><span><span class="card-num">#137</span><span class="card-title">Final Account Statement After Termination</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, your account with {{BUSINESS_NAME}} has been closed. Final balance: [AMOUNT]. Payment is due by [DATE]. After that date, the matter may be referred for collection. All records have been retained per our standard retention policy. No further correspondence is required unless regarding payment.</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- BLACK: THREATENING / ABUSIVE — CONTAINMENT (7)         -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Threatening / Abusive Messages &mdash; Firm Containment<span class="count">7 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Threatening">
+    <div class="card-head"><span><span class="card-num">#138</span><span class="card-title">Client Threatening Legal Action</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I've noted your statement regarding legal action. If you choose to proceed through legal channels, all communication should be directed to {{BUSINESS_EMAIL}} in writing. I have full documentation of our agreement and all deliverables. I will respond to any formal correspondence received.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Threatening">
+    <div class="card-head"><span><span class="card-num">#139</span><span class="card-title">Client Threatening Negative Reviews</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I stand behind the work delivered by {{BUSINESS_NAME}}. Review platforms are designed for honest feedback. If you have a specific concern about the work, please submit it in writing. Threats do not change the terms of our agreement or the quality of work delivered.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Threatening">
+    <div class="card-head"><span><span class="card-num">#140</span><span class="card-title">Client Using Intimidating Language</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the language in your recent message is not acceptable. I will not engage further until communication returns to a professional standard. Submit any concerns in writing to {{BUSINESS_EMAIL}}. Messages containing threats or intimidation will be documented but not responded to.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Threatening">
+    <div class="card-head"><span><span class="card-num">#141</span><span class="card-title">Client Threatening to Contact Your Other Clients</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, contacting my other clients regarding our private business matter would be inappropriate and potentially actionable. I recommend resolving this directly and professionally. Submit your concerns in writing to {{BUSINESS_EMAIL}}. I will respond within [TIMEFRAME].</div>
+  </div>
+
+  <div class="prompt-card" data-category="Threatening">
+    <div class="card-head"><span><span class="card-num">#142</span><span class="card-title">Client Making Defamatory Statements</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I'm aware of statements made about {{BUSINESS_NAME}} that are factually inaccurate. I have documentation that contradicts these claims. I recommend retracting any public statements that do not reflect the documented facts. Further action will be taken if necessary.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Threatening">
+    <div class="card-head"><span><span class="card-num">#143</span><span class="card-title">Client Threatening to Report You to a Licensing Body</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, you are free to contact any relevant licensing or regulatory body. I operate in full compliance and maintain complete records. If you have a specific professional concern, submit it in writing. I will cooperate with any formal inquiry.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Threatening">
+    <div class="card-head"><span><span class="card-num">#144</span><span class="card-title">Ceasing All Communication After Repeated Abuse</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I have made multiple requests for professional communication. Those requests have not been respected. Effective now, I am ceasing all direct communication. Any further matters should be directed in writing to {{BUSINESS_EMAIL}} or through your legal representative. This is my final message on this channel.</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- BLACK: SCREENSHOT-SAFE REFUSAL / POSITION (6)          -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <div class="section-header"><h2>Screenshot-Safe Refusal / Position Statements<span class="count">6 prompts</span></h2></div>
+
+  <div class="prompt-card" data-category="Position Statement">
+    <div class="card-head"><span><span class="card-num">#145</span><span class="card-title">Declining to Accept Fault</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the work was completed in accordance with the signed agreement and approved scope. I do not accept the characterization of fault. The documented record reflects full compliance with the agreed terms. I'm available for a factual review if you'd like to proceed through {{BUSINESS_EMAIL}}.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Position Statement">
+    <div class="card-head"><span><span class="card-num">#146</span><span class="card-title">Declining to Provide Free Remediation</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, the deliverables met the agreed specifications. Any changes or additional work from this point is new scope and will be quoted accordingly. There is no basis for complimentary remediation under the current agreement.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Position Statement">
+    <div class="card-head"><span><span class="card-num">#147</span><span class="card-title">Reaffirming Position Under Pressure</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, my position has not changed. The terms of our agreement are clear, the work has been delivered as specified, and the invoice is due as stated. I will not be revising this position based on the current correspondence. If you have new documented information, submit it to {{BUSINESS_EMAIL}}.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Position Statement">
+    <div class="card-head"><span><span class="card-num">#148</span><span class="card-title">Refusing to Engage in He-Said-She-Said</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I deal in documented facts: signed agreements, written approvals, and timestamped deliveries. I will not engage in disputes based on recollection or interpretation. If you have a documented basis for your claim, provide it. Otherwise, the existing records are the basis for my position.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Position Statement">
+    <div class="card-head"><span><span class="card-num">#149</span><span class="card-title">Confirming Final Position Before Escalation</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, this is my final position: [STATE POSITION]. The documentation supports this. If you wish to escalate, you are free to do so through the appropriate channels. I will respond to any formal proceedings with the full record. No further informal discussion is needed.</div>
+  </div>
+
+  <div class="prompt-card" data-category="Position Statement">
+    <div class="card-head"><span><span class="card-num">#150</span><span class="card-title">Closing All Communication on a Dispute</span></span><button class="copy-btn">Copy</button></div>
+    <div class="card-body">{{CLIENT_NAME}}, I have stated my position clearly and provided documentation to support it. I have nothing further to add. All records have been retained. Any future correspondence on this matter should be directed to {{BUSINESS_EMAIL}} or through formal channels. This is my final communication on this topic.</div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Copied to clipboard</div>
+
+<script>
+(function() {
+  const fields = {
+    BUSINESS_NAME: '',
+    YOUR_FIRST_NAME: '',
+    YOUR_FULL_NAME: '',
+    CLIENT_NAME: '',
+    BUSINESS_PHONE: '',
+    BUSINESS_EMAIL: '',
+    WEBSITE: '',
+    ABN: '',
+    CITY: ''
+  };
+
+  // Store original templates
+  const cards = document.querySelectorAll('.card-body');
+  const templates = [];
+  cards.forEach(function(card) {
+    templates.push(card.textContent);
+  });
+
+  function renderAll() {
+    cards.forEach(function(card, i) {
+      var text = templates[i];
+      var html = text.replace(/\{\{(\w+)\}\}/g, function(match, key) {
+        if (fields[key] && fields[key].length > 0) {
+          return '<span class="placeholder">' + escapeHtml(fields[key]) + '</span>';
+        }
+        return '<span class="placeholder">' + match + '</span>';
+      });
+      card.innerHTML = html;
+    });
+  }
+
+  function escapeHtml(str) {
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // Bind inputs
+  document.querySelectorAll('.details-grid input').forEach(function(input) {
+    input.addEventListener('input', function() {
+      fields[this.dataset.field] = this.value;
+      renderAll();
+    });
+  });
+
+  // Initial render to wrap placeholders
+  renderAll();
+
+  // Copy buttons
+  document.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('copy-btn')) return;
+    var body = e.target.closest('.prompt-card').querySelector('.card-body');
+    var text = body.textContent;
+    navigator.clipboard.writeText(text).then(function() {
+      e.target.textContent = 'Copied';
+      e.target.classList.add('copied');
+      var toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(function() {
+        e.target.textContent = 'Copy';
+        e.target.classList.remove('copied');
+        toast.classList.remove('show');
+      }, 1500);
+    });
+  });
+})();
+</script>
+</body>
+</html>

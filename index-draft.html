@@ -30,12 +30,23 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-  background: var(--bg);
   color: var(--text);
   font-family: var(--mono);
   font-size: 15px;
   line-height: 1.6;
   overflow-x: hidden;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  background:
+    linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+    url("file:///C:/Users/ADMIN/Desktop/A's%20bits%20n%20bobs/download.gif")
+    center top / cover no-repeat;
+  background-attachment: fixed;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -50,13 +61,15 @@ p { margin: 0; }
 .editor {
   border: 1px solid var(--line-hi);
   border-radius: 16px;
-  background: var(--surface);
+  background: rgba(12, 14, 17, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   overflow: hidden;
   box-shadow: 0 24px 80px rgba(0,0,0,.55);
 }
 
 .topbar {
-  background: #0d1015;
+  background: rgba(13, 16, 21, 0.85);
   padding: 12px 18px;
   display: flex;
   align-items: center;
@@ -111,7 +124,7 @@ p { margin: 0; }
 /* HERO CONTENT */
 .hero {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.15fr .85fr;
   gap: 32px;
   padding: 36px 32px;
   align-items: start;
@@ -194,18 +207,6 @@ p { margin: 0; }
 .btn.accent-cyan   { background: var(--cyan); color: #020d10; border-color: transparent; font-weight: 700; }
 .btn.accent-purple { background: var(--purple); color: #0a0612; border-color: transparent; font-weight: 700; }
 .btn.accent-amber:hover, .btn.accent-cyan:hover, .btn.accent-purple:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
-/* ASCII Banner */
-.hero-banner {
-  grid-column: 1 / -1;
-  margin-bottom: 8px;
-}
-.hero-banner img {
-  display: block;
-  width: 100%;
-  height: auto;
-  mix-blend-mode: lighten;
-}
 
 /* Console block */
 .console {
@@ -293,7 +294,9 @@ p { margin: 0; }
 }
 .box {
   padding: 20px;
-  background: var(--surface);
+  background: rgba(12, 14, 17, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border: 1px solid var(--line-hi);
   border-radius: var(--radius);
 }
@@ -332,7 +335,9 @@ p { margin: 0; }
 }
 .step-card {
   padding: 24px;
-  background: var(--surface);
+  background: rgba(12, 14, 17, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border: 1px solid var(--line-hi);
   border-radius: var(--radius);
 }
@@ -364,7 +369,9 @@ p { margin: 0; }
 }
 .proof-card {
   padding: 22px;
-  background: var(--surface);
+  background: rgba(12, 14, 17, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   font-size: 13px;
@@ -400,7 +407,9 @@ p { margin: 0; }
   gap: 12px;
   align-items: flex-start;
   padding: 16px;
-  background: var(--surface);
+  background: rgba(12, 14, 17, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border: 1px solid var(--line);
   border-radius: 12px;
   font-size: 13px;
@@ -416,11 +425,11 @@ p { margin: 0; }
 .feature-dot.purple { background: var(--purple); }
 .feature.pro-only {
   border-color: rgba(34,211,238,.2);
-  background: color-mix(in srgb, var(--cyan) 3%, var(--surface));
+  background: rgba(12, 18, 22, 0.75);
 }
 .feature.black-only {
   border-color: rgba(167,139,250,.2);
-  background: color-mix(in srgb, var(--purple) 3%, var(--surface));
+  background: rgba(16, 12, 22, 0.75);
 }
 .feature strong {
   display: block;
@@ -446,7 +455,9 @@ p { margin: 0; }
 .scheduler-spotlight {
   margin-top: 40px;
   padding: 32px;
-  background: var(--surface);
+  background: rgba(12, 14, 17, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border: 1px solid rgba(34,211,238,.22);
   border-radius: 18px;
   display: grid;
@@ -519,7 +530,7 @@ th, td {
 }
 th {
   color: var(--text);
-  background: rgba(12,14,17,.9);
+  background: rgba(12, 14, 17, 0.8);
   font-weight: 700;
 }
 td { color: var(--muted-hi); }
@@ -539,7 +550,9 @@ tr.sched-row td:first-child { border-left: 2px solid rgba(34,211,238,.3); }
 .tier-card {
   display: block;
   padding: 24px;
-  background: var(--surface);
+  background: rgba(12, 14, 17, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border: 1px solid var(--line-hi);
   border-radius: var(--radius);
   position: relative;
@@ -597,20 +610,23 @@ tr.sched-row td:first-child { border-left: 2px solid rgba(34,211,238,.3); }
 }
 .price-card {
   padding: 28px 24px;
-  background: var(--surface);
+  background: rgba(10, 10, 14, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border: 1px solid var(--line-hi);
   border-radius: 18px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-shadow: 0 2px 24px rgba(0,0,0,0.4);
 }
 .price-card.featured {
   border-color: rgba(34,211,238,.3);
-  background: color-mix(in srgb, var(--cyan) 4%, var(--surface));
+  background: rgba(10, 18, 22, 0.78);
 }
 .price-card.premium {
   border-color: rgba(167,139,250,.3);
-  background: color-mix(in srgb, var(--purple) 4%, var(--surface));
+  background: rgba(14, 10, 22, 0.78);
 }
 .price-tier {
   font-size: 11px;
@@ -652,11 +668,21 @@ tr.sched-row td:first-child { border-left: 2px solid rgba(34,211,238,.3); }
 .price-best { font-size: 12px; color: var(--muted); }
 .price-secure { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
+/* ── Reduced-motion: drop the GIF, use solid dark background ── */
+@media (prefers-reduced-motion: reduce) {
+  body {
+    background: var(--bg);
+    background-attachment: scroll;
+  }
+}
+
 /* FAQ */
 .faq { display: grid; gap: 8px; margin-top: 24px; }
 details {
   padding: 18px 20px;
-  background: var(--surface);
+  background: rgba(12, 14, 17, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border: 1px solid var(--line);
   border-radius: 12px;
 }
@@ -711,9 +737,10 @@ details p {
 .sticky {
   position: fixed;
   left: 0; right: 0; bottom: 0;
-  background: rgba(2,2,3,.97);
+  background: rgba(2, 2, 3, 0.85);
   border-top: 1px solid var(--line-hi);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   padding: 12px 20px;
   z-index: 999;
 }
@@ -803,22 +830,24 @@ hr.sep {
     </div>
 
     <div class="hero">
-      <div class="hero-banner">
-        <img src="assets/text-boss-ascii-banner.png"
-             alt="TEXT BOSS — terminal ASCII banner"
-             loading="eager" />
-      </div>
       <div>
         <h1>Stop losing money to bad client messages — and missed appointments.</h1>
         <p class="kicker">
           Every improvised reply is a risk. A soft boundary becomes a pricing concession. A missed confirmation becomes a no-show.
         </p>
         <p class="kicker">
-          Structured templates cover known patterns. A tier-gated AI handles the situations templates can't.
+          Text Boss gives you structured, send-ready responses for known client patterns — and a tier-gated AI for the situations templates can't cover.
         </p>
         <p class="kicker">
-          Pro and Black add a conversational AI that books, confirms, and manages appointments — without you in the thread.
+          Pro and Black members also get a conversational AI that books, confirms, and manages appointments without you in the thread.
         </p>
+
+        <ul class="bullets">
+          <li><span class="dot"></span><span><strong>Prevent scope creep</strong> before it starts.</span></li>
+          <li><span class="dot"></span><span><strong>Shut down negotiation</strong> without escalation.</span></li>
+          <li><span class="dot"></span><span><strong>Book appointments by AI</strong> — no back-and-forth.</span></li>
+          <li><span class="dot"></span><span><strong>Get tier-specific AI guidance</strong> when stakes rise.</span></li>
+        </ul>
 
         <div class="cta-row">
           <a class="btn green" href="access.html">Access TextBoss</a>
@@ -839,10 +868,6 @@ hr.sep {
         <div class="line"><span class="out">→</span><span class="out"><b>A communication control system</b> for businesses that can't afford message mistakes.</span></div>
         <div class="line"><span class="out">→</span><span class="out">Templates for known patterns + a tier-gated AI for real-time decisions.</span></div>
         <div class="line"><span class="out">→</span><span class="out tok-cyan">Pro/Black: conversational AI appointment booking — persistent, confirmable, no-show resistant.</span></div>
-        <div class="line" style="margin-top:8px; padding-top:8px; border-top:1px solid var(--line);"><span class="out tok-cyan">→</span><span class="out"><b>Prevent scope creep</b> before it starts.</span></div>
-        <div class="line"><span class="out tok-cyan">→</span><span class="out"><b>Shut down negotiation</b> without escalation.</span></div>
-        <div class="line"><span class="out tok-cyan">→</span><span class="out"><b>Book appointments by AI</b> — no back-and-forth.</span></div>
-        <div class="line"><span class="out tok-cyan">→</span><span class="out"><b>Get tier-specific AI guidance</b> when stakes rise.</span></div>
         <div class="line console-tagline"><span class="out tok-purple" style="font-weight:700;">// say less. control more. protect everything.</span></div>
       </div>
     </div>
@@ -861,7 +886,7 @@ hr.sep {
       Text Boss reduces improvisation — and improvisation is where you leak time, pricing, and control.
     </p>
     <p class="body-text">
-      Then there's the scheduling gap: the DM chain that never got confirmed, the client who "thought it was next week," the no-show you couldn't prove was coming. Pro and Black members get an AI that closes that loop.
+      Then there's the scheduling gap: the DM chain that never got confirmed, the client who "thought it was next week," the no-show you couldn't prove was coming. Pro and Black members get an AI that closes that loop entirely.
     </p>
   </section>
 
@@ -932,7 +957,7 @@ hr.sep {
       <div class="step-card">
         <div class="step-n">03</div>
         <div class="step-t">Use the AI when it gets real</div>
-        <div class="step-d">When the template doesn't fit — when it's hostile, unprecedented, or high-stakes — paste it into the AI. It drafts a response constrained to your tier's risk tolerance. You send it. Done.</div>
+        <div class="step-d">When the template doesn't fit — when it's hostile, unprecedented, or the kind of thing you've never had to respond to before — paste it into the AI. It drafts a response constrained to your tier's risk tolerance. You send it. Done.</div>
       </div>
     </div>
   </section>
@@ -940,11 +965,11 @@ hr.sep {
   <!-- 03.5 — SOCIAL PROOF / DESIGNED FOR -->
   <section class="sec">
     <div class="sec-label"><span class="sl">//</span> Built around real scenarios</div>
-    <h2>Built for businesses where one message has consequences.</h2>
+    <h2>Designed for the moments that cost you money.</h2>
     <div class="proof-cards">
       <div class="proof-card">
         <div class="proof-comment">// scenario_01</div>
-        <p class="proof-scenario"><b>The consultant who gave a discount</b> because they didn't know how to say no cleanly — and set a precedent that followed them for six months.</p>
+        <p class="proof-scenario"><b>The consultant who gave a discount</b> because they didn't have the words to say no cleanly — and set a precedent that followed them for six months.</p>
         <p class="proof-outcome">→ Core prevents this.</p>
       </div>
       <div class="proof-card">
@@ -954,7 +979,7 @@ hr.sep {
       </div>
       <div class="proof-card">
         <div class="proof-comment">// scenario_03</div>
-        <p class="proof-scenario"><b>The coach whose no-show rate dropped</b> after switching appointment management to an AI that confirms, reminds, and documents.</p>
+        <p class="proof-scenario"><b>The coach whose no-show rate dropped</b> after switching appointment management to an AI that confirms, reminds, and documents — leaving no ambiguity about who agreed to what.</p>
         <p class="proof-outcome">→ Pro + Black schedule this.</p>
       </div>
     </div>
@@ -965,14 +990,14 @@ hr.sep {
     <div class="sec-label"><span class="sl">//</span> 04 — AI Appointment Scheduler <span class="tier-badge pro" style="margin-left:8px;vertical-align:middle;">Pro</span> <span class="tier-badge black" style="margin-left:4px;vertical-align:middle;">Black</span></div>
     <h2>Your AI that books, confirms, and holds appointments — conversationally.</h2>
     <p class="body-text">
-      Stop chasing replies to set a time. Pro and Black members get a persistent conversational AI that handles the entire booking flow: availability, confirmation, reminders, and rebooking.
+      Stop chasing replies to set a time. Pro and Black members get a persistent conversational AI that handles the entire booking flow: availability, confirmation, reminders, and rebooking — all in natural language, all under your brand voice.
     </p>
 
     <div class="scheduler-spotlight">
       <div>
         <h3>No more <span class="tok-cyan">scheduling back-and-forth.</span></h3>
         <p>
-          The AI Scheduler finds the time, locks the booking, and follows up. You see the outcome — not the thread.
+          The AI Scheduler works as a persistent agent in your workflow. It converses with clients to find and lock a time, sends confirmation, and follows up. You see the outcome — not the thread.
         </p>
         <ul class="sched-bullets">
           <li><span class="sdot"></span><span><strong>Conversational booking</strong> — clients respond naturally, AI handles the rest.</span></li>
@@ -998,7 +1023,7 @@ hr.sep {
   <!-- 05 — WHAT YOU GET -->
   <section class="sec">
     <div class="sec-label"><span class="sl">//</span> 05 — What you get each month</div>
-    <h2>What's included at every tier.</h2>
+    <h2>Everything you need to stay in control.</h2>
     <div class="features">
       <div class="feature">
         <div class="feature-dot"></div>
@@ -1063,7 +1088,7 @@ hr.sep {
         <div>
           <span class="tier-badge black">Black only</span>
           <strong>Legally defensible scheduling language</strong>
-          <span>Confirmation and cancellation wording that doesn't admit fault and is safe to screenshot.</span>
+          <span>Confirmation and cancellation wording that doesn't admit fault, is safe to screenshot, and holds up with payment processors.</span>
         </div>
       </div>
       <div class="feature black-only">
@@ -1071,7 +1096,7 @@ hr.sep {
         <div>
           <span class="tier-badge black">Black only</span>
           <strong>No-show containment scripts</strong>
-          <span>AI-drafted follow-ups that document the missed appointment without escalating, conceding, or admitting anything.</span>
+          <span>AI-drafted follow-ups that document the missed appointment and preserve your position — no escalation, no concessions, no admissions.</span>
         </div>
       </div>
     </div>
@@ -1105,7 +1130,7 @@ hr.sep {
             <td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td>
           </tr>
           <tr>
-            <td><b>Scope creep sequences + retainer resets</b><br><span class="tok-muted">multi-step patterns for persistent pushback</span></td>
+            <td><b>Scope creep sequences + retainer resets</b><br><span class="tok-muted">multi-step ladders for persistent objections</span></td>
             <td class="dash">—</td><td class="tick">✓</td><td class="tick">✓</td>
           </tr>
           <tr>
@@ -1152,11 +1177,11 @@ hr.sep {
   <!-- 07 — EXPLORE TIERS -->
   <section class="sec">
     <div class="sec-label"><span class="sl">//</span> 07 — Explore tiers</div>
-    <h2>Pick your tier.</h2>
+    <h2>Find the right level of control.</h2>
     <div class="tier-cards">
       <a class="tier-card core" href="core.html" aria-label="Open Core page">
         <h3><span class="tok-amber">Core</span></h3>
-        <p>Everyday client control. Cleaner messages. Less back-and-forth.</p>
+        <p>Everyday client control. Cleaner messages. Fewer misunderstandings. Less back-and-forth.</p>
         <div class="meta"><span class="tok-amber">Best for:</span> friction, follow-ups, minor pushback.</div>
         <div class="hint">enter →</div>
         <div class="arrow" style="color:var(--muted)">open →</div>
@@ -1183,7 +1208,7 @@ hr.sep {
   <!-- 08 — PRICING -->
   <section class="sec" id="pricing">
     <div class="sec-label"><span class="sl">//</span> 08 — Pricing</div>
-    <h2>Pricing.</h2>
+    <h2>Choose your level of control.</h2>
     <div class="price-grid">
 
       <div class="price-card">
@@ -1192,7 +1217,7 @@ hr.sep {
           <span class="num">$29</span>
           <span class="per"> AUD/mo</span>
         </div>
-        <p class="price-desc">Clean, firm language and instant AI backup for everyday friction.</p>
+        <p class="price-desc">For solo operators who want clean, firm language and instant AI backup for everyday client friction.</p>
         <ul class="price-includes">
           <li><span class="pi-dot on"></span><b>All categorised templates</b></li>
           <li><span class="pi-dot on"></span><b>Core-tier AI assistant</b></li>
@@ -1214,7 +1239,7 @@ hr.sep {
           <span class="num">$79</span>
           <span class="per"> AUD/mo</span>
         </div>
-        <p class="price-desc">For recurring pushback, scope creep, retainer resets — and businesses that need scheduling handled without a back-and-forth thread.</p>
+        <p class="price-desc">For recurring pushback, scope creep sequences, retainer resets, and businesses that need scheduling handled — automatically and conversationally.</p>
         <ul class="price-includes">
           <li><span class="pi-dot on"></span><b>Everything in Core</b></li>
           <li><span class="pi-dot on"></span><b>Pro-tier AI assistant (advanced)</b></li>
@@ -1257,14 +1282,14 @@ hr.sep {
 
     </div>
     <p class="small" style="margin-top:16px; text-align:center;">
-      Cancel any time. No lock-in, no cancellation fees.
+      Cancel any time. No lock-in. If one prevented misstep doesn't cover the cost, cancel.
     </p>
   </section>
 
   <!-- 09 — FAQ -->
   <section class="sec">
     <div class="sec-label"><span class="sl">//</span> 09 — FAQ</div>
-    <h2>Questions.</h2>
+    <h2>Common questions.</h2>
     <div class="faq">
       <details>
         <summary>Is this just email templates?</summary>
@@ -1272,31 +1297,31 @@ hr.sep {
       </details>
       <details>
         <summary>How does the AI Appointment Scheduler work?</summary>
-        <p>The scheduler is a persistent conversational AI available to Pro and Black members. It engages clients to find a time, locks the booking, sends confirmation, and handles rebooking if plans change — without you managing the thread.</p>
+        <p>The scheduler is a persistent conversational AI available to Pro and Black members. It engages clients in natural language to find a time, locks the booking, sends confirmation, and handles rebooking if plans change — without you managing the thread. Black members additionally get legally defensible scheduling language and no-show containment scripts.</p>
       </details>
       <details>
         <summary>Does the AI Scheduler integrate with my calendar?</summary>
-        <p>The scheduling AI handles the full conversational booking layer. Calendar integrations are on the roadmap — confirmed times are delivered clearly so you can add them to your preferred system.</p>
+        <p>The scheduling AI handles the conversational booking layer — the dialogue, confirmation, and follow-up. Calendar system integrations are on the roadmap. For now, confirmed times are delivered to you clearly so you can add them to your preferred system.</p>
       </details>
       <details>
-        <summary>Why not a one-time purchase?</summary>
-        <p>Client pressure patterns evolve — and so do the templates, AI behaviour, and scheduling flows. Subscription keeps everything current.</p>
+        <summary>Why subscription instead of one-time purchase?</summary>
+        <p>Client pressure patterns evolve. Your library and AI playbook needs to evolve with them. Subscription keeps it current — templates, AI behaviour, and scheduling flows all update when new patterns emerge.</p>
       </details>
       <details>
         <summary>Why not just use ChatGPT?</summary>
-        <p>Generic AI over-explains, introduces negotiation leakage, and ignores risk level. Text Boss is constrained by tier and risk profile — including how the scheduling AI communicates.</p>
+        <p>Generic AI will happily over-explain, introduce negotiation leakage, and book appointments without any awareness of risk level or legal defensibility. Text Boss is constrained by tier, structure, and risk level — including how your scheduling AI communicates.</p>
       </details>
       <details>
         <summary>Will this make me sound aggressive?</summary>
-        <p>No. Structured, calm, and decisive. Authority without emotional tone.</p>
+        <p>No. It makes you sound structured, calm, and decisive — in both client messages and scheduling interactions. Authority without emotional tone.</p>
       </details>
       <details>
         <summary>What happens if a client no-shows?</summary>
-        <p>Black members get no-show containment scripts — AI-drafted follow-ups that document the event without escalating or conceding. Pro members get standard rebooking flows.</p>
+        <p>Black members get no-show containment scripts: controlled AI-drafted follow-ups that document the missed appointment and preserve your position — without escalating or conceding anything. Pro members receive standard rebooking flows.</p>
       </details>
       <details>
         <summary>Can I cancel at any time?</summary>
-        <p>Yes. Cancel from your account at any time. No lock-in, no fees. Access continues through the end of your billing cycle.</p>
+        <p>Yes. Cancel any time from your account. No lock-in periods, no cancellation fees. Your access continues until the end of your current billing cycle.</p>
       </details>
       <details>
         <summary>Is my data private?</summary>
@@ -1304,7 +1329,7 @@ hr.sep {
       </details>
       <details>
         <summary>Can I customise the templates?</summary>
-        <p>Templates are send-ready as-is. Adapt them before sending if needed — they're starting points, not locked scripts.</p>
+        <p>Templates are designed to be send-ready. You can adapt any template before sending — they're copy-paste starting points, not locked scripts.</p>
       </details>
     </div>
   </section>
@@ -1324,7 +1349,7 @@ hr.sep {
 <div class="sticky" role="region" aria-label="Sticky pricing call to action">
   <div class="sticky-inner">
     <div class="sticky-text">
-      <b>Core:</b> messaging control. <b>Pro + Black:</b> messaging + <span style="color:var(--cyan)">AI scheduling</span>.
+      <b>Ready to stop improvising?</b> Core: messaging control. Pro &amp; Black: messaging + <span style="color:var(--cyan)">AI scheduling</span>.
     </div>
     <div class="sticky-actions">
       <a class="btn" href="core.html">Core</a>

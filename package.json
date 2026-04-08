@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "bin": {
+    "textboss": "./bin/textboss.js"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node -e \"const fs=require('node:fs'); const path=require('node:path'); const cp=require('node:child_process'); for (const file of fs.readdirSync('tests').filter((name)=>name.endsWith('.test.js')).sort()) { cp.execFileSync(process.execPath,[path.join('tests',file)],{stdio:'inherit'}); }\""
   },
   "repository": {
     "type": "git",
@@ -21,5 +24,8 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.95.3",
     "stripe": "^20.3.1"
+  },
+  "devDependencies": {
+    "netlify-cli": "^24.9.0"
   }
 }

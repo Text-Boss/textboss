@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Text Boss — Access</title>
+  <style>
+    :root {
+      --bg:      #020203;
+      --surface: #0c0e11;
+      --line:    #191d22;
+      --line-hi: #232830;
+      --text:    #e4ecf2;
+      --muted:   #52606d;
+      --muted-hi:#8896a4;
+      --green:   #22c55e;
+      --danger:  #ef4444;
+      --mono: Consolas, Monaco, 'Courier New', ui-monospace, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 15px;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background-image: radial-gradient(ellipse 60% 30% at 50% 0%,
+        rgba(34,197,94,.07), transparent);
+    }
+
+    .wordmark {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .wordmark span { color: var(--green); }
+
+    .card {
+      width: min(100%, 480px);
+      border: 1px solid var(--line-hi);
+      border-radius: 20px;
+      background: var(--surface);
+      padding: 32px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.55);
+    }
+
+    .card-label {
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .card-label .sl { color: var(--green); font-weight: 700; }
+
+    h1 { font-size: clamp(18px, 4vw, 22px); margin-bottom: 8px; }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted-hi);
+      line-height: 1.65;
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted-hi);
+      margin-bottom: 8px;
+      letter-spacing: .04em;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--line-hi);
+      border-radius: 12px;
+      background: rgba(0,0,0,.25);
+      color: var(--text);
+      padding: 13px 16px;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+      caret-color: var(--green);
+      transition: border-color .15s;
+    }
+    input:focus { border-color: rgba(34,197,94,.45); }
+    input::placeholder { color: var(--muted); }
+
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+    button, .back-link {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 44px;
+      border-radius: 10px;
+      padding: 0 18px;
+      border: 1px solid var(--line-hi);
+      color: var(--text);
+      background: var(--surface);
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color .15s, filter .15s;
+      white-space: nowrap;
+    }
+    button:hover, .back-link:hover { border-color: rgba(255,255,255,.2); }
+
+    button.primary {
+      background: var(--green);
+      color: #040e07;
+      border-color: transparent;
+      font-weight: 700;
+    }
+    button.primary:hover { filter: brightness(1.08); }
+
+    .status {
+      margin-top: 16px;
+      min-height: 20px;
+      font-size: 12px;
+      color: var(--muted-hi);
+      line-height: 1.5;
+    }
+    .status.error { color: #fca5a5; }
+
+    .back-link { margin-top: 24px; font-size: 12px; color: var(--muted); border: none; background: none; padding: 0; min-height: 0; }
+    .back-link:hover { color: var(--text); border: none; }
+
+    @media (max-width: 640px) {
+      input { font-size: 16px; }
+    }
+    @media (max-width: 400px) {
+      body { padding: 16px; }
+      .card { padding: 24px 18px; }
+      .actions { flex-direction: column; }
+      .actions button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wordmark">Text <span>Boss</span></div>
+
+  <div class="card">
+    <div class="card-label"><span class="sl">//</span> subscriber access</div>
+    <h1>Verify your access.</h1>
+    <p class="subtitle">Enter the email address linked to your active Text Boss subscription.</p>
+
+    <form id="access-form">
+      <label for="email">Subscription email</label>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+      <div class="actions">
+        <button class="primary" type="submit">Verify access</button>
+      </div>
+    </form>
+
+    <div id="status" class="status" aria-live="polite"></div>
+  </div>
+
+  <a class="back-link" href="/index.html">← Back to pricing</a>
+
+  <script>
+    (function () {
+      const form       = document.getElementById("access-form");
+      const emailInput = document.getElementById("email");
+      const statusNode = document.getElementById("status");
+
+      function setStatus(message, isError) {
+        statusNode.textContent = message;
+        statusNode.className = isError ? "status error" : "status";
+      }
+
+      form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        setStatus("Verifying access…", false);
+
+        try {
+          const response = await fetch("/.netlify/functions/verify-email", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ email: emailInput.value }),
+          });
+
+          let data = null;
+          const responseText = await response.text();
+          try { data = responseText ? JSON.parse(responseText) : null; } catch { data = null; }
+
+          if (data && data.ok && data.redirectTo) {
+            window.location.href = data.redirectTo;
+            return;
+          }
+
+          const reason = data && typeof data.reason === "string"
+            ? data.reason : `http_${response.status}`;
+          setStatus(`Access denied (${reason}). Check your subscription email and status.`, true);
+        } catch {
+          setStatus("Access check failed. Try again.", true);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

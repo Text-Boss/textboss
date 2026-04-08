@@ -4,306 +4,238 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TEXT BOSS / PRO</title>
-
 <style>
-:root{
-  --bg:#0b0e14;
-  --panel:#0f1320;
-  --panel2:#14182a;
-  --text:#c9d1d9;
-  --muted:#8b949e;
-  --accent:#7ee787;
-  --accent2:#58a6ff;
-  --shadow: 0 20px 60px rgba(0,0,0,.6);
-  --radius: 10px;
-  --mono: Consolas, Monaco, 'Courier New', ui-monospace, SFMono-Regular, Menlo, monospace;
+:root {
+  --bg:       #020203;
+  --surface:  #0c0e11;
+  --surface2: #0f1216;
+  --line:     #191d22;
+  --line-hi:  #232830;
+  --text:     #e4ecf2;
+  --muted:    #52606d;
+  --muted-hi: #8896a4;
+  --accent:   #22d3ee;
 
-  --pad: clamp(16px, 2.4vw, 24px);
-  --gap: clamp(10px, 2vw, 14px);
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  background:var(--bg);
-  font-family:var(--mono);
-  color:var(--text);
-  overflow-x:hidden;
-  padding-bottom: 88px;
-}
-a{color:inherit;text-decoration:none}
+  --green:  #22c55e;
+  --amber:  #f59e0b;
+  --purple: #a78bfa;
+  --danger: #ff5a7a;
 
-.container{
-  width:min(820px, calc(100% - 28px));
-  margin: clamp(18px, 6vw, 60px) auto 120px;
+  --mono: Consolas, Monaco, 'Courier New', ui-monospace, monospace;
+  --container: min(820px, calc(100% - 40px));
+  --radius: 14px;
 }
-.editor{
-  background:var(--panel);
-  border-radius:8px;
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  border:1px solid rgba(255,255,255,.05);
-}
-.topbar{
-  background:#161b2b;
-  padding:10px 16px;
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:12px;
-  border-bottom:1px solid rgba(255,255,255,.05);
-  flex-wrap:wrap;
-}
-.left{
-  display:flex;
-  align-items:flex-start;
-  gap:14px;
-  min-width:0;
-  flex: 1 1 360px;
-}
-.dots{flex:0 0 auto; margin-top:3px}
-.dots span{
-  display:inline-block;
-  width:10px;height:10px;border-radius:50%;
-  margin-right:6px;
-}
-.red{background:#ff5f56}.yellow{background:#ffbd2e}.green{background:#27c93f}
-.title{
-  font-weight:700;
-  letter-spacing:1px;
-  color:var(--accent2);
-  font-size: clamp(13px, 2.2vw, 14px);
-  white-space:nowrap;
-}
-.nav{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.pill{
-  border:1px solid rgba(255,255,255,.08);
-  background:rgba(0,0,0,.18);
-  padding:7px 10px;
-  border-radius:999px;
-  font-size:12px;
-  color:var(--muted);
-  white-space:nowrap;
-}
-.pill b{color:var(--accent)}
-.content{padding:var(--pad);line-height:1.65}
-.keyword{color:var(--accent2)}
-.string{color:var(--accent)}
-.comment{color:var(--muted)}
-hr.sep{border:0;border-top:1px dashed rgba(88,166,255,.35);margin:18px 0}
 
-.console{
-  background:rgba(0,0,0,.20);
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:10px;
-  padding:14px;
-  margin-top:14px
-}
-.line{
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-  font-size:13px;
-  flex-wrap:wrap;
-  word-break:break-word;
-  overflow-wrap:anywhere;
-}
-.prompt{color:var(--accent)}
-.cmd{color:var(--text)}
-.out{color:var(--muted)}
-.out b{color:var(--text)}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 15px; line-height: 1.6; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
 
-.cursor{
-  display:inline-block;
-  width:10px;height:16px;
-  margin-left:6px;
-  vertical-align:-2px;
-  background:var(--accent);
-  opacity:1;
-  animation:blink 1s steps(1) infinite;
-  border-radius:2px
-}
-@keyframes blink{50%{opacity:0}}
+.hero-wrap { width: var(--container); margin: 40px auto 0; }
+.editor { border: 1px solid var(--line-hi); border-radius: 16px; background: var(--surface); overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,.55); }
+.topbar { background: #0d1015; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.dots { display: flex; gap: 6px; align-items: center; }
+.dots span { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.dot-r { background: #ff5f56; } .dot-y { background: #ffbd2e; } .dot-g { background: #27c93f; }
+.brand-title { font-weight: 900; letter-spacing: .08em; font-size: 14px; flex: 1; padding: 0 12px; }
+.brand-title span { color: var(--accent); }
+.topnav { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill { border: 1px solid var(--line-hi); background: rgba(0,0,0,.2); padding: 6px 10px; border-radius: 999px; font-size: 11px; color: var(--muted-hi); white-space: nowrap; }
+.pill.accent { border-color: color-mix(in srgb, var(--accent) 35%, transparent); color: var(--accent); }
 
-.priceRow{
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  align-items:flex-start;
-  padding:14px;
-  border-radius:10px;
-  background:rgba(0,0,0,.18);
-  border:1px solid rgba(255,255,255,.06);
-  margin-top:12px;
-  flex-wrap:wrap;
-}
-.priceBox{text-align:right;min-width:160px}
-.price{font-size:18px;color:var(--text)}
-.per{font-size:12px;color:var(--muted)}
+.hero-body { padding: 28px 28px 32px; }
+.console { background: rgba(0,0,0,.22); border: 1px solid var(--line-hi); border-radius: 12px; padding: 16px 18px; }
+.line { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.65; margin-bottom: 6px; word-break: break-word; flex-wrap: wrap; }
+.line:last-child { margin-bottom: 0; }
+.prompt { color: var(--green); flex-shrink: 0; }
+.out { color: var(--muted-hi); } .out b { color: var(--text); }
+.cursor { display: inline-block; width: 9px; height: 15px; margin-left: 4px; vertical-align: -2px; background: var(--accent); border-radius: 2px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
 
-.btn{
-  display:inline-block;
-  margin-top:10px;
-  padding:10px 12px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(20,24,42,.9);
-  font-size:12px;
-  color:var(--text);
-  cursor:pointer;
-  transition:border-color .15s ease, transform .15s ease;
-  user-select:none;
-  white-space:nowrap;
-  text-align:center;
-}
-.btn:hover{border-color:rgba(126,231,135,.45);transform:translateY(-1px)}
-.btn.primary{border-color:rgba(126,231,135,.35)}
-.btn.primary:hover{border-color:rgba(126,231,135,.75)}
+.page { width: var(--container); margin: 0 auto; padding-bottom: 140px; }
+.sec { padding: 64px 0; border-top: 1px solid var(--line); }
+.sec-label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+.sec-label .sl { color: var(--accent); font-weight: 700; }
+.sec h2 { font-size: clamp(20px, 3.5vw, 26px); line-height: 1.25; margin-bottom: 14px; }
+.body-text { font-size: 14px; color: var(--muted-hi); line-height: 1.75; max-width: 62ch; }
 
-.sticky{
-  position:fixed;
-  left:0;right:0;bottom:0;
-  background:rgba(15,19,32,.92);
-  border-top:1px solid rgba(88,166,255,.25);
-  backdrop-filter:blur(10px);
-  padding:12px 14px;
-  z-index:999
-}
-.stickyInner{
-  width:min(820px, calc(100% - 28px));
-  margin:0 auto;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  flex-wrap:wrap
-}
-.stickyText{font-size:12px;color:var(--muted)}
-.stickyText b{color:var(--text)}
-.stickyActions{display:flex;gap:10px;flex-wrap:wrap}
+.why-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 24px; }
+.why-card { padding: 20px; background: var(--surface); border: 1px solid var(--line-hi); border-radius: var(--radius); }
+.why-card .label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; font-weight: 700; }
+.why-card p { font-size: 13px; color: var(--muted-hi); line-height: 1.65; }
 
-@media (max-width: 820px){
-  .priceBox{text-align:left; min-width:0}
+.features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 24px; }
+.feature { display: flex; gap: 12px; align-items: flex-start; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; font-size: 13px; }
+.fdot { flex-shrink: 0; width: 7px; height: 7px; border-radius: 2px; background: var(--accent); margin-top: 5px; }
+.feature strong { display: block; color: var(--text); margin-bottom: 3px; font-weight: 700; }
+.feature span { color: var(--muted-hi); }
+
+.price-wrap { display: flex; justify-content: flex-start; margin-top: 24px; }
+.price-card { padding: 28px 24px; background: var(--surface); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius: 18px; min-width: 280px; max-width: 100%; }
+.price-tier { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+.price-amount { display: flex; align-items: baseline; gap: 4px; margin-bottom: 12px; }
+.price-amount .num { font-size: 32px; font-weight: 700; color: var(--text); }
+.price-amount .per { font-size: 13px; color: var(--muted); }
+.price-best { font-size: 12px; color: var(--muted-hi); margin-bottom: 18px; }
+.price-secure { font-size: 11px; color: var(--muted); margin-top: 8px; }
+
+.upgrade-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+.upgrade-card { flex: 1 1 180px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--line-hi); border-radius: var(--radius); transition: border-color .15s, transform .15s; }
+.upgrade-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.15); }
+.upgrade-card .tier-name { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.upgrade-card .tier-desc { font-size: 12px; color: var(--muted-hi); line-height: 1.6; }
+.upgrade-card .tier-arrow { font-size: 12px; color: var(--muted); margin-top: 10px; display: block; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 18px; min-height: 44px; border-radius: 10px; border: 1px solid var(--line-hi); background: var(--surface2); color: var(--text); font: inherit; font-size: 13px; cursor: pointer; transition: border-color .15s, filter .15s, transform .1s; white-space: nowrap; }
+.btn:hover { border-color: rgba(255,255,255,.2); transform: translateY(-1px); }
+.btn.accent { background: var(--accent); color: #020d10; border-color: transparent; font-weight: 700; }
+.btn.accent:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn.ghost { background: rgba(0,0,0,.18); }
+
+.sticky { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(2,2,3,.97); border-top: 1px solid var(--line-hi); backdrop-filter: blur(12px); padding: 12px 20px; z-index: 999; }
+.sticky-inner { width: var(--container); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.sticky-text { font-size: 12px; color: var(--muted-hi); }
+.sticky-text b { color: var(--text); }
+.sticky-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+@media (max-width: 820px) {
+  .why-grid { grid-template-columns: 1fr; }
+  .features { grid-template-columns: 1fr; }
 }
-@media (max-width: 520px){
-  .btn{width:100%; text-align:center}
-  .stickyActions{width:100%}
-  .stickyActions .btn,
-  .stickyActions a.btn{flex:1 1 auto}
+@media (max-width: 640px) {
+  .sticky-inner { flex-direction: column; align-items: stretch; text-align: center; }
+  .sticky-actions { width: 100%; }
+  .sticky-actions .btn { flex: 1 1 calc(50% - 8px); text-align: center; }
+  .sticky-actions .btn.ghost { display: none; }
+  .hero-body { padding: 20px 18px 24px; }
+  .topnav { width: 100%; justify-content: flex-start; }
+  .sec { padding: 48px 0; }
+}
+@media (max-width: 400px) {
+  :root { --container: min(820px, calc(100% - 24px)); }
+  .hero-body { padding: 16px 12px 20px; }
+  .sec h2 { font-size: clamp(18px, 4vw, 24px); }
+  .sticky { padding: 10px 12px; }
+  .sticky-actions .btn { flex: 1 1 100%; }
+  .price-card { padding: 22px 18px; min-width: 0; }
+  .why-card { padding: 16px; }
 }
 </style>
 </head>
-
 <body>
-<div class="container">
+
+<div class="hero-wrap">
   <div class="editor">
     <div class="topbar">
-      <div class="left">
-        <div class="dots"><span class="red"></span><span class="yellow"></span><span class="green"></span></div>
-        <div class="title">TEXT BOSS / PRO</div>
-      </div>
-      <div class="nav">
+      <div class="dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+      <div class="brand-title">TEXT BOSS / <span>PRO</span></div>
+      <nav class="topnav">
         <a class="pill" href="index.html">← home</a>
-        <span class="pill">tier: <b>pro</b></span>
-      </div>
+        <span class="pill accent">tier: pro</span>
+      </nav>
     </div>
-
-    <div class="content">
-      <p class="comment">// PRO — For Boundary & Pushback Situations</p>
-
+    <div class="hero-body">
       <div class="console">
         <div class="line">
           <span class="prompt">$</span>
-          <span class="cmd" data-typewriter data-speed="9">textboss pro --purpose</span>
+          <span data-typewriter data-speed="9">textboss pro --purpose</span>
           <span class="cursor" aria-hidden="true"></span>
         </div>
-        <div class="line"><span class="out">→</span><span class="out"><b>By the time you need PRO, you already know the pattern.</b> The client who keeps “just asking.” The project that keeps expanding. The conversation that reopens after it was already resolved.</span></div>
-        <div class="line"><span class="out">→</span><span class="out">You don’t need confidence. You need language that closes doors without creating friction. Text Boss PRO provides controlled, authority-safe messages designed to assert boundaries, limit scope drift, and reduce emotional escalation—while keeping communication professional.</span></div>
+        <div class="line"><span class="out">→</span><span class="out"><b>By the time you need Pro, you already know the pattern.</b> The client who keeps "just asking." The project that keeps expanding. The conversation that reopens after it was already resolved.</span></div>
+        <div class="line"><span class="out">→</span><span class="out">Pro states positions. It doesn't ask for permission. It drafts the message, the sequence, or the reset — and every word is chosen to end the pattern, not extend it.</span></div>
       </div>
-
-      <hr class="sep">
-
-      <p><span class="keyword">Who it’s for:</span> operators who manage bigger deals, multiple stakeholders, or recurring scenarios where the same boundaries must be enforced repeatedly without sounding reactive.</p>
-
-      <p><span class="keyword">What it does:</span> gives you controlled message progressions that move from soft → firm → close, while staying calm and professional.</p>
-
-      <p><span class="keyword">Why users benefit:</span> clearer boundaries, fewer reopened discussions, reduced scope pressure, and conversations that end decisively without relationship damage.</p>
-
-      <hr class="sep">
-
-      <p class="comment">// What you get (includes everything in Core)</p>
-      <div class="console">
-        <div class="line"><span class="out">→</span><span class="out"><b>Message progression</b> (soft → firm → close)</span></div>
-        <div class="line"><span class="out">→</span><span class="out"><b>Boundary and pricing responses</b> scope control, pushback handling</span></div>
-        <div class="line"><span class="out">→</span><span class="out"><b>Decision compression language</b> clear options with yes/no framing</span></div>
-        <div class="line"><span class="out">→</span><span class="out"><b>Conversation stabilization</b> resets for misunderstandings, tension, or drift</span></div>
-        <div class="line"><span class="out">→</span><span class="out"><b>Follow-up sequencing</b> what to send next if there’s no response</span></div>
-        <div class="line"><span class="out">→</span><span class="out"><b>Response timing guidance</b> when to pause vs respond</span></div>
-      </div>
-
-      <hr class="sep">
-
-      <div class="priceRow">
-        <div>
-          <h4><span class="string">Pro</span> — $79/month</h4>
-          <p class="comment" style="margin:0;">Best for: retainers, teams, repeat scenarios, and staying in control as volume increases.</p>
-        </div>
-        <div class="priceBox">
-          <div class="price">$79 <span class="per">/mo</span></div>
-          <button type="button" class="btn primary" data-checkout="https://buy.stripe.com/test_fZu4gAe78cBX4C96o2ebu01">Buy Pro</button>
-          <div class="per" style="margin-top:8px;">Secure checkout via Stripe</div>
-        </div>
-      </div>
-
-      <p class="comment" style="margin-top:14px;">
-        // Highest-stakes upgrade: <a href="black.html" class="string">Black</a>
-      </p>
     </div>
   </div>
 </div>
 
+<div class="page">
+
+  <section class="sec">
+    <div class="sec-label"><span class="sl">//</span> 01 — Who it's for</div>
+    <h2>Built for operators managing pressure, patterns, and repeat pushback.</h2>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="label">Who it's for</div>
+        <p>Operators managing repeat pushback, scope creep, or retainer relationships where the same boundaries need to hold consistently across many conversations.</p>
+      </div>
+      <div class="why-card">
+        <div class="label">What it does</div>
+        <p>Drafts messages and sequences that state positions decisively, reset pattern behaviour, and handle scheduling — all from a single interface.</p>
+      </div>
+      <div class="why-card">
+        <div class="label">Why you benefit</div>
+        <p>Clearer boundaries, fewer reopened discussions, and a built-in AI scheduling assistant that books and manages client appointments alongside your communication.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-label"><span class="sl">//</span> 02 — What you get</div>
+    <h2>Everything in Core, plus pattern control and AI scheduling.</h2>
+    <div class="features">
+      <div class="feature"><div class="fdot"></div><div><strong>Message progression</strong><span>Soft → firm → close. Controlled sequences that move conversations forward without reopening doors.</span></div></div>
+      <div class="feature"><div class="fdot"></div><div><strong>Boundary and pricing responses</strong><span>Scope control and pushback handling built to hold under pressure.</span></div></div>
+      <div class="feature"><div class="fdot"></div><div><strong>Decision compression language</strong><span>Clear options with yes/no framing that removes ambiguity and stalls.</span></div></div>
+      <div class="feature"><div class="fdot"></div><div><strong>Conversation stabilisation</strong><span>Resets for misunderstandings, tension, or drift — before they escalate.</span></div></div>
+      <div class="feature"><div class="fdot"></div><div><strong>Follow-up sequencing</strong><span>What to send next when there's no response. No more improvising the chase.</span></div></div>
+      <div class="feature"><div class="fdot"></div><div><strong>AI Appointment Scheduler</strong><span>Set your availability once. The AI proposes slots, confirms bookings, and handles rescheduling — in natural language, inside the app.</span></div></div>
+      <div class="feature"><div class="fdot"></div><div><strong>50 saved conversation threads</strong><span>Named, browsable chat history with AI-generated titles. Resume any past conversation with full context.</span></div></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-label"><span class="sl">//</span> 03 — Pricing</div>
+    <h2>Stop losing ground in conversations that should already be closed.</h2>
+    <div class="price-wrap">
+      <div class="price-card">
+        <div class="price-tier">Pro</div>
+        <div class="price-amount"><span class="num">$79</span><span class="per"> AUD/mo</span></div>
+        <p class="price-best">Best for: retainers, teams, repeat scenarios, and staying in control as volume increases.</p>
+        <button type="button" class="btn accent" style="width:100%" data-checkout="https://buy.stripe.com/test_fZu4gAe78cBX4C96o2ebu01">Buy Pro</button>
+        <p class="price-secure">Secure checkout via Stripe</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-label"><span class="sl">//</span> 04 — Upgrade path</div>
+    <h2>When a conversation becomes a liability.</h2>
+    <p class="body-text">Pro keeps things orderly. Black exists for when one message could become evidence — disputes, hostility, chargeback risk, and situations where restraint matters more than resolution.</p>
+    <div class="upgrade-row">
+      <a class="upgrade-card" href="black.html">
+        <div class="tier-name" style="color:var(--purple)">Black</div>
+        <div class="tier-desc">Highest-restraint communication. Non-admission language, screenshot-safe responses, and finality scripts for high-stakes situations. AUD $199/mo.</div>
+        <span class="tier-arrow">open →</span>
+      </a>
+    </div>
+  </section>
+
+</div>
+
 <div class="sticky">
-  <div class="stickyInner">
-    <div class="stickyText"><b>Pro</b> is for situations where boundaries must hold under pressure.</div>
-    <div class="stickyActions">
-      <button type="button" class="btn primary" data-checkout="https://buy.stripe.com/test_fZu4gAe78cBX4C96o2ebu01">Buy Pro</button>
-      <a class="btn" href="index.html#pricing">Compare tiers</a>
+  <div class="sticky-inner">
+    <div class="sticky-text"><b>Pro</b> is for situations where boundaries must hold under pressure.</div>
+    <div class="sticky-actions">
+      <button type="button" class="btn accent" data-checkout="https://buy.stripe.com/test_fZu4gAe78cBX4C96o2ebu01">Buy Pro</button>
+      <a class="btn" href="access.html">Subscriber access</a>
+      <a class="btn ghost" href="index.html#pricing">Compare tiers</a>
     </div>
   </div>
 </div>
 
 <script>
 (function () {
-  const nodes = document.querySelectorAll("[data-typewriter]");
-  nodes.forEach((el) => {
-    const full = el.textContent;
-    const speed = Number(el.getAttribute("data-speed") || 14);
-    el.textContent = "";
-    let i = 0;
-    const tick = () => {
-      el.textContent = full.slice(0, i);
-      i++;
-      if (i <= full.length) setTimeout(tick, speed);
-    };
+  document.querySelectorAll("[data-typewriter]").forEach((el) => {
+    const full = el.textContent, speed = Number(el.getAttribute("data-speed") || 14);
+    el.textContent = ""; let i = 0;
+    const tick = () => { el.textContent = full.slice(0, i++); if (i <= full.length) setTimeout(tick, speed); };
     tick();
   });
 })();
-
 (function () {
-  const btns = document.querySelectorAll("[data-checkout]");
-  btns.forEach((btn) => {
+  document.querySelectorAll("[data-checkout]").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       const url = (btn.getAttribute("data-checkout") || "").trim();
-      if (!url) {
-        e.preventDefault();
-        alert("Checkout link missing. Add a Stripe Checkout URL to data-checkout.");
-        return;
-      }
+      if (!url) { e.preventDefault(); alert("Checkout link missing."); return; }
       window.location.href = url;
     });
   });
