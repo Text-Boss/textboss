@@ -1,0 +1,1 @@
+- [AI Scheduler Feature](project_scheduler_feature.md) — Tool-calling pattern, tier separation, reminder system design decisions from 2026-04-08

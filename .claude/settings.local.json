@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Skill(update-config)"
+      "Skill(update-config)",
+      "Bash(node tests/availability.test.js)",
+      "Bash(node -e \"require\\('./netlify/functions/availability'\\)\")",
+      "Bash(node -e ':*)",
+      "Bash(npm test:*)"
     ]
   }
 }

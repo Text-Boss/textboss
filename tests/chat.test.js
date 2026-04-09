@@ -117,7 +117,7 @@ async function testOversizedMessageRejected() {
   assert.equal(response.statusCode, 400);
   assert.deepEqual(JSON.parse(response.body), {
     ok: false,
-    denied: true,
+    denied: false,
     reason: "message_too_long",
   });
 }

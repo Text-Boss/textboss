@@ -69,7 +69,7 @@ async function testHandlerReturnsJsonWhenRuntimeDepsAreMissing() {
     assert.equal(response.statusCode, 500);
     assert.deepEqual(JSON.parse(response.body), {
       ok: false,
-      denied: true,
+      denied: false,
       reason: "server_error",
     });
   } finally {

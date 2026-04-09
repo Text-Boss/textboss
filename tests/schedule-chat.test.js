@@ -18,9 +18,18 @@ function makeProDeps(overrides = {}) {
       responseMaxTokens: 600,
     }),
     getSchedulingInstructions: () => "pro-scheduling-instructions",
-    createResponse: async () => ({ output: "Book you in.", usage: { total_tokens: 20 } }),
+    createSchedulingResponse: async () => ({
+      output: "Book you in.",
+      usage: { total_tokens: 20 },
+      toolCalls: [],
+      rawOutput: [],
+    }),
     listAvailability: async () => [],
     listAppointments: async () => [],
+    createAppointment: async () => { throw new Error("should not create"); },
+    updateAppointment: async () => { throw new Error("should not update"); },
+    loadThreadMessages: async () => [],
+    saveMessage: async () => {},
     ...overrides,
   };
 }
@@ -38,9 +47,14 @@ async function testProTierGetsSchedulingResponse() {
       { id: "a1", scheduled_date: "2026-04-13", scheduled_time: "10:00",
         duration_minutes: 60, client_name: "Jane", status: "confirmed" },
     ],
-    createResponse: async (input) => {
+    createSchedulingResponse: async (input) => {
       capturedInput = input;
-      return { output: "Monday at 9am works.", usage: { total_tokens: 30 } };
+      return {
+        output: "Monday at 9am works.",
+        usage: { total_tokens: 30 },
+        toolCalls: [],
+        rawOutput: [],
+      };
     },
   }));
 
@@ -57,7 +71,7 @@ async function testProTierGetsSchedulingResponse() {
   assert.equal(body.tier, "Pro");
   assert.equal(body.output, "Monday at 9am works.");
 
-  assert.ok(capturedInput, "createResponse was not called");
+  assert.ok(capturedInput, "createSchedulingResponse was not called");
   assert.ok(capturedInput.extraSystemContext.includes("pro-scheduling-instructions"),
     "scheduling instructions missing from context");
   assert.ok(capturedInput.extraSystemContext.includes("Monday: 09:00 – 17:00"),
@@ -66,6 +80,8 @@ async function testProTierGetsSchedulingResponse() {
     "appointment date missing from context");
   assert.ok(capturedInput.extraSystemContext.includes("Jane"),
     "client name missing from context");
+  assert.ok(capturedInput.tools, "tools not passed to createSchedulingResponse");
+  assert.ok(capturedInput.tools.length > 0, "tools array is empty");
 }
 
 async function testBlackTierGetsSchedulingResponse() {
@@ -91,12 +107,21 @@ async function testBlackTierGetsSchedulingResponse() {
       assert.equal(tier, "Black");
       return "black-scheduling-instructions";
     },
-    createResponse: async (input) => {
+    createSchedulingResponse: async (input) => {
       assert.ok(input.extraSystemContext.includes("black-scheduling-instructions"));
-      return { output: "Confirmed.", usage: { total_tokens: 10 } };
+      return {
+        output: "Confirmed.",
+        usage: { total_tokens: 10 },
+        toolCalls: [],
+        rawOutput: [],
+      };
     },
     listAvailability: async () => [],
     listAppointments: async () => [],
+    createAppointment: async () => { throw new Error("should not create"); },
+    updateAppointment: async () => { throw new Error("should not update"); },
+    loadThreadMessages: async () => [],
+    saveMessage: async () => {},
   });
 
   const res = await handler({
@@ -125,9 +150,13 @@ async function testCoreTierDenied() {
     }),
     getTierPolicy: () => ({ tier: "Core", instructions: "", inputLimit: 4000 }),
     getSchedulingInstructions: () => null,
-    createResponse: async () => { throw new Error("should not call OpenAI for Core"); },
+    createSchedulingResponse: async () => { throw new Error("should not call OpenAI for Core"); },
     listAvailability: async () => { throw new Error("should not query availability"); },
     listAppointments: async () => { throw new Error("should not query appointments"); },
+    createAppointment: async () => { throw new Error("should not create"); },
+    updateAppointment: async () => { throw new Error("should not update"); },
+    loadThreadMessages: async () => { throw new Error("should not load threads"); },
+    saveMessage: async () => { throw new Error("should not save"); },
   });
 
   const res = await handler({
@@ -149,9 +178,13 @@ async function testMissingSessionDenied() {
     findEntitlementByEmail: async () => { throw new Error("should not query"); },
     getTierPolicy: () => { throw new Error("should not get policy"); },
     getSchedulingInstructions: () => { throw new Error("should not get instructions"); },
-    createResponse: async () => { throw new Error("should not call OpenAI"); },
+    createSchedulingResponse: async () => { throw new Error("should not call OpenAI"); },
     listAvailability: async () => { throw new Error("should not query"); },
     listAppointments: async () => { throw new Error("should not query"); },
+    createAppointment: async () => { throw new Error("should not create"); },
+    updateAppointment: async () => { throw new Error("should not update"); },
+    loadThreadMessages: async () => { throw new Error("should not load"); },
+    saveMessage: async () => { throw new Error("should not save"); },
   });
 
   const res = await handler({
@@ -168,7 +201,7 @@ async function testMissingMessageRejected() {
   const { createHandler } = require("../netlify/functions/schedule-chat");
 
   const handler = createHandler(makeProDeps({
-    createResponse: async () => { throw new Error("should not call OpenAI"); },
+    createSchedulingResponse: async () => { throw new Error("should not call OpenAI"); },
   }));
 
   const res = await handler({
@@ -186,7 +219,7 @@ async function testOversizedMessageRejected() {
   const { createHandler } = require("../netlify/functions/schedule-chat");
 
   const handler = createHandler(makeProDeps({
-    createResponse: async () => { throw new Error("should not call OpenAI"); },
+    createSchedulingResponse: async () => { throw new Error("should not call OpenAI"); },
   }));
 
   const res = await handler({
@@ -245,6 +278,7 @@ async function testBuildSchedulingContextFormat() {
   assert.ok(ctx.includes("Jane Smith"), "client name missing");
   assert.ok(ctx.includes("jane@example.com"), "client contact missing");
   assert.ok(ctx.includes("Consultation"), "title missing");
+  assert.ok(ctx.includes("[id:a1]"), "appointment ID missing from context");
 }
 
 async function testBuildSchedulingContextEmpty() {
@@ -254,6 +288,237 @@ async function testBuildSchedulingContextEmpty() {
 
   assert.ok(ctx.includes("No availability configured"), "empty availability message missing");
   assert.ok(ctx.includes("No upcoming appointments"), "empty appointments message missing");
+}
+
+async function testToolCallBookAppointment() {
+  const { createHandler } = require("../netlify/functions/schedule-chat");
+
+  let createdAppt = null;
+  let round = 0;
+
+  const handler = createHandler(makeProDeps({
+    createSchedulingResponse: async (input) => {
+      round++;
+      if (round === 1) {
+        // First round: AI decides to call book_appointment
+        return {
+          output: "",
+          usage: { total_tokens: 15 },
+          toolCalls: [{
+            call_id: "call_123",
+            name: "book_appointment",
+            arguments: JSON.stringify({
+              client_name: "Jane",
+              scheduled_date: "2026-04-15",
+              scheduled_time: "14:00",
+              duration_minutes: 30,
+            }),
+          }],
+          rawOutput: [{ type: "function_call", call_id: "call_123", name: "book_appointment" }],
+        };
+      }
+      // Second round: AI produces final text after tool result
+      return {
+        output: "Booked Jane for April 15 at 2pm, 30 minutes.",
+        usage: { total_tokens: 25 },
+        toolCalls: [],
+        rawOutput: [],
+      };
+    },
+    createAppointment: async (email, appt) => {
+      createdAppt = { email, ...appt };
+      return {
+        id: "new-appt-1",
+        ...appt,
+        status: "confirmed",
+      };
+    },
+  }));
+
+  const res = await handler({
+    httpMethod: "POST",
+    headers: {},
+    queryStringParameters: {},
+    body: JSON.stringify({ message: "Book Jane for next Tuesday at 2pm, 30 minutes." }),
+  });
+
+  assert.equal(res.statusCode, 200);
+  const body = JSON.parse(res.body);
+  assert.equal(body.ok, true);
+  assert.equal(body.output, "Booked Jane for April 15 at 2pm, 30 minutes.");
+  assert.ok(body.actions, "actions array missing");
+  assert.equal(body.actions.length, 1);
+  assert.equal(body.actions[0].tool, "book_appointment");
+  assert.ok(body.actions[0].result.booked, "appointment not flagged as booked");
+
+  assert.ok(createdAppt, "createAppointment was not called");
+  assert.equal(createdAppt.email, "pro@example.com");
+  assert.equal(createdAppt.client_name, "Jane");
+  assert.equal(createdAppt.scheduled_date, "2026-04-15");
+  assert.equal(createdAppt.scheduled_time, "14:00");
+  assert.equal(createdAppt.duration_minutes, 30);
+}
+
+async function testToolCallCancelAppointment() {
+  const { createHandler } = require("../netlify/functions/schedule-chat");
+
+  let updatedArgs = null;
+
+  const handler = createHandler(makeProDeps({
+    createSchedulingResponse: async () => {
+      if (!updatedArgs) {
+        return {
+          output: "",
+          usage: { total_tokens: 10 },
+          toolCalls: [{
+            call_id: "call_456",
+            name: "cancel_appointment",
+            arguments: JSON.stringify({ appointment_id: "appt-to-cancel" }),
+          }],
+          rawOutput: [{ type: "function_call", call_id: "call_456", name: "cancel_appointment" }],
+        };
+      }
+      return {
+        output: "The appointment has been cancelled.",
+        usage: { total_tokens: 20 },
+        toolCalls: [],
+        rawOutput: [],
+      };
+    },
+    updateAppointment: async (id, email, updates) => {
+      updatedArgs = { id, email, updates };
+      return { id, status: "cancelled" };
+    },
+  }));
+
+  const res = await handler({
+    httpMethod: "POST",
+    headers: {},
+    queryStringParameters: {},
+    body: JSON.stringify({ message: "Cancel my appointment appt-to-cancel." }),
+  });
+
+  assert.equal(res.statusCode, 200);
+  const body = JSON.parse(res.body);
+  assert.equal(body.ok, true);
+  assert.ok(body.actions);
+  assert.equal(body.actions[0].tool, "cancel_appointment");
+  assert.ok(body.actions[0].result.cancelled);
+
+  assert.ok(updatedArgs, "updateAppointment was not called");
+  assert.equal(updatedArgs.id, "appt-to-cancel");
+  assert.equal(updatedArgs.updates.status, "cancelled");
+}
+
+async function testToolCallRescheduleAppointment() {
+  const { createHandler } = require("../netlify/functions/schedule-chat");
+
+  let updatedArgs = null;
+
+  const handler = createHandler(makeProDeps({
+    createSchedulingResponse: async () => {
+      if (!updatedArgs) {
+        return {
+          output: "",
+          usage: { total_tokens: 10 },
+          toolCalls: [{
+            call_id: "call_789",
+            name: "reschedule_appointment",
+            arguments: JSON.stringify({
+              appointment_id: "appt-to-move",
+              scheduled_date: "2026-04-17",
+              scheduled_time: "15:00",
+            }),
+          }],
+          rawOutput: [{ type: "function_call", call_id: "call_789", name: "reschedule_appointment" }],
+        };
+      }
+      return {
+        output: "Rescheduled to Thursday at 3pm.",
+        usage: { total_tokens: 20 },
+        toolCalls: [],
+        rawOutput: [],
+      };
+    },
+    updateAppointment: async (id, email, updates) => {
+      updatedArgs = { id, email, updates };
+      return { id, ...updates };
+    },
+  }));
+
+  const res = await handler({
+    httpMethod: "POST",
+    headers: {},
+    queryStringParameters: {},
+    body: JSON.stringify({ message: "Move my appointment to Thursday at 3pm." }),
+  });
+
+  assert.equal(res.statusCode, 200);
+  const body = JSON.parse(res.body);
+  assert.ok(body.actions);
+  assert.equal(body.actions[0].tool, "reschedule_appointment");
+  assert.ok(body.actions[0].result.rescheduled);
+
+  assert.equal(updatedArgs.id, "appt-to-move");
+  assert.equal(updatedArgs.updates.scheduled_date, "2026-04-17");
+  assert.equal(updatedArgs.updates.scheduled_time, "15:00");
+  assert.equal(updatedArgs.updates.status, "confirmed");
+}
+
+async function testThreadMessagesPersisted() {
+  const { createHandler } = require("../netlify/functions/schedule-chat");
+
+  const saved = [];
+
+  const handler = createHandler(makeProDeps({
+    createSchedulingResponse: async () => ({
+      output: "Done.",
+      usage: { total_tokens: 5 },
+      toolCalls: [],
+      rawOutput: [],
+    }),
+    loadThreadMessages: async (threadId, email) => {
+      assert.equal(threadId, "thread-abc");
+      assert.equal(email, "pro@example.com");
+      return [
+        { role: "user", content: "Earlier message" },
+        { role: "assistant", content: "Earlier reply" },
+      ];
+    },
+    saveMessage: async (threadId, role, content) => {
+      saved.push({ threadId, role, content });
+    },
+  }));
+
+  const res = await handler({
+    httpMethod: "POST",
+    headers: {},
+    queryStringParameters: {},
+    body: JSON.stringify({ message: "Follow-up", threadId: "thread-abc" }),
+  });
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(JSON.parse(res.body).threadId, "thread-abc");
+
+  assert.equal(saved.length, 2);
+  assert.equal(saved[0].role, "user");
+  assert.equal(saved[0].content, "Follow-up");
+  assert.equal(saved[1].role, "assistant");
+  assert.equal(saved[1].content, "Done.");
+}
+
+async function testSchedulingToolsExported() {
+  const { SCHEDULING_TOOLS } = require("../netlify/functions/schedule-chat");
+
+  assert.ok(Array.isArray(SCHEDULING_TOOLS), "SCHEDULING_TOOLS not an array");
+  assert.equal(SCHEDULING_TOOLS.length, 5);
+
+  const toolNames = SCHEDULING_TOOLS.map(t => t.name);
+  assert.ok(toolNames.includes("get_availability"));
+  assert.ok(toolNames.includes("list_appointments"));
+  assert.ok(toolNames.includes("book_appointment"));
+  assert.ok(toolNames.includes("cancel_appointment"));
+  assert.ok(toolNames.includes("reschedule_appointment"));
 }
 
 async function run() {
@@ -266,6 +531,11 @@ async function run() {
   await testNonPostMethodRejected();
   await testBuildSchedulingContextFormat();
   await testBuildSchedulingContextEmpty();
+  await testToolCallBookAppointment();
+  await testToolCallCancelAppointment();
+  await testToolCallRescheduleAppointment();
+  await testThreadMessagesPersisted();
+  await testSchedulingToolsExported();
   console.log("schedule-chat tests passed");
 }
 

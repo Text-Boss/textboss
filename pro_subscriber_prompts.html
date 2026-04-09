@@ -130,6 +130,10 @@
     .details-grid input::placeholder {
       color: var(--muted);
     }
+    .details-grid input[type="date"],
+    .details-grid input[type="time"] {
+      color-scheme: dark;
+    }
 
     @media (max-width: 600px) {
       .details-grid { grid-template-columns: 1fr; }
@@ -272,6 +276,10 @@
     <div><label>Website <span class="optional">(optional)</span></label><input type="text" data-field="WEBSITE" placeholder="e.g. www.brightside.com"></div>
     <div><label>ABN / Business Number <span class="optional">(optional)</span></label><input type="text" data-field="ABN" placeholder="e.g. 12 345 678 901"></div>
     <div><label>City / Location <span class="optional">(optional)</span></label><input type="text" data-field="CITY" placeholder="e.g. Melbourne"></div>
+    <div style="display:flex;gap:10px;">
+      <div style="flex:1;min-width:0;"><label>Date <span class="optional">(optional)</span></label><input type="date" data-field="DATE" style="width:100%;"></div>
+      <div style="flex:1;min-width:0;"><label>Time <span class="optional">(optional)</span></label><input type="time" data-field="TIME" style="width:100%;"></div>
+    </div>
   </div>
 </div>
 

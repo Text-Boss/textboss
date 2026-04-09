@@ -90,6 +90,37 @@
       padding: 3px 9px;
     }
 
+    /* ── Tab bar ── */
+    .tab-bar {
+      flex-shrink: 0;
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+      background: rgba(2,2,3,.92);
+      padding: 0 24px;
+    }
+
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
     /* ── Sidebar ── */
     .sidebar-toggle {
       display: inline-flex;
@@ -232,6 +263,10 @@
       overflow: hidden;
       min-width: 0;
     }
+
+    /* ── Tab panels ── */
+    .tab-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+    .tab-panel.active { display: flex; }
 
     /* ── Thread ── */
     .chat-thread {
@@ -380,7 +415,7 @@
 
     button.secondary-btn:hover { background: #181c22; border-color: #2e3540; }
 
-    #app-status {
+    #app-status, #sched-status {
       flex: 1;
       font-size: 12px;
       color: var(--muted);
@@ -444,6 +479,160 @@
     }
     .sidebar-backdrop.visible { display: block; }
 
+    /* ── Scheduler panels ── */
+    .sched-layout {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .sched-sidebar {
+      width: 340px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--line);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sched-sidebar-section {
+      border-bottom: 1px solid var(--line);
+      padding: 14px 16px;
+    }
+
+    .sched-sidebar-section h3 {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .sched-sidebar-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0;
+    }
+
+    .sched-sidebar-scroll::-webkit-scrollbar { width: 3px; }
+    .sched-sidebar-scroll::-webkit-scrollbar-thumb { background: var(--line-hi); border-radius: 3px; }
+
+    .avail-slot, .appt-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 13px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .avail-slot:last-child, .appt-item:last-child { border-bottom: none; }
+
+    .avail-slot-info, .appt-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .avail-day { font-weight: 600; font-size: 12px; }
+    .avail-time { font-size: 11px; color: var(--muted); }
+    .appt-title { font-weight: 600; font-size: 12px; }
+    .appt-detail { font-size: 11px; color: var(--muted); }
+    .appt-status { font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+
+    .remove-btn {
+      background: none;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 10px;
+      padding: 2px 7px;
+      transition: color .12s, border-color .12s;
+    }
+
+    .remove-btn:hover { color: #ef4444; border-color: #ef4444; }
+
+    .sched-chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* ── Add availability form ── */
+    .avail-form {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .avail-form select, .avail-form input[type="time"] {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--line-hi);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font: inherit;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .avail-form select:focus, .avail-form input[type="time"]:focus {
+      border-color: var(--accent);
+    }
+
+    .avail-add-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      font: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .12s;
+    }
+
+    .avail-add-btn:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+
+    /* ── iCal export ── */
+    .export-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--line-hi);
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 11px;
+      cursor: pointer;
+      transition: color .12s, border-color .12s;
+      margin-top: 10px;
+    }
+
+    .export-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    .empty-state {
+      font-size: 12px;
+      color: var(--muted);
+      opacity: .6;
+      padding: 6px 0;
+    }
+
+
+
     @media (max-width: 820px) {
       .threads-sidebar {
         position: absolute;
@@ -452,12 +641,18 @@
         margin-left: -260px;
       }
       .threads-sidebar.open { margin-left: 0; }
+
+      .sched-sidebar {
+        display: none;
+      }
     }
 
     @media (max-width: 640px) {
       .app-header { padding: 12px 16px; gap: 10px; flex-wrap: wrap; }
       .app-wordmark { font-size: 12px; min-width: 0; }
       .app-tier-badge { display: none; }
+      .tab-bar { padding: 0 16px; }
+      .tab-btn { padding: 8px 12px; font-size: 11px; }
       .chat-thread { padding: 20px 16px; }
       .msg { max-width: min(90%, 680px); }
       .app-footer { padding: 12px 16px 16px; }
@@ -488,6 +683,12 @@
       <button class="secondary-btn" id="logout-button" type="button">Logout</button>
     </header>
 
+    <nav class="tab-bar">
+      <button class="tab-btn active" data-tab="chat" type="button">Messages</button>
+      <button class="tab-btn" data-tab="scheduler" type="button">Scheduler</button>
+      <button class="tab-btn" data-tab="prompts" type="button">Prompts</button>
+    </nav>
+
     <div class="app-body">
       <aside class="threads-sidebar" id="threads-sidebar">
         <div class="sidebar-header">
@@ -498,32 +699,444 @@
         <div class="threads-list" id="threads-list"></div>
       </aside>
 
-      <div class="chat-area">
-        <div
-          class="chat-thread"
-          id="app-output"
-          data-placeholder="Describe the situation and what's at stake — every word will be chosen for defensibility."
-        ></div>
+      <!-- ── Chat tab ── -->
+      <div class="tab-panel active" id="panel-chat">
+        <div class="chat-area">
+          <div
+            class="chat-thread"
+            id="app-output"
+            data-placeholder="Describe the situation and what's at stake — every word will be chosen for defensibility."
+          ></div>
 
-        <footer class="app-footer">
-          <form id="chat-form">
-            <textarea
-              id="chat-message"
-              placeholder="Client is threatening to dispute the charge. The project was completed per the agreed scope…"
-              rows="3"
-            ></textarea>
-            <div class="footer-row">
-              <button class="primary-btn" type="submit">Generate</button>
-              <span id="app-status" aria-live="polite">Checking session…</span>
-              <span id="char-count" class="char-count"></span>
-            </div>
-          </form>
-          <p class="hint">Enter to send &middot; Shift+Enter for new line &middot; Every word is chosen for defensibility.</p>
-        </footer>
+          <footer class="app-footer">
+            <form id="chat-form">
+              <textarea
+                id="chat-message"
+                placeholder="Client is threatening to dispute the charge. The project was completed per the agreed scope…"
+                rows="3"
+              ></textarea>
+              <div class="footer-row">
+                <button class="primary-btn" type="submit">Generate</button>
+                <span id="app-status" aria-live="polite">Checking session…</span>
+                <span id="char-count" class="char-count"></span>
+              </div>
+            </form>
+            <p class="hint">Enter to send &middot; Shift+Enter for new line &middot; Every word is chosen for defensibility.</p>
+          </footer>
+        </div>
       </div>
+
+      <!-- ── Scheduler tab ── -->
+      <div class="tab-panel" id="panel-scheduler">
+        <div class="sched-layout">
+          <aside class="sched-sidebar">
+            <div class="sched-sidebar-scroll">
+              <div class="sched-sidebar-section">
+                <h3>Your Availability</h3>
+                <div id="avail-list"></div>
+                <form class="avail-form" id="avail-form">
+                  <select id="avail-day">
+                    <option value="0">Sun</option>
+                    <option value="1" selected>Mon</option>
+                    <option value="2">Tue</option>
+                    <option value="3">Wed</option>
+                    <option value="4">Thu</option>
+                    <option value="5">Fri</option>
+                    <option value="6">Sat</option>
+                  </select>
+                  <input type="time" id="avail-start" value="09:00">
+                  <input type="time" id="avail-end" value="17:00">
+                  <button type="submit" class="avail-add-btn">Add</button>
+                </form>
+              </div>
+              <div class="sched-sidebar-section">
+                <h3>Upcoming Appointments</h3>
+                <div id="appt-list"></div>
+                <button type="button" class="export-btn" id="ical-export">Export .ics</button>
+              </div>
+            </div>
+          </aside>
+
+          <div class="sched-chat-area">
+            <div
+              class="chat-thread"
+              id="sched-output"
+              data-placeholder="Describe what to schedule — every confirmation is drafted for defensibility and precision."
+            ></div>
+
+            <footer class="app-footer">
+              <form id="sched-form">
+                <textarea
+                  id="sched-message"
+                  placeholder="Book a consultation with Jane next Thursday at 2pm. She cancelled last week — document the rebooking."
+                  rows="3"
+                ></textarea>
+                <div class="footer-row">
+                  <button class="primary-btn" type="submit">Send</button>
+                  <span id="sched-status" aria-live="polite">Ready.</span>
+                  <span id="sched-char-count" class="char-count"></span>
+                </div>
+              </form>
+              <p class="hint">Enter to send &middot; Shift+Enter for new line &middot; Every scheduling action is documented for defensibility.</p>
+            </footer>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Prompts tab ── -->
+      <div class="tab-panel" id="panel-prompts">
+        <iframe
+          src="/black_subscriber_prompts.html"
+          id="prompts-frame"
+          style="flex:1;width:100%;height:100%;border:none;display:block;"
+          title="Black Prompt Templates"
+        ></iframe>
+      </div>
+
     </div>
 
   </div>
   <script src="/app-client.js"></script>
+  <script>
+  (function () {
+    var DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+    async function getJson(url, options) {
+      var response = await fetch(url, options);
+      var data = await response.json();
+      return { response: response, data: data };
+    }
+
+    function appendSchedulerMessage(threadNode, role, text) {
+      var isAI = role !== "user";
+      var wrap  = document.createElement("div");
+      wrap.className = "msg " + (isAI ? "msg-ai" : "msg-user");
+
+      var label = document.createElement("div");
+      label.className  = "msg-label";
+      label.textContent = isAI ? "SCHEDULER" : "you";
+      wrap.appendChild(label);
+
+      var bubble = document.createElement("div");
+      bubble.className  = "msg-text";
+      bubble.textContent = text;
+      wrap.appendChild(bubble);
+
+      if (isAI) {
+        var copyBtn = document.createElement("button");
+        copyBtn.className   = "copy-btn";
+        copyBtn.type        = "button";
+        copyBtn.textContent = "Copy";
+        copyBtn.addEventListener("click", function () {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(function () {
+              copyBtn.textContent = "\u2713 Copied";
+              setTimeout(function () { copyBtn.textContent = "Copy"; }, 1500);
+            });
+          }
+        });
+        wrap.appendChild(copyBtn);
+      }
+
+      threadNode.appendChild(wrap);
+      threadNode.scrollTop = threadNode.scrollHeight;
+      return wrap;
+    }
+
+    function showSchedulerTyping(threadNode) {
+      var wrap = document.createElement("div");
+      wrap.className = "msg msg-ai msg-typing";
+      var label = document.createElement("div");
+      label.className  = "msg-label";
+      label.textContent = "SCHEDULER";
+      var bubble = document.createElement("div");
+      bubble.className = "msg-text";
+      bubble.innerHTML = "<span class='tdot'></span><span class='tdot'></span><span class='tdot'></span>";
+      wrap.appendChild(label);
+      wrap.appendChild(bubble);
+      threadNode.appendChild(wrap);
+      threadNode.scrollTop = threadNode.scrollHeight;
+      return wrap;
+    }
+
+    // ── Tab switching ──
+    var tabBtns = document.querySelectorAll(".tab-btn");
+    var tabPanels = document.querySelectorAll(".tab-panel");
+
+    tabBtns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var target = btn.getAttribute("data-tab");
+        tabBtns.forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        tabPanels.forEach(function (p) { p.classList.remove("active"); });
+        var panel = document.getElementById("panel-" + target);
+        if (panel) panel.classList.add("active");
+        if (target === "scheduler") {
+          loadAvailability();
+          loadAppointments();
+        }
+      });
+    });
+
+    // ── Availability ──
+    var availList = document.getElementById("avail-list");
+    var availForm = document.getElementById("avail-form");
+
+    async function loadAvailability() {
+      try {
+        var result = await getJson("/.netlify/functions/availability", {
+          method: "GET", credentials: "same-origin",
+        });
+        if (!result.data.ok) return;
+        renderAvailability(result.data.availability || []);
+      } catch (_) {}
+    }
+
+    function renderAvailability(slots) {
+      availList.innerHTML = "";
+      if (slots.length === 0) {
+        availList.innerHTML = "<div class='empty-state'>No availability set. Add your hours below.</div>";
+        return;
+      }
+      slots.forEach(function (slot) {
+        var el = document.createElement("div");
+        el.className = "avail-slot";
+        el.innerHTML =
+          "<div class='avail-slot-info'>" +
+            "<span class='avail-day'>" + (DAYS[slot.day_of_week] || "Day " + slot.day_of_week) + "</span>" +
+            "<span class='avail-time'>" + slot.start_time + " – " + slot.end_time + "</span>" +
+          "</div>";
+        var removeBtn = document.createElement("button");
+        removeBtn.className = "remove-btn";
+        removeBtn.textContent = "Remove";
+        removeBtn.addEventListener("click", async function () {
+          await fetch("/.netlify/functions/availability?id=" + slot.id, {
+            method: "DELETE", credentials: "same-origin",
+          });
+          loadAvailability();
+        });
+        el.appendChild(removeBtn);
+        availList.appendChild(el);
+      });
+    }
+
+    if (availForm) {
+      availForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var addBtn = availForm.querySelector(".avail-add-btn");
+        var day = Number(document.getElementById("avail-day").value);
+        var start = document.getElementById("avail-start").value;
+        var end = document.getElementById("avail-end").value;
+        if (!start || !end) return;
+        if (addBtn) { addBtn.disabled = true; addBtn.textContent = "Adding\u2026"; }
+        try {
+          var res = await fetch("/.netlify/functions/availability", {
+            method: "POST", credentials: "same-origin",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ day_of_week: day, start_time: start, end_time: end }),
+          });
+          if (!res.ok) {
+            var errBody = await res.json().catch(function () { return {}; });
+            var reason = errBody.reason || "server_error";
+            if (addBtn) { addBtn.textContent = "Failed"; setTimeout(function () { addBtn.textContent = "Add"; }, 2000); }
+            console.error("Availability add failed:", reason);
+          } else {
+            if (addBtn) { addBtn.textContent = "Added!"; setTimeout(function () { addBtn.textContent = "Add"; }, 1200); }
+          }
+          await loadAvailability();
+        } catch (err) {
+          console.error("Availability add error:", err);
+          if (addBtn) { addBtn.textContent = "Failed"; setTimeout(function () { addBtn.textContent = "Add"; }, 2000); }
+        } finally {
+          if (addBtn) { addBtn.disabled = false; }
+        }
+      });
+    }
+
+    // ── Appointments ──
+    var apptList = document.getElementById("appt-list");
+    var cachedAppointments = [];
+
+    async function loadAppointments() {
+      try {
+        var result = await getJson("/.netlify/functions/appointments", {
+          method: "GET", credentials: "same-origin",
+        });
+        if (!result.data.ok) return;
+        cachedAppointments = result.data.appointments || [];
+        renderAppointments(cachedAppointments);
+      } catch (_) {}
+    }
+
+    function renderAppointments(appts) {
+      apptList.innerHTML = "";
+      var confirmed = appts.filter(function (a) { return a.status === "confirmed"; });
+      if (confirmed.length === 0) {
+        apptList.innerHTML = "<div class='empty-state'>No upcoming appointments.</div>";
+        return;
+      }
+      confirmed.forEach(function (appt) {
+        var el = document.createElement("div");
+        el.className = "appt-item";
+        var title = appt.title || appt.client_name || "Appointment";
+        var detail = appt.scheduled_date + " at " + appt.scheduled_time;
+        if (appt.client_name) detail += " — " + appt.client_name;
+        el.innerHTML =
+          "<div class='appt-info'>" +
+            "<span class='appt-title'>" + title + "</span>" +
+            "<span class='appt-detail'>" + detail + "</span>" +
+            "<span class='appt-status'>confirmed</span>" +
+          "</div>";
+        apptList.appendChild(el);
+      });
+    }
+
+    // ── iCal export (Black-only feature) ──
+    var icalBtn = document.getElementById("ical-export");
+    if (icalBtn) {
+      icalBtn.addEventListener("click", function () {
+        var confirmed = cachedAppointments.filter(function (a) { return a.status === "confirmed"; });
+        if (confirmed.length === 0) return;
+
+        var lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Text Boss//Black//EN"];
+
+        confirmed.forEach(function (appt) {
+          var dateStr = appt.scheduled_date.replace(/-/g, "");
+          var timeStr = appt.scheduled_time.replace(/:/g, "") + "00";
+          var dur = appt.duration_minutes || 60;
+          var durH = Math.floor(dur / 60);
+          var durM = dur % 60;
+          var durStr = "PT" + (durH > 0 ? durH + "H" : "") + (durM > 0 ? durM + "M" : "");
+          if (!durStr || durStr === "PT") durStr = "PT1H";
+
+          lines.push("BEGIN:VEVENT");
+          lines.push("DTSTART:" + dateStr + "T" + timeStr);
+          lines.push("DURATION:" + durStr);
+          lines.push("SUMMARY:" + (appt.title || appt.client_name || "Appointment"));
+          if (appt.client_name) lines.push("DESCRIPTION:Client: " + appt.client_name);
+          lines.push("UID:" + appt.id + "@textboss");
+          lines.push("END:VEVENT");
+        });
+
+        lines.push("END:VCALENDAR");
+
+        var blob = new Blob([lines.join("\r\n")], { type: "text/calendar" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "textboss-appointments.ics";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // ── Scheduler chat ──
+    var schedOutput = document.getElementById("sched-output");
+    var schedForm = document.getElementById("sched-form");
+    var schedMessage = document.getElementById("sched-message");
+    var schedStatus = document.getElementById("sched-status");
+    var schedCharCount = document.getElementById("sched-char-count");
+    var schedConversation = [];
+    var schedBusy = false;
+    var inputLimit = 8000;
+
+    if (schedForm) {
+      schedForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        if (schedBusy) return;
+
+        var message = String(schedMessage.value || "").trim();
+        if (!message) { schedStatus.textContent = "Enter a message first."; return; }
+
+        if (message.length > inputLimit) {
+          schedStatus.textContent = "Too long — " + message.length + "/" + inputLimit + " chars max.";
+          return;
+        }
+
+        schedBusy = true;
+        appendSchedulerMessage(schedOutput, "user", message);
+        schedMessage.value = "";
+        schedMessage.style.height = "auto";
+        if (schedCharCount) { schedCharCount.textContent = ""; schedCharCount.className = "char-count"; }
+        schedStatus.textContent = "Scheduling…";
+
+        var typing = showSchedulerTyping(schedOutput);
+        var historySnapshot = schedConversation.slice();
+
+        schedConversation.push({
+          role: "user",
+          content: [{ type: "input_text", text: message }],
+        });
+
+        try {
+          var result = await getJson("/.netlify/functions/schedule-chat", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              message: message,
+              conversation: historySnapshot,
+            }),
+          });
+
+          typing.remove();
+
+          if (!result.data.ok) {
+            schedConversation.pop();
+            schedStatus.textContent = "Error: " + (result.data.reason || "unknown");
+            schedBusy = false;
+            return;
+          }
+
+          var output = result.data.output || "";
+          appendSchedulerMessage(schedOutput, "assistant", output);
+          schedConversation.push({
+            role: "assistant",
+            content: [{ type: "output_text", text: output }],
+          });
+          schedStatus.textContent = "Ready.";
+
+          // Refresh sidebar data after any scheduling action
+          if (result.data.actions && result.data.actions.length > 0) {
+            loadAvailability();
+            loadAppointments();
+          }
+        } catch (_) {
+          typing.remove();
+          schedConversation.pop();
+          schedStatus.textContent = "Request failed — check your connection.";
+        }
+
+        schedBusy = false;
+      });
+
+      schedMessage.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          schedForm.requestSubmit();
+        }
+      });
+
+      schedMessage.addEventListener("input", function () {
+        this.style.height = "auto";
+        this.style.height = Math.min(this.scrollHeight, 200) + "px";
+        if (schedCharCount) {
+          var used = this.value.length;
+          var remaining = inputLimit - used;
+          var threshold = Math.floor(inputLimit * 0.25);
+          if (used > 0 && remaining < threshold) {
+            schedCharCount.textContent = remaining + " chars remaining";
+            schedCharCount.className = "char-count" + (remaining < 200 ? " warn" : "");
+          } else {
+            schedCharCount.textContent = "";
+            schedCharCount.className = "char-count";
+          }
+        }
+      });
+    }
+  })();
+  </script>
 </body>
 </html>

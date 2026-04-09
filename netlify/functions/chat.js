@@ -22,7 +22,7 @@ function normalizeStatus(value) {
 function deny(statusCode, reason) {
   return json(statusCode, {
     ok: false,
-    denied: true,
+    denied: statusCode === 401 || statusCode === 403,
     reason,
   });
 }
@@ -291,7 +291,7 @@ function createRuntimeHandler(overrides = {}) {
 async function handler(event, context) {
   try {
     const runtimeHandler = createRuntimeHandler();
-    return runtimeHandler(event, context);
+    return await runtimeHandler(event, context);
   } catch {
     return deny(500, "server_error");
   }

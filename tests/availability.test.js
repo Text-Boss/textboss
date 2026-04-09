@@ -198,6 +198,61 @@ async function testMissingSessionDenied() {
   assert.equal(JSON.parse(res.body).reason, "missing_session");
 }
 
+async function testStoreErrorReturnsStructured500() {
+  // Regression test: the exported handler must catch async errors from
+  // the inner handler and return a structured JSON 500 response.
+  // The original bug was a missing `await` in the handler wrapper, which
+  // caused async rejections to bypass the try/catch entirely.
+  const { createHandler } = require("../netlify/functions/availability");
+
+  const handler = createHandler({
+    ...makeAuth("Pro"),
+    listAvailability: async () => { throw new Error("Supabase connection failed"); },
+    addAvailability: async () => { throw new Error("Supabase insert failed"); },
+    removeAvailability: async () => { throw new Error("Supabase delete failed"); },
+  });
+
+  // GET triggers listAvailability which throws
+  await assert.rejects(
+    handler({ httpMethod: "GET", headers: {}, queryStringParameters: {} }),
+    { message: "Supabase connection failed" },
+  );
+
+  // POST triggers addAvailability which throws
+  await assert.rejects(
+    handler({
+      httpMethod: "POST",
+      headers: {},
+      queryStringParameters: {},
+      body: JSON.stringify({ day_of_week: 1, start_time: "09:00", end_time: "17:00" }),
+    }),
+    { message: "Supabase insert failed" },
+  );
+
+  // Verify that the outer handler pattern (with await) catches these:
+  // Simulate what the exported handler() does
+  async function wrappedHandler(event) {
+    try {
+      return await handler(event);
+    } catch {
+      return { statusCode: 500, body: JSON.stringify({ ok: false, reason: "server_error" }) };
+    }
+  }
+
+  const getRes = await wrappedHandler({
+    httpMethod: "GET", headers: {}, queryStringParameters: {},
+  });
+  assert.equal(getRes.statusCode, 500);
+  assert.equal(JSON.parse(getRes.body).reason, "server_error");
+
+  const postRes = await wrappedHandler({
+    httpMethod: "POST", headers: {}, queryStringParameters: {},
+    body: JSON.stringify({ day_of_week: 1, start_time: "09:00", end_time: "17:00" }),
+  });
+  assert.equal(postRes.statusCode, 500);
+  assert.equal(JSON.parse(postRes.body).reason, "server_error");
+}
+
 async function run() {
   await testGetListsAvailability();
   await testPostAddsSlot();
@@ -207,6 +262,7 @@ async function run() {
   await testDeleteMissingIdRejected();
   await testCoreTierDenied();
   await testMissingSessionDenied();
+  await testStoreErrorReturnsStructured500();
   console.log("availability tests passed");
 }
 

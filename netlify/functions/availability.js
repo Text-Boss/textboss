@@ -121,7 +121,7 @@ function createRuntimeHandler(overrides = {}) {
 
 async function handler(event, context) {
   try {
-    return createRuntimeHandler()(event, context);
+    return await createRuntimeHandler()(event, context);
   } catch {
     return deny(500, "server_error");
   }

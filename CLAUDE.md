@@ -52,11 +52,17 @@ All backend logic lives in `netlify/functions/`. Each function exports three thi
 - `createRuntimeHandler(overrides?)` — wires real dependencies; accepts partial overrides for testing
 - `handler(event, context)` — the actual Netlify entry point
 
+`_lib/http.js` exports two helpers used across functions: `json(statusCode, body, headers?)` and `denied(statusCode, reason, headers?)`. The `denied` helper always sets `{ ok: false, denied: true }` in the response body — clients use the `denied` flag to redirect to `denied.html`.
+
+`session-logout.js` clears the `textboss_session` cookie by setting it with `Max-Age=0`.
+
 ### Supabase `entitlements` table columns
 `email`, `entitled_tier`, `subscription_status`, `current_period_end`, `stripe_customer_id`, `stripe_subscription_id`, `price_id`, `updated_at`
 
 ### OpenAI integration
 `netlify/functions/_lib/openai.js` uses the **Responses API** (`POST /v1/responses`), not the Chat Completions API. The conversation history passed by the client maps directly to the `input` array. System instructions are injected per-request from `tier-policy.js` (not stored server-side between calls).
+
+Message format in the `input` array: user turns use `{ type: "input_text", text }`, assistant turns use `{ type: "output_text", text }`. This differs from Chat Completions format and is specific to the Responses API.
 
 ### Stripe webhook
 `stripe-webhook.js` handles `checkout.session.completed`, `customer.subscription.updated`, and `customer.subscription.deleted`. It upserts the `entitlements` table using `email` as the conflict key.
@@ -69,6 +75,8 @@ Three additional functions handle appointment scheduling:
 - `threads.js` — manages conversation thread persistence (`threads`/`messages` tables; schema in `migrations/001_create_threads_and_messages.sql`)
 
 All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core users are denied at the function level.
+
+Thread limits per tier (defined in `tier-policy.js`): Core = 10, Pro = 50, Black = unlimited.
 
 ### Supabase stores (`_lib/supabase.js`)
 Exports `createEntitlementStore`, `createAvailabilityStore`, `createAppointmentStore`. Each factory accepts an optional `{ client }` override for testing without real Supabase credentials.
