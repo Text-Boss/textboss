@@ -740,6 +740,30 @@ hr.sep {
   margin: 28px 0;
 }
 
+/* Site footer */
+.site-footer {
+  width: var(--container);
+  margin: 0 auto;
+  padding: 24px 0 72px; /* extra bottom padding to clear sticky bar */
+  text-align: center;
+}
+.site-footer .footer-links {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.site-footer .footer-links a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color .15s;
+}
+.site-footer .footer-links a:hover { color: var(--muted-hi); }
+.site-footer .footer-links .sep { margin: 0 8px; color: var(--line-hi); }
+.site-footer .copyright {
+  font-size: 11px;
+  color: var(--line-hi);
+}
+
 /* Responsive */
 @media (max-width: 820px) {
   .hero { grid-template-columns: 1fr; }
@@ -1344,6 +1368,17 @@ hr.sep {
     </div>
   </div>
 </div>
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="privacy.html">Privacy Policy</a>
+    <span class="sep">&middot;</span>
+    <a href="terms.html">Terms of Service</a>
+    <span class="sep">&middot;</span>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="copyright">&copy; 2026 Text Boss. All rights reserved.</div>
+</footer>
 
 <script>
 (function () {

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="shortcut icon" href="assets/favicon-32.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Contact — TEXT BOSS</title>
+<style>
+:root {
+  --bg:       #020203;
+  --surface:  #0c0e11;
+  --surface2: #0f1216;
+  --line:     #191d22;
+  --line-hi:  #232830;
+  --text:     #e4ecf2;
+  --muted:    #52606d;
+  --muted-hi: #8896a4;
+  --green:  #22c55e;
+  --cyan:   #22d3ee;
+  --mono: Consolas, Monaco, 'Courier New', ui-monospace, monospace;
+  --container: min(960px, calc(100% - 40px));
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a { color: var(--cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.page-header {
+  width: var(--container);
+  margin: 0 auto;
+  padding: 40px 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.page-header .brand-title {
+  font-weight: 900;
+  letter-spacing: .08em;
+  font-size: 14px;
+  color: var(--text);
+}
+.page-header .back-link {
+  font-size: 12px;
+  color: var(--muted-hi);
+}
+.page-header .back-link:hover { color: var(--cyan); }
+
+.legal {
+  width: var(--container);
+  margin: 0 auto;
+  padding: 48px 0 120px;
+}
+
+.legal h1 {
+  font-size: clamp(22px, 4vw, 30px);
+  letter-spacing: -.2px;
+  margin-bottom: 8px;
+}
+
+.legal .effective {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 40px;
+}
+
+.legal h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 40px;
+  margin-bottom: 12px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.legal h2:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.legal p {
+  font-size: 13px;
+  color: var(--muted-hi);
+  line-height: 1.75;
+  max-width: 72ch;
+  margin-bottom: 12px;
+}
+
+.legal ul {
+  list-style: none;
+  margin-bottom: 12px;
+  padding-left: 0;
+}
+
+.legal ul li {
+  font-size: 13px;
+  color: var(--muted-hi);
+  line-height: 1.75;
+  padding-left: 18px;
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.legal ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.legal strong { color: var(--text); font-weight: 700; }
+
+.legal a { color: var(--cyan); }
+
+.contact-box {
+  margin-top: 32px;
+  padding: 20px 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--cyan);
+  max-width: 480px;
+}
+
+.contact-box .label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.contact-box .email-link {
+  font-size: 15px;
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+.site-footer {
+  width: var(--container);
+  margin: 0 auto;
+  padding: 24px 0 32px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+.site-footer .footer-links {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.site-footer .footer-links a {
+  color: var(--muted);
+  transition: color .15s;
+}
+.site-footer .footer-links a:hover { color: var(--muted-hi); text-decoration: none; }
+.site-footer .footer-links .sep { margin: 0 8px; color: var(--line-hi); }
+.site-footer .copyright {
+  font-size: 11px;
+  color: var(--line-hi);
+}
+
+@media (max-width: 640px) {
+  .legal { padding: 32px 0 80px; }
+  .legal h2 { margin-top: 32px; padding-top: 20px; }
+  .page-header { padding: 28px 0 24px; }
+}
+@media (max-width: 400px) {
+  :root { --container: min(960px, calc(100% - 24px)); }
+}
+</style>
+</head>
+
+<body>
+
+<header class="page-header">
+  <div class="brand-title">TEXT BOSS</div>
+  <a class="back-link" href="index.html">&larr; Back to homepage</a>
+</header>
+
+<main class="legal">
+  <h1>Contact</h1>
+  <p class="effective">We're here to help — reach out any time.</p>
+
+  <h2>General Enquiries</h2>
+  <p>
+    For any general questions about Text Boss — including how the product works, what each
+    subscription tier includes, or anything else you'd like to know before signing up — send
+    us an email and we'll get back to you as soon as possible.
+  </p>
+
+  <h2>Account &amp; Billing</h2>
+  <p>
+    If you have questions about your subscription, billing, charges, or need help accessing
+    your account, contact us by email with your registered email address and a brief
+    description of the issue.
+  </p>
+
+  <h2>Technical Support</h2>
+  <p>
+    Experiencing a problem with the app, a feature not working as expected, or something
+    that looks like a bug? Email us with as much detail as you can — what you were doing,
+    what you expected to happen, and what happened instead.
+  </p>
+
+  <h2>Privacy &amp; Data Requests</h2>
+  <p>
+    To request access to, correction of, or deletion of your personal data, or for any
+    other privacy-related enquiry, please email us. See our
+    <a href="privacy.html">Privacy Policy</a> for full details of your rights.
+  </p>
+
+  <h2>How to Reach Us</h2>
+  <p>
+    All enquiries — general, billing, technical, or privacy-related — should be directed to
+    the address below. We aim to respond to every message.
+  </p>
+
+  <div class="contact-box">
+    <div class="label">Email</div>
+    <a class="email-link" href="mailto:textboss@programmer.net">textboss@programmer.net</a>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="privacy.html">Privacy Policy</a>
+    <span class="sep">&middot;</span>
+    <a href="terms.html">Terms of Service</a>
+    <span class="sep">&middot;</span>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="copyright">&copy; 2026 Text Boss. All rights reserved.</div>
+</footer>
+
+</body>
+</html>

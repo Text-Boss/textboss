@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="shortcut icon" href="assets/favicon-32.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Terms of Service — TEXT BOSS</title>
+<style>
+:root {
+  --bg:       #020203;
+  --surface:  #0c0e11;
+  --surface2: #0f1216;
+  --line:     #191d22;
+  --line-hi:  #232830;
+  --text:     #e4ecf2;
+  --muted:    #52606d;
+  --muted-hi: #8896a4;
+  --green:  #22c55e;
+  --cyan:   #22d3ee;
+  --mono: Consolas, Monaco, 'Courier New', ui-monospace, monospace;
+  --container: min(960px, calc(100% - 40px));
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a { color: var(--cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.page-header {
+  width: var(--container);
+  margin: 0 auto;
+  padding: 40px 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.page-header .brand-title {
+  font-weight: 900;
+  letter-spacing: .08em;
+  font-size: 14px;
+  color: var(--text);
+}
+.page-header .back-link {
+  font-size: 12px;
+  color: var(--muted-hi);
+}
+.page-header .back-link:hover { color: var(--cyan); }
+
+.legal {
+  width: var(--container);
+  margin: 0 auto;
+  padding: 48px 0 120px;
+}
+
+.legal h1 {
+  font-size: clamp(22px, 4vw, 30px);
+  letter-spacing: -.2px;
+  margin-bottom: 8px;
+}
+
+.legal .effective {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 40px;
+}
+
+.legal h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 40px;
+  margin-bottom: 12px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.legal h2:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.legal p {
+  font-size: 13px;
+  color: var(--muted-hi);
+  line-height: 1.75;
+  max-width: 72ch;
+  margin-bottom: 12px;
+}
+
+.legal ul, .legal ol {
+  list-style: none;
+  margin-bottom: 12px;
+  padding-left: 0;
+}
+
+.legal ul li, .legal ol li {
+  font-size: 13px;
+  color: var(--muted-hi);
+  line-height: 1.75;
+  padding-left: 18px;
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.legal ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.legal ol { counter-reset: legal-list; }
+.legal ol li { counter-increment: legal-list; }
+.legal ol li::before {
+  content: counter(legal-list, lower-alpha) '.';
+  position: absolute;
+  left: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.legal strong { color: var(--text); font-weight: 700; }
+
+.legal a { color: var(--cyan); }
+
+.site-footer {
+  width: var(--container);
+  margin: 0 auto;
+  padding: 24px 0 32px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+.site-footer .footer-links {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.site-footer .footer-links a {
+  color: var(--muted);
+  transition: color .15s;
+}
+.site-footer .footer-links a:hover { color: var(--muted-hi); text-decoration: none; }
+.site-footer .footer-links .sep { margin: 0 8px; color: var(--line-hi); }
+.site-footer .copyright {
+  font-size: 11px;
+  color: var(--line-hi);
+}
+
+@media (max-width: 640px) {
+  .legal { padding: 32px 0 80px; }
+  .legal h2 { margin-top: 32px; padding-top: 20px; }
+  .page-header { padding: 28px 0 24px; }
+}
+@media (max-width: 400px) {
+  :root { --container: min(960px, calc(100% - 24px)); }
+}
+</style>
+</head>
+
+<body>
+
+<header class="page-header">
+  <div class="brand-title">TEXT BOSS</div>
+  <a class="back-link" href="index.html">&larr; Back to homepage</a>
+</header>
+
+<main class="legal">
+  <h1>Terms of Service</h1>
+  <p class="effective">Effective date: April 11, 2026</p>
+
+  <h2>1. Agreement to Terms</h2>
+  <p>
+    By accessing or using Text Boss ("the Service"), operated at textboss.ai, you agree to be
+    bound by these Terms of Service ("Terms"). If you do not agree to these Terms, do not use
+    the Service. "We," "us," and "our" refer to Text Boss. "You" and "your" refer to the
+    individual or entity using the Service.
+  </p>
+
+  <h2>2. Service Description</h2>
+  <p>
+    Text Boss is an AI-powered business communication assistant that helps professionals
+    craft controlled, precise client messages and manage appointments. The Service includes:
+  </p>
+  <ul>
+    <li>Structured message templates for common business communication scenarios</li>
+    <li>A tier-gated AI assistant for real-time communication guidance</li>
+    <li>AI-powered appointment scheduling and management (Pro and Black tiers)</li>
+    <li>Conversation thread persistence and business profile management (Pro and Black tiers)</li>
+    <li>Push notification reminders for upcoming appointments (Pro and Black tiers)</li>
+  </ul>
+  <p>
+    The AI assistant provides suggestions and guidance. You are solely responsible for all
+    messages you send to your clients and all scheduling decisions you make. Text Boss does
+    not guarantee any particular business outcome.
+  </p>
+
+  <h2>3. Subscription Tiers and Access</h2>
+  <p>
+    Text Boss offers three subscription tiers: <strong>Core</strong>, <strong>Pro</strong>,
+    and <strong>Black</strong>. Each tier provides different capabilities, token limits, and
+    feature access as described on our pricing page. Access requires:
+  </p>
+  <ul>
+    <li>A valid email address</li>
+    <li>An active, paid subscription for the selected tier</li>
+    <li>Verification of your subscription status on each use</li>
+  </ul>
+  <p>
+    We reserve the right to modify tier features, limits, and pricing with reasonable notice.
+    Changes to pricing will not affect your current billing period.
+  </p>
+
+  <h2>4. Billing and Payments</h2>
+  <p>
+    Subscriptions are billed through <strong>Stripe</strong>. By subscribing, you authorize
+    Stripe to charge your payment method on a recurring basis according to your selected plan.
+    You agree to:
+  </p>
+  <ul>
+    <li>Provide accurate and complete billing information</li>
+    <li>Maintain a valid payment method on file</li>
+    <li>Pay all charges incurred under your account</li>
+  </ul>
+  <p>
+    Subscriptions automatically renew at the end of each billing period unless canceled.
+    You may cancel your subscription at any time through Stripe's customer portal. Cancellation
+    takes effect at the end of the current billing period -- you retain access until then.
+  </p>
+
+  <h2>5. Refund Policy</h2>
+  <p>
+    Due to the nature of digital services, subscriptions are generally non-refundable. However,
+    if you experience a significant service disruption or billing error, contact us at
+    <a href="mailto:legal@textboss.ai">legal@textboss.ai</a> within 14 days and we will
+    review your request on a case-by-case basis.
+  </p>
+
+  <h2>6. Acceptable Use</h2>
+  <p>You agree not to:</p>
+  <ul>
+    <li>Use the Service for any unlawful purpose or in violation of any applicable laws</li>
+    <li>Share your account access or session credentials with others</li>
+    <li>Attempt to bypass tier restrictions, token limits, or access controls</li>
+    <li>Use the AI assistant to generate harassing, threatening, defamatory, or fraudulent communications</li>
+    <li>Reverse-engineer, scrape, or extract the AI system prompts or model behavior</li>
+    <li>Submit content that infringes on the intellectual property rights of others</li>
+    <li>Interfere with or disrupt the Service or its infrastructure</li>
+    <li>Use automated tools or bots to access the Service beyond normal usage</li>
+  </ul>
+  <p>
+    Violation of these terms may result in immediate suspension or termination of your
+    account without refund.
+  </p>
+
+  <h2>7. Intellectual Property</h2>
+  <p>
+    The Text Boss name, brand, website design, system prompts, template library, and all
+    associated visual and code assets are the property of Text Boss and are protected by
+    intellectual property laws. You may not copy, modify, distribute, or create derivative
+    works from these materials.
+  </p>
+  <p>
+    You retain ownership of the content you input into the Service (your messages, scheduling
+    data, and business information). By using the Service, you grant us a limited license to
+    process this content solely for the purpose of delivering the Service to you.
+  </p>
+
+  <h2>8. AI-Generated Content</h2>
+  <p>
+    The AI assistant generates suggested text based on your inputs and the context you provide.
+    AI-generated suggestions are not legal, financial, or professional advice. You are
+    responsible for reviewing, modifying, and approving any AI-generated text before sending
+    it to clients. We are not liable for any consequences resulting from your use of
+    AI-generated content.
+  </p>
+
+  <h2>9. Disclaimer of Warranties</h2>
+  <p>
+    The Service is provided <strong>"as is"</strong> and <strong>"as available"</strong>
+    without warranties of any kind, whether express or implied, including but not limited to
+    implied warranties of merchantability, fitness for a particular purpose, and
+    non-infringement. We do not warrant that:
+  </p>
+  <ul>
+    <li>The Service will be uninterrupted, error-free, or secure</li>
+    <li>AI-generated suggestions will be accurate, appropriate, or effective</li>
+    <li>The Service will meet your specific business requirements</li>
+    <li>Scheduling features will prevent all missed appointments or no-shows</li>
+  </ul>
+
+  <h2>10. Limitation of Liability</h2>
+  <p>
+    To the maximum extent permitted by law, Text Boss and its operators shall not be liable
+    for any indirect, incidental, special, consequential, or punitive damages, including but
+    not limited to loss of profits, revenue, clients, data, or business opportunities,
+    arising from your use of or inability to use the Service -- even if we have been advised
+    of the possibility of such damages.
+  </p>
+  <p>
+    Our total liability for any claim arising from or related to the Service shall not exceed
+    the amount you paid for the Service in the 12 months preceding the claim.
+  </p>
+
+  <h2>11. Termination</h2>
+  <p>
+    You may terminate your use of the Service at any time by canceling your subscription
+    and ceasing to use the platform. We may suspend or terminate your access if:
+  </p>
+  <ul>
+    <li>You violate these Terms</li>
+    <li>Your subscription payment fails and is not resolved</li>
+    <li>We reasonably believe your use poses a risk to the Service or other users</li>
+    <li>We discontinue the Service (with reasonable notice)</li>
+  </ul>
+  <p>
+    Upon termination, your right to access the Service ends immediately. Provisions that by
+    their nature should survive termination (including limitation of liability, intellectual
+    property, and dispute resolution) will remain in effect.
+  </p>
+
+  <h2>12. Governing Law</h2>
+  <p>
+    These Terms are governed by and construed in accordance with the laws of the United States.
+    Any disputes arising under these Terms shall be resolved in the courts of competent
+    jurisdiction. You agree to submit to the personal jurisdiction of such courts.
+  </p>
+
+  <h2>13. Changes to These Terms</h2>
+  <p>
+    We may update these Terms from time to time. Changes will be reflected by updating the
+    "Effective date" at the top of this page. Continued use of the Service after changes are
+    posted constitutes your acceptance of the revised Terms. For material changes, we will
+    make reasonable efforts to notify affected subscribers.
+  </p>
+
+  <h2>14. Severability</h2>
+  <p>
+    If any provision of these Terms is found to be unenforceable or invalid, that provision
+    will be limited or eliminated to the minimum extent necessary, and the remaining provisions
+    will remain in full force and effect.
+  </p>
+
+  <h2>15. Contact</h2>
+  <p>
+    For questions about these Terms, contact us at
+    <a href="mailto:legal@textboss.ai">legal@textboss.ai</a>.
+  </p>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="privacy.html">Privacy Policy</a>
+    <span class="sep">&middot;</span>
+    <a href="terms.html">Terms of Service</a>
+    <span class="sep">&middot;</span>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="copyright">&copy; 2026 Text Boss. All rights reserved.</div>
+</footer>
+
+</body>
+</html>
