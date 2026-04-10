@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="shortcut icon" href="assets/favicon-32.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Privacy Policy — TEXT BOSS</title>
+<style>
+:root {
+  --bg:       #020203;
+  --surface:  #0c0e11;
+  --surface2: #0f1216;
+  --line:     #191d22;
+  --line-hi:  #232830;
+  --text:     #e4ecf2;
+  --muted:    #52606d;
+  --muted-hi: #8896a4;
+  --green:  #22c55e;
+  --cyan:   #22d3ee;
+  --mono: Consolas, Monaco, 'Courier New', ui-monospace, monospace;
+  --container: min(960px, calc(100% - 40px));
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a { color: var(--cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.page-header {
+  width: var(--container);
+  margin: 0 auto;
+  padding: 40px 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.page-header .brand-title {
+  font-weight: 900;
+  letter-spacing: .08em;
+  font-size: 14px;
+  color: var(--text);
+}
+.page-header .back-link {
+  font-size: 12px;
+  color: var(--muted-hi);
+}
+.page-header .back-link:hover { color: var(--cyan); }
+
+.legal {
+  width: var(--container);
+  margin: 0 auto;
+  padding: 48px 0 120px;
+}
+
+.legal h1 {
+  font-size: clamp(22px, 4vw, 30px);
+  letter-spacing: -.2px;
+  margin-bottom: 8px;
+}
+
+.legal .effective {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 40px;
+}
+
+.legal h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 40px;
+  margin-bottom: 12px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.legal h2:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.legal p {
+  font-size: 13px;
+  color: var(--muted-hi);
+  line-height: 1.75;
+  max-width: 72ch;
+  margin-bottom: 12px;
+}
+
+.legal ul {
+  list-style: none;
+  margin-bottom: 12px;
+  padding-left: 0;
+}
+
+.legal ul li {
+  font-size: 13px;
+  color: var(--muted-hi);
+  line-height: 1.75;
+  padding-left: 18px;
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.legal ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.legal strong { color: var(--text); font-weight: 700; }
+
+.legal a { color: var(--cyan); }
+
+.site-footer {
+  width: var(--container);
+  margin: 0 auto;
+  padding: 24px 0 32px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+.site-footer .footer-links {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.site-footer .footer-links a {
+  color: var(--muted);
+  transition: color .15s;
+}
+.site-footer .footer-links a:hover { color: var(--muted-hi); text-decoration: none; }
+.site-footer .footer-links .sep { margin: 0 8px; color: var(--line-hi); }
+.site-footer .copyright {
+  font-size: 11px;
+  color: var(--line-hi);
+}
+
+@media (max-width: 640px) {
+  .legal { padding: 32px 0 80px; }
+  .legal h2 { margin-top: 32px; padding-top: 20px; }
+  .page-header { padding: 28px 0 24px; }
+}
+@media (max-width: 400px) {
+  :root { --container: min(960px, calc(100% - 24px)); }
+}
+</style>
+</head>
+
+<body>
+
+<header class="page-header">
+  <div class="brand-title">TEXT BOSS</div>
+  <a class="back-link" href="index.html">&larr; Back to homepage</a>
+</header>
+
+<main class="legal">
+  <h1>Privacy Policy</h1>
+  <p class="effective">Effective date: April 11, 2026</p>
+
+  <h2>1. Introduction</h2>
+  <p>
+    Text Boss ("we," "us," or "our") operates an AI-powered business communication assistant
+    available at textboss.ai. This Privacy Policy explains what information we collect, how we
+    use it, and your rights regarding that information. By using Text Boss, you agree to the
+    practices described in this policy.
+  </p>
+
+  <h2>2. Information We Collect</h2>
+  <p>We collect the following categories of information:</p>
+  <ul>
+    <li><strong>Email address</strong> -- provided when you access Text Boss or purchase a subscription. Used for authentication, session management, and subscription verification.</li>
+    <li><strong>Subscription and billing data</strong> -- your subscription tier (Core, Pro, or Black), subscription status, billing period, and Stripe customer identifiers. Payment card details are processed and stored exclusively by Stripe; we do not store card numbers.</li>
+    <li><strong>Chat messages</strong> -- the messages you send to the Text Boss AI assistant during a session. These are transmitted to OpenAI for processing and are not permanently stored on our servers beyond the duration of your active session, except for conversation threads in Pro and Black tiers which are stored to maintain continuity.</li>
+    <li><strong>Scheduling data</strong> (Pro and Black tiers) -- availability slots, appointment details, client names, contact information, and business profile data you provide to the AI scheduling assistant.</li>
+    <li><strong>Push notification subscriptions</strong> (Pro and Black tiers) -- Web Push endpoint and key data required to deliver appointment reminders to your device.</li>
+  </ul>
+
+  <h2>3. How We Use Your Information</h2>
+  <p>We use the information we collect to:</p>
+  <ul>
+    <li>Authenticate your identity and manage your session</li>
+    <li>Verify your subscription status and enforce tier-based access</li>
+    <li>Deliver the Text Boss AI communication assistant and scheduling features</li>
+    <li>Process subscription payments through Stripe</li>
+    <li>Send appointment reminders via Web Push notifications (if enabled)</li>
+    <li>Maintain and improve the service</li>
+  </ul>
+
+  <h2>4. Third-Party Services</h2>
+  <p>Text Boss relies on the following third-party services to operate:</p>
+  <ul>
+    <li><strong>Stripe</strong> -- payment processing and subscription management. Stripe processes your payment information under its own privacy policy. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener">stripe.com/privacy</a>.</li>
+    <li><strong>Supabase</strong> -- database hosting for entitlement records, scheduling data, and conversation threads. Data is stored in Supabase-managed infrastructure.</li>
+    <li><strong>OpenAI</strong> -- AI model provider. Chat messages are sent to OpenAI's API for processing. OpenAI's data usage policies apply to this processing. See <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">openai.com/policies/privacy-policy</a>.</li>
+    <li><strong>Netlify</strong> -- hosting and serverless function execution. See <a href="https://www.netlify.com/privacy/" target="_blank" rel="noopener">netlify.com/privacy</a>.</li>
+  </ul>
+
+  <h2>5. Cookies</h2>
+  <p>
+    Text Boss uses a single <strong>HttpOnly session cookie</strong> (<code>textboss_session</code>)
+    to authenticate your session after email verification. This cookie contains your email,
+    subscription tier, and session expiration data, signed with an HMAC key. It expires after
+    30 days. We do not use tracking cookies, advertising cookies, or third-party analytics cookies.
+  </p>
+
+  <h2>6. Data Retention</h2>
+  <ul>
+    <li><strong>Session data</strong> -- session cookies expire after 30 days. No server-side session storage persists beyond this period.</li>
+    <li><strong>Entitlement records</strong> -- retained for the duration of your subscription and a reasonable period afterward for billing and dispute purposes.</li>
+    <li><strong>Chat messages</strong> -- Core tier messages exist only in your browser session. Pro and Black tier conversation threads are retained until you delete them or your subscription ends.</li>
+    <li><strong>Scheduling data</strong> -- appointment and availability data is retained for the duration of your subscription.</li>
+  </ul>
+
+  <h2>7. Data Security</h2>
+  <p>
+    We implement security measures including HMAC-signed session cookies with timing-safe
+    comparison, HTTPS-only transmission, HttpOnly cookie flags to prevent client-side script
+    access, and server-side entitlement verification on every API request. No system is
+    perfectly secure, and we cannot guarantee absolute security of your data.
+  </p>
+
+  <h2>8. Your Rights</h2>
+  <p>You have the right to:</p>
+  <ul>
+    <li>Request access to the personal data we hold about you</li>
+    <li>Request correction of inaccurate data</li>
+    <li>Request deletion of your data, subject to legal and contractual obligations</li>
+    <li>Cancel your subscription at any time through Stripe</li>
+    <li>Clear your session by logging out, which removes the session cookie</li>
+  </ul>
+  <p>
+    To exercise any of these rights, contact us at
+    <a href="mailto:privacy@textboss.ai">privacy@textboss.ai</a>.
+  </p>
+
+  <h2>9. Children's Privacy</h2>
+  <p>
+    Text Boss is not intended for use by individuals under the age of 18. We do not knowingly
+    collect personal information from children. If you believe a child has provided us with
+    personal data, contact us and we will delete it.
+  </p>
+
+  <h2>10. Changes to This Policy</h2>
+  <p>
+    We may update this Privacy Policy from time to time. Changes will be reflected by updating
+    the "Effective date" at the top of this page. Your continued use of Text Boss after changes
+    are posted constitutes acceptance of the updated policy.
+  </p>
+
+  <h2>11. Contact</h2>
+  <p>
+    For privacy-related questions or requests, contact us at
+    <a href="mailto:privacy@textboss.ai">privacy@textboss.ai</a>.
+  </p>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="privacy.html">Privacy Policy</a>
+    <span class="sep">&middot;</span>
+    <a href="terms.html">Terms of Service</a>
+  </div>
+  <div class="copyright">&copy; 2026 Text Boss. All rights reserved.</div>
+</footer>
+
+</body>
+</html>

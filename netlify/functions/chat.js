@@ -47,7 +47,12 @@ function createHandler(deps) {
       return deny(405, "method_not_allowed");
     }
 
-    const verification = verifySessionCookie(event.headers || {});
+    let verification;
+    try {
+      verification = verifySessionCookie(event.headers || {});
+    } catch {
+      return deny(401, "missing_session");
+    }
     if (!verification.ok) {
       return deny(401, verification.reason);
     }
