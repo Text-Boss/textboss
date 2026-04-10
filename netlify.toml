@@ -8,3 +8,7 @@
   publish = "."
   functions = "netlify/functions"
   autoLaunch = false
+
+# Run send-reminders every hour to check for appointments within the next 24h
+[functions."send-reminders"]
+  schedule = "0 * * * *"

@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="shortcut icon" href="assets/favicon-32.png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Text Boss - Black Prompt Templates</title>
   <style>
@@ -139,6 +142,59 @@
       .details-grid { grid-template-columns: 1fr; }
     }
 
+    /* ── Category Index ── */
+    .index-panel {
+      max-width: 780px;
+      margin: 0 auto 32px;
+      background: var(--surface);
+      border: 1px solid var(--line-hi);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .index-panel .panel-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+    }
+    .index-panel .panel-bar::before {
+      content: '>';
+      color: var(--muted);
+    }
+    .index-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      padding: 12px;
+    }
+    .index-grid a {
+      display: block;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted-hi);
+      text-decoration: none;
+      border-radius: 3px;
+      border: 1px solid transparent;
+      transition: all .15s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .index-grid a:hover {
+      color: var(--accent);
+      border-color: var(--accent-border);
+      background: var(--accent-dim);
+    }
+    @media (max-width: 600px) {
+      .index-grid { grid-template-columns: 1fr; }
+    }
+
     /* ── Prompt Content ── */
     .prompt-container {
       max-width: 780px;
@@ -232,6 +288,10 @@
       color: var(--accent);
       font-weight: 600;
     }
+    .card-body .placeholder-open {
+      color: #f59e0b;
+      font-weight: 600;
+    }
 
     /* ── Toast ── */
     .toast {
@@ -283,12 +343,40 @@
   </div>
 </div>
 
+<div class="index-panel">
+  <div class="panel-bar">Quick Navigation</div>
+  <div class="index-grid">
+    <a href="#sec-appointment-scheduling">Appointment Scheduling</a>
+    <a href="#sec-payment-reminders">Payment Reminders</a>
+    <a href="#sec-followup">Follow-Up After No Response</a>
+    <a href="#sec-scope-clarification">Scope Clarification</a>
+    <a href="#sec-declining">Politely Declining Requests</a>
+    <a href="#sec-delivery-timeline">Delivery / Timeline Updates</a>
+    <a href="#sec-end-of-project">End-of-Project Wrap-Up</a>
+    <a href="#sec-onboarding">New Client Onboarding</a>
+    <a href="#sec-scope-creep-first">Scope Creep — First Enforcement</a>
+    <a href="#sec-scope-creep-escalation">Scope Creep — Escalation</a>
+    <a href="#sec-retainer">Retainer Boundary Resets</a>
+    <a href="#sec-objections">Persistent Objections</a>
+    <a href="#sec-entitlement">Entitlement Behavior</a>
+    <a href="#sec-relationship-reset">Relationship Reset</a>
+    <a href="#sec-pricing-pushback">Pricing Pushback</a>
+    <a href="#sec-payment-dispute">Active Payment Dispute</a>
+    <a href="#sec-chargeback">Chargeback Threat Response</a>
+    <a href="#sec-hostile-client">Hostile Client De-Escalation</a>
+    <a href="#sec-no-show">No-Show Documentation</a>
+    <a href="#sec-termination">Relationship Termination</a>
+    <a href="#sec-threatening">Threatening / Abusive Messages</a>
+    <a href="#sec-screenshot-safe">Screenshot-Safe Refusals</a>
+  </div>
+</div>
+
 <div class="prompt-container" id="prompts">
 
   <!-- ════════════════════════════════════════════ -->
   <!-- CORE: APPOINTMENT SCHEDULING (8)            -->
   <!-- ════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Appointment Scheduling &amp; Confirmation<span class="count">8 prompts</span></h2></div>
+  <div class="section-header" id="sec-appointment-scheduling"><h2>Appointment Scheduling &amp; Confirmation<span class="count">8 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Appointment Scheduling">
     <div class="card-head"><span><span class="card-num">#1</span><span class="card-title">Offering Two Time Slots</span></span><button class="copy-btn">Copy</button></div>
@@ -333,7 +421,7 @@
   <!-- ════════════════════════════════════════════ -->
   <!-- CORE: PAYMENT REMINDERS (8)                 -->
   <!-- ════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Payment Reminders<span class="count">8 prompts</span></h2></div>
+  <div class="section-header" id="sec-payment-reminders"><h2>Payment Reminders<span class="count">8 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Payment Reminders">
     <div class="card-head"><span><span class="card-num">#9</span><span class="card-title">First Invoice Notification</span></span><button class="copy-btn">Copy</button></div>
@@ -378,7 +466,7 @@
   <!-- ════════════════════════════════════════════ -->
   <!-- CORE: FOLLOW-UP AFTER NO RESPONSE (6)       -->
   <!-- ════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Follow-Up After No Response<span class="count">6 prompts</span></h2></div>
+  <div class="section-header" id="sec-followup"><h2>Follow-Up After No Response<span class="count">6 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Follow-Up">
     <div class="card-head"><span><span class="card-num">#17</span><span class="card-title">First Follow-Up After Inquiry</span></span><button class="copy-btn">Copy</button></div>
@@ -413,7 +501,7 @@
   <!-- ════════════════════════════════════════════ -->
   <!-- CORE: SCOPE CLARIFICATION (6)               -->
   <!-- ════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Scope Clarification<span class="count">6 prompts</span></h2></div>
+  <div class="section-header" id="sec-scope-clarification"><h2>Scope Clarification<span class="count">6 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Scope Clarification">
     <div class="card-head"><span><span class="card-num">#23</span><span class="card-title">Outlining What's Included in the Quote</span></span><button class="copy-btn">Copy</button></div>
@@ -448,7 +536,7 @@
   <!-- ════════════════════════════════════════════ -->
   <!-- CORE: POLITELY DECLINING REQUESTS (6)       -->
   <!-- ════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Politely Declining Requests<span class="count">6 prompts</span></h2></div>
+  <div class="section-header" id="sec-declining"><h2>Politely Declining Requests<span class="count">6 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Declining Requests">
     <div class="card-head"><span><span class="card-num">#29</span><span class="card-title">Declining Work During Your Leave</span></span><button class="copy-btn">Copy</button></div>
@@ -483,7 +571,7 @@
   <!-- ════════════════════════════════════════════ -->
   <!-- CORE: DELIVERY / TIMELINE UPDATES (6)       -->
   <!-- ════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Delivery / Timeline Updates<span class="count">6 prompts</span></h2></div>
+  <div class="section-header" id="sec-delivery-timeline"><h2>Delivery / Timeline Updates<span class="count">6 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Delivery Updates">
     <div class="card-head"><span><span class="card-num">#35</span><span class="card-title">Confirming Start After Deposit Clears</span></span><button class="copy-btn">Copy</button></div>
@@ -518,7 +606,7 @@
   <!-- ════════════════════════════════════════════ -->
   <!-- CORE: END-OF-PROJECT WRAP-UP (5)            -->
   <!-- ════════════════════════════════════════════ -->
-  <div class="section-header"><h2>End-of-Project Wrap-Up<span class="count">5 prompts</span></h2></div>
+  <div class="section-header" id="sec-end-of-project"><h2>End-of-Project Wrap-Up<span class="count">5 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Wrap-Up">
     <div class="card-head"><span><span class="card-num">#41</span><span class="card-title">Final Files Sent + Backup Reminder</span></span><button class="copy-btn">Copy</button></div>
@@ -548,7 +636,7 @@
   <!-- ════════════════════════════════════════════ -->
   <!-- CORE: NEW CLIENT ONBOARDING (5)             -->
   <!-- ════════════════════════════════════════════ -->
-  <div class="section-header"><h2>New Client Onboarding<span class="count">5 prompts</span></h2></div>
+  <div class="section-header" id="sec-onboarding"><h2>New Client Onboarding<span class="count">5 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Onboarding">
     <div class="card-head"><span><span class="card-num">#46</span><span class="card-title">Welcome + What to Expect</span></span><button class="copy-btn">Copy</button></div>
@@ -578,7 +666,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- PRO: SCOPE CREEP — FIRST BOUNDARY ENFORCEMENT (8)      -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Scope Creep &mdash; First Boundary Enforcement<span class="count">8 prompts</span></h2></div>
+  <div class="section-header" id="sec-scope-creep-first"><h2>Scope Creep &mdash; First Boundary Enforcement<span class="count">8 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Scope Creep">
     <div class="card-head"><span><span class="card-num">#51</span><span class="card-title">Client Adding Social Posts to Website Build (Agency)</span></span><button class="copy-btn">Copy</button></div>
@@ -623,7 +711,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- PRO: SCOPE CREEP — ESCALATION SEQUENCES (8)            -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Scope Creep &mdash; Escalation Sequences<span class="count">8 prompts</span></h2></div>
+  <div class="section-header" id="sec-scope-creep-escalation"><h2>Scope Creep &mdash; Escalation Sequences<span class="count">8 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Scope Creep Escalation">
     <div class="card-head"><span><span class="card-num">#59</span><span class="card-title">Client Continuously Expanding Brief (Graphic Designer)</span></span><button class="copy-btn">Copy</button></div>
@@ -712,7 +800,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- PRO: RETAINER BOUNDARY RESETS (8)                      -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Retainer Boundary Resets<span class="count">8 prompts</span></h2></div>
+  <div class="section-header" id="sec-retainer"><h2>Retainer Boundary Resets<span class="count">8 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Retainer Boundaries">
     <div class="card-head"><span><span class="card-num">#67</span><span class="card-title">Retainer Hours Used in First Week (Web Dev)</span></span><button class="copy-btn">Copy</button></div>
@@ -757,7 +845,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- PRO: PERSISTENT OBJECTIONS AFTER A DECISION (8)        -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Persistent Objections After a Decision<span class="count">8 prompts</span></h2></div>
+  <div class="section-header" id="sec-objections"><h2>Persistent Objections After a Decision<span class="count">8 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Persistent Objections">
     <div class="card-head"><span><span class="card-num">#75</span><span class="card-title">Client Rehashing a Settled Timeline (Contractor)</span></span><button class="copy-btn">Copy</button></div>
@@ -802,7 +890,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- PRO: ENTITLEMENT BEHAVIOR (8)                          -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Entitlement Behavior<span class="count">8 prompts</span></h2></div>
+  <div class="section-header" id="sec-entitlement"><h2>Entitlement Behavior<span class="count">8 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Entitlement">
     <div class="card-head"><span><span class="card-num">#83</span><span class="card-title">Client Expecting You to Be Available on Demand (Graphic Designer)</span></span><button class="copy-btn">Copy</button></div>
@@ -847,7 +935,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- PRO: PROFESSIONAL RELATIONSHIP RESET (5)               -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Professional Relationship Reset<span class="count">5 prompts</span></h2></div>
+  <div class="section-header" id="sec-relationship-reset"><h2>Professional Relationship Reset<span class="count">5 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Relationship Reset">
     <div class="card-head"><span><span class="card-num">#91</span><span class="card-title">Transitioning a Casual Client to Formal Terms</span></span><button class="copy-btn">Copy</button></div>
@@ -877,7 +965,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- PRO: PRICING PUSHBACK — FIRM REFUSAL SEQUENCES (5)     -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Pricing Pushback &mdash; Firm Refusal Sequences<span class="count">5 prompts</span></h2></div>
+  <div class="section-header" id="sec-pricing-pushback"><h2>Pricing Pushback &mdash; Firm Refusal Sequences<span class="count">5 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Pricing Pushback">
     <div class="card-head"><span><span class="card-num">#96</span><span class="card-title">Client Wanting to Pay After Seeing Results (Coach)</span></span><button class="copy-btn">Copy</button></div>
@@ -927,7 +1015,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- BLACK: ACTIVE PAYMENT DISPUTE — CONTAINMENT (8)        -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Active Payment Dispute &mdash; Containment Messages<span class="count">8 prompts</span></h2></div>
+  <div class="section-header" id="sec-payment-dispute"><h2>Active Payment Dispute &mdash; Containment Messages<span class="count">8 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Payment Dispute">
     <div class="card-head"><span><span class="card-num">#101</span><span class="card-title">Client Claiming They Were Overcharged</span></span><button class="copy-btn">Copy</button></div>
@@ -972,7 +1060,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- BLACK: CHARGEBACK THREAT RESPONSE (7)                  -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Chargeback Threat Response<span class="count">7 prompts</span></h2></div>
+  <div class="section-header" id="sec-chargeback"><h2>Chargeback Threat Response<span class="count">7 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Chargeback">
     <div class="card-head"><span><span class="card-num">#109</span><span class="card-title">Client Threatening Chargeback on Completed Work</span></span><button class="copy-btn">Copy</button></div>
@@ -1012,7 +1100,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- BLACK: HOSTILE CLIENT — DE-ESCALATION (8)              -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Hostile Client &mdash; De-Escalation Without Concession<span class="count">8 prompts</span></h2></div>
+  <div class="section-header" id="sec-hostile-client"><h2>Hostile Client &mdash; De-Escalation Without Concession<span class="count">8 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Hostile Client">
     <div class="card-head"><span><span class="card-num">#116</span><span class="card-title">Client Sending Angry Messages</span></span><button class="copy-btn">Copy</button></div>
@@ -1057,7 +1145,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- BLACK: NO-SHOW DOCUMENTATION (7)                       -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>No-Show Documentation<span class="count">7 prompts</span></h2></div>
+  <div class="section-header" id="sec-no-show"><h2>No-Show Documentation<span class="count">7 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="No-Show">
     <div class="card-head"><span><span class="card-num">#124</span><span class="card-title">Recording a No-Show — First Instance</span></span><button class="copy-btn">Copy</button></div>
@@ -1097,7 +1185,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- BLACK: RELATIONSHIP TERMINATION (7)                    -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Relationship Termination &mdash; Clean Final Messages<span class="count">7 prompts</span></h2></div>
+  <div class="section-header" id="sec-termination"><h2>Relationship Termination &mdash; Clean Final Messages<span class="count">7 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Termination">
     <div class="card-head"><span><span class="card-num">#131</span><span class="card-title">Ending Services Due to Repeated Non-Payment</span></span><button class="copy-btn">Copy</button></div>
@@ -1137,7 +1225,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- BLACK: THREATENING / ABUSIVE — CONTAINMENT (7)         -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Threatening / Abusive Messages &mdash; Firm Containment<span class="count">7 prompts</span></h2></div>
+  <div class="section-header" id="sec-threatening"><h2>Threatening / Abusive Messages &mdash; Firm Containment<span class="count">7 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Threatening">
     <div class="card-head"><span><span class="card-num">#138</span><span class="card-title">Client Threatening Legal Action</span></span><button class="copy-btn">Copy</button></div>
@@ -1177,7 +1265,7 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- BLACK: SCREENSHOT-SAFE REFUSAL / POSITION (6)          -->
   <!-- ════════════════════════════════════════════════════════ -->
-  <div class="section-header"><h2>Screenshot-Safe Refusal / Position Statements<span class="count">6 prompts</span></h2></div>
+  <div class="section-header" id="sec-screenshot-safe"><h2>Screenshot-Safe Refusal / Position Statements<span class="count">6 prompts</span></h2></div>
 
   <div class="prompt-card" data-category="Position Statement">
     <div class="card-head"><span><span class="card-num">#145</span><span class="card-title">Declining to Accept Fault</span></span><button class="copy-btn">Copy</button></div>
@@ -1224,7 +1312,9 @@
     BUSINESS_EMAIL: '',
     WEBSITE: '',
     ABN: '',
-    CITY: ''
+    CITY: '',
+    DATE: '',
+    TIME: ''
   };
 
   // Store original templates
@@ -1234,15 +1324,42 @@
     templates.push(card.textContent);
   });
 
+  function formatDate(val) {
+    var d = new Date(val + 'T00:00:00');
+    return d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function formatTime(val) {
+    var parts = val.split(':');
+    var h = parseInt(parts[0], 10);
+    var m = parts[1];
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return h + ':' + m + ' ' + ampm;
+  }
+
   function renderAll() {
+    var dateDisplay = fields.DATE ? formatDate(fields.DATE) : '';
+    var timeDisplay = fields.TIME ? formatTime(fields.TIME) : '';
+
     cards.forEach(function(card, i) {
       var text = templates[i];
+      // 1. Replace {{FIELD}} linked placeholders (cyan)
       var html = text.replace(/\{\{(\w+)\}\}/g, function(match, key) {
         if (fields[key] && fields[key].length > 0) {
           return '<span class="placeholder">' + escapeHtml(fields[key]) + '</span>';
         }
         return '<span class="placeholder">' + match + '</span>';
       });
+      // 2. Highlight unlinked [PLACEHOLDER] text amber (skip [DATE] and [TIME] — handled next)
+      html = html.replace(/\[(?!DATE\]|TIME\])([^\]]+)\]/g, '<span class="placeholder-open">[$1]</span>');
+      // 3. Replace [DATE] and [TIME] with linked input values (cyan)
+      html = html.replace(/\[DATE\]/g, dateDisplay
+        ? '<span class="placeholder">' + escapeHtml(dateDisplay) + '</span>'
+        : '<span class="placeholder">[DATE]</span>');
+      html = html.replace(/\[TIME\]/g, timeDisplay
+        ? '<span class="placeholder">' + escapeHtml(timeDisplay) + '</span>'
+        : '<span class="placeholder">[TIME]</span>');
       card.innerHTML = html;
     });
   }

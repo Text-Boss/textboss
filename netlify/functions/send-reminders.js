@@ -1,4 +1,8 @@
-const { createServiceRoleClient } = require("./_lib/supabase");
+const { createServiceRoleClient, createPushSubscriptionStore } = require("./_lib/supabase");
+
+// web-push is optional — gracefully skip push delivery if not installed or VAPID not configured
+let webpush;
+try { webpush = require("web-push"); } catch (_) { /* not installed */ }
 
 function json(statusCode, body) {
   return {
@@ -17,6 +21,9 @@ function createHandler(deps) {
     verifyScheduledAccess,
     findUpcomingUnreminded,
     markReminded,
+    getSubscriptionsByEmail,
+    deleteSubscriptionById,
+    sendPushNotification,
   } = deps;
 
   return async function handler(event) {
@@ -38,7 +45,8 @@ function createHandler(deps) {
     const reminded = [];
     for (const appt of appointments) {
       await markReminded(appt.id);
-      reminded.push({
+
+      const record = {
         id: appt.id,
         owner_email: appt.owner_email,
         client_name: appt.client_name,
@@ -46,7 +54,32 @@ function createHandler(deps) {
         title: appt.title,
         scheduled_date: appt.scheduled_date,
         scheduled_time: appt.scheduled_time,
-      });
+      };
+      reminded.push(record);
+
+      // Deliver push notification to all of this owner's subscribed devices
+      if (sendPushNotification) {
+        const subscriptions = await getSubscriptionsByEmail(appt.owner_email);
+        for (const sub of subscriptions) {
+          try {
+            await sendPushNotification(sub, {
+              title: "Text Boss · Upcoming Appointment",
+              body: [
+                appt.title || "Appointment",
+                appt.client_name ? `with ${appt.client_name}` : null,
+                `at ${appt.scheduled_time}`,
+              ].filter(Boolean).join(" "),
+              data: { appointmentId: appt.id },
+            });
+          } catch (err) {
+            // 410 Gone = subscription expired; remove it so we don't retry
+            if (err && (err.statusCode === 410 || err.statusCode === 404)) {
+              await deleteSubscriptionById(sub.id).catch(() => {});
+            }
+            // All other errors: log and continue — don't block marking reminded
+          }
+        }
+      }
     }
 
     return json(200, {
@@ -64,6 +97,19 @@ function createRuntimeHandler(overrides = {}) {
       _supabase = overrides.supabase || createServiceRoleClient();
     }
     return _supabase;
+  }
+
+  const pushStore = overrides.pushStore || createPushSubscriptionStore();
+
+  // Configure VAPID once; skip if keys not present
+  let vapidReady = false;
+  if (webpush && process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+    webpush.setVapidDetails(
+      process.env.VAPID_SUBJECT || "mailto:noreply@textboss.app",
+      process.env.VAPID_PUBLIC_KEY,
+      process.env.VAPID_PRIVATE_KEY
+    );
+    vapidReady = true;
   }
 
   return createHandler({
@@ -118,6 +164,19 @@ function createRuntimeHandler(overrides = {}) {
 
       if (error) throw error;
     },
+
+    getSubscriptionsByEmail: (email) => pushStore.getSubscriptionsByEmail(email),
+    deleteSubscriptionById:  (id) => pushStore.deleteSubscriptionById(id),
+
+    sendPushNotification: vapidReady
+      ? async (sub, payload) => {
+          const subscription = {
+            endpoint: sub.endpoint,
+            keys: { p256dh: sub.p256dh, auth: sub.auth },
+          };
+          await webpush.sendNotification(subscription, JSON.stringify(payload));
+        }
+      : null, // null = push delivery skipped (VAPID not configured)
   });
 }
 

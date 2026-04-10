@@ -5,7 +5,9 @@
       "Bash(node tests/availability.test.js)",
       "Bash(node -e \"require\\('./netlify/functions/availability'\\)\")",
       "Bash(node -e ':*)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(node:*)",
+      "Bash(npm list:*)"
     ]
   }
 }

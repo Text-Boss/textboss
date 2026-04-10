@@ -157,7 +157,93 @@ function createAppointmentStore(options = {}) {
   };
 }
 
-exports.createServiceRoleClient = createServiceRoleClient;
-exports.createEntitlementStore  = createEntitlementStore;
-exports.createAvailabilityStore = createAvailabilityStore;
-exports.createAppointmentStore  = createAppointmentStore;
+function createBusinessProfileStore(options = {}) {
+  const client = options.client || createServiceRoleClient();
+
+  return {
+    async getProfile(email) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { data, error } = await client
+        .from("business_profiles")
+        .select("email, occupation, services, buffer_before_minutes, buffer_after_minutes, working_hours, onboarding_complete, updated_at")
+        .ilike("email", normalized)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+
+    async upsertProfile(email, updates) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const payload = { email: normalized, updated_at: new Date().toISOString() };
+      const allowed = ["occupation", "services", "buffer_before_minutes",
+                       "buffer_after_minutes", "working_hours", "onboarding_complete"];
+      for (const f of allowed) {
+        if (updates[f] !== undefined) payload[f] = updates[f];
+      }
+      const { data, error } = await client
+        .from("business_profiles")
+        .upsert(payload, { onConflict: "email" })
+        .select("email, occupation, services, buffer_before_minutes, buffer_after_minutes, working_hours, onboarding_complete, updated_at")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  };
+}
+
+function createPushSubscriptionStore(options = {}) {
+  const client = options.client || createServiceRoleClient();
+
+  return {
+    async saveSubscription(email, subscription) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { data, error } = await client
+        .from("push_subscriptions")
+        .upsert({
+          email:    normalized,
+          endpoint: subscription.endpoint,
+          p256dh:   subscription.keys.p256dh,
+          auth:     subscription.keys.auth,
+        }, { onConflict: "email,endpoint" })
+        .select("id")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+
+    async deleteSubscription(email, endpoint) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { error } = await client
+        .from("push_subscriptions")
+        .delete()
+        .ilike("email", normalized)
+        .eq("endpoint", endpoint);
+      if (error) throw error;
+    },
+
+    async getSubscriptionsByEmail(email) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { data, error } = await client
+        .from("push_subscriptions")
+        .select("id, endpoint, p256dh, auth")
+        .ilike("email", normalized);
+      if (error) throw error;
+      return data || [];
+    },
+
+    async deleteSubscriptionById(id) {
+      const { error } = await client
+        .from("push_subscriptions")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+  };
+}
+
+exports.createServiceRoleClient      = createServiceRoleClient;
+exports.createEntitlementStore       = createEntitlementStore;
+exports.createAvailabilityStore      = createAvailabilityStore;
+exports.createAppointmentStore       = createAppointmentStore;
+exports.createBusinessProfileStore   = createBusinessProfileStore;
+exports.createPushSubscriptionStore  = createPushSubscriptionStore;

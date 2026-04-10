@@ -1,8 +1,9 @@
-const { createEntitlementStore, createAvailabilityStore, createAppointmentStore, createServiceRoleClient } = require("./_lib/supabase");
+const { createEntitlementStore, createAppointmentStore, createBusinessProfileStore, createServiceRoleClient } = require("./_lib/supabase");
 const sessionLib    = require("./_lib/session");
 const tierPolicyLib = require("./_lib/tier-policy");
 const { createResponsesClient } = require("./_lib/openai");
 const { normalizeTier } = require("./_lib/tier-policy");
+const { findAvailableSlots, formatBusinessProfile, formatAppointments, workingHoursToArray } = require("./_lib/scheduler");
 
 function json(statusCode, body) {
   return {
@@ -22,57 +23,62 @@ function normalizeStatus(value) {
 
 const SCHEDULING_TIERS = new Set(["Pro", "Black"]);
 
-const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+function addDays(dateStr, n) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const date = new Date(y, m - 1, d + n);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
 
-function buildSchedulingContext(availability, appointments) {
-  const lines = ["=== SCHEDULING CONTEXT ==="];
+function buildSchedulingContext(profile, appointments) {
+  const parts = [];
 
-  lines.push("\nWeekly Availability:");
-  if (!availability || availability.length === 0) {
-    lines.push("- No availability configured.");
-  } else {
-    for (const slot of availability) {
-      const day = DAYS[slot.day_of_week] || `Day ${slot.day_of_week}`;
-      lines.push(`- ${day}: ${slot.start_time} – ${slot.end_time}`);
-    }
-  }
+  const profileBlock = formatBusinessProfile(profile);
+  if (profileBlock) parts.push(profileBlock);
 
-  lines.push("\nUpcoming Appointments:");
-  if (!appointments || appointments.length === 0) {
-    lines.push("- No upcoming appointments.");
-  } else {
-    for (const appt of appointments) {
-      const dateParts = appt.scheduled_date ? appt.scheduled_date.split("-") : [];
-      let dayLabel = "";
-      if (dateParts.length === 3) {
-        const d = new Date(Number(dateParts[0]), Number(dateParts[1]) - 1, Number(dateParts[2]));
-        dayLabel = ` (${DAYS[d.getDay()]})`;
-      }
-      const parts = [
-        `[id:${appt.id}]`,
-        `${appt.scheduled_date}${dayLabel} at ${appt.scheduled_time}`,
-        `${appt.duration_minutes || 60} min`,
-      ];
-      if (appt.client_name)    parts.push(appt.client_name);
-      if (appt.client_contact) parts.push(appt.client_contact);
-      if (appt.title)          parts.push(appt.title);
-      if (appt.status && appt.status !== "confirmed") parts.push(`[${appt.status}]`);
-      lines.push(`- ${parts.join(" | ")}`);
-    }
-  }
+  parts.push(formatAppointments(appointments));
+  parts.push("Today's date: " + new Date().toISOString().split("T")[0]);
 
-  lines.push("\nToday's date: " + new Date().toISOString().split("T")[0]);
-
-  return lines.join("\n");
+  return parts.join("\n\n");
 }
 
 const SCHEDULING_TOOLS = [
   {
     type: "function",
-    name: "get_availability",
-    description: "Retrieve the business owner's weekly availability slots.",
-    parameters: { type: "object", properties: {}, required: [], additionalProperties: false },
-    strict: true,
+    name: "find_available_slots",
+    description: "Find open time slots for a new booking. Computes gaps between existing appointments using the business profile's buffer settings. Always call this to check availability — do not guess.",
+    parameters: {
+      type: "object",
+      properties: {
+        duration_minutes: {
+          type: "number",
+          description: "Duration of the service in minutes. Use the service default from the business profile if the user named a service.",
+        },
+        buffer_before: {
+          type: "number",
+          description: "Travel/prep time to reserve before the booking (minutes). Defaults to the profile's buffer_before_minutes if omitted.",
+        },
+        buffer_after: {
+          type: "number",
+          description: "Travel/cleanup time to reserve after the booking (minutes). Defaults to the profile's buffer_after_minutes if omitted.",
+        },
+        start_date: {
+          type: "string",
+          description: "Start of search range in YYYY-MM-DD format. Defaults to today.",
+        },
+        end_date: {
+          type: "string",
+          description: "End of search range in YYYY-MM-DD format. Defaults to 14 days from today.",
+        },
+        preferred_time_of_day: {
+          type: "string",
+          enum: ["morning", "afternoon", "evening", "any"],
+          description: "Optional preference to filter results by time of day.",
+        },
+      },
+      required: ["duration_minutes"],
+      additionalProperties: false,
+    },
+    strict: false,
   },
   {
     type: "function",
@@ -153,7 +159,7 @@ function createHandler(deps) {
     getTierPolicy,
     getSchedulingInstructions,
     createSchedulingResponse,
-    listAvailability,
+    getBusinessProfile,
     listAppointments,
     createAppointment,
     updateAppointment,
@@ -161,11 +167,25 @@ function createHandler(deps) {
     saveMessage,
   } = deps;
 
-  async function executeTool(toolName, args, email) {
+  // context = { appointments, profile } — loaded once per request, reused by tool calls
+  async function executeTool(toolName, args, email, context) {
     switch (toolName) {
-      case "get_availability": {
-        const slots = await listAvailability(email);
-        return { availability: slots };
+      case "find_available_slots": {
+        const profile     = context.profile || {};
+        const bufferBefore = args.buffer_before ?? (profile.buffer_before_minutes ?? 0);
+        const bufferAfter  = args.buffer_after  ?? (profile.buffer_after_minutes  ?? 0);
+        const today        = new Date().toISOString().split("T")[0];
+        const slots = findAvailableSlots({
+          appointments:  context.appointments,
+          workingHours:  workingHoursToArray(profile.working_hours),
+          durationMinutes: args.duration_minutes,
+          preBuffer:     bufferBefore,
+          postBuffer:    bufferAfter,
+          startDate:     args.start_date || today,
+          endDate:       args.end_date   || addDays(today, 14),
+          maxSlotsPerDay: 3,
+        });
+        return { slots, count: slots.length };
       }
       case "list_appointments": {
         const upcomingOnly = !args.include_all;
@@ -182,7 +202,7 @@ function createHandler(deps) {
           duration_minutes: args.duration_minutes || 60,
           notes:            args.notes            || null,
         });
-        return { booked: true, appointment: appt };
+        return { booked: true, appointment: appt, _notify: true };
       }
       case "cancel_appointment": {
         const appt = await updateAppointment(args.appointment_id, email, { status: "cancelled" });
@@ -265,11 +285,11 @@ function createHandler(deps) {
       }
     }
 
-    let availability = [];
+    let profile = null;
     let appointments = [];
     try {
-      [availability, appointments] = await Promise.all([
-        listAvailability(session.email),
+      [profile, appointments] = await Promise.all([
+        getBusinessProfile(session.email),
         listAppointments(session.email, true),
       ]);
     } catch (_) {
@@ -277,11 +297,14 @@ function createHandler(deps) {
     }
 
     const schedulingInstructions = getSchedulingInstructions(sessionTier);
-    const contextBlock = buildSchedulingContext(availability, appointments);
+    const contextBlock = buildSchedulingContext(profile, appointments);
 
     const extraSystemContext = schedulingInstructions
       ? `${schedulingInstructions}\n\n${contextBlock}`
       : contextBlock;
+
+    // Shared context passed to every tool call in this request
+    const toolContext = { profile, appointments };
 
     // Tool-calling loop: send to OpenAI, execute any tool calls, feed results back
     let currentConversation = conversation.slice();
@@ -324,7 +347,7 @@ function createHandler(deps) {
           const args = typeof call.arguments === "string"
             ? JSON.parse(call.arguments)
             : (call.arguments || {});
-          toolResult = await executeTool(call.name, args, session.email);
+          toolResult = await executeTool(call.name, args, session.email, toolContext);
           toolActions.push({ tool: call.name, result: toolResult });
         } catch (err) {
           toolResult = { error: err.message || "tool_execution_failed" };
@@ -350,12 +373,22 @@ function createHandler(deps) {
       }
     }
 
+    // Extract notification signal before stripping internal flag
+    const bookAction = toolActions.find(a => a.result && a.result._notify);
+    for (const a of toolActions) {
+      if (a.result && a.result._notify) delete a.result._notify;
+    }
+
     return json(200, {
       ok: true,
       tier: sessionTier,
       output: finalOutput,
       usage: finalUsage,
       actions: toolActions.length > 0 ? toolActions : undefined,
+      notification: bookAction ? {
+        type: "appointment_created",
+        appointment: bookAction.result.appointment,
+      } : undefined,
       threadId: threadId || undefined,
     });
   };
@@ -363,7 +396,7 @@ function createHandler(deps) {
 
 function createRuntimeHandler(overrides = {}) {
   const entitlementStore  = overrides.entitlementStore  || createEntitlementStore();
-  const availabilityStore = overrides.availabilityStore || createAvailabilityStore();
+  const profileStore      = overrides.profileStore      || createBusinessProfileStore();
   const appointmentStore  = overrides.appointmentStore  || createAppointmentStore();
   const runtimeSessionLib = overrides.sessionLib        || sessionLib;
   const runtimePolicyLib  = overrides.tierPolicyLib     || tierPolicyLib;
@@ -382,13 +415,17 @@ function createRuntimeHandler(overrides = {}) {
     findEntitlementByEmail:   (e) => entitlementStore.findEntitlementByEmail(e),
     getTierPolicy:            (t) => runtimePolicyLib.getTierPolicy(t),
     getSchedulingInstructions:(t) => runtimePolicyLib.getSchedulingInstructions(t),
-    listAvailability:         (e) => availabilityStore.listAvailability(e),
+    getBusinessProfile:       (e) => profileStore.getProfile(e),
     listAppointments:         (e, u) => appointmentStore.listAppointments(e, u),
     createAppointment:        (e, a) => appointmentStore.createAppointment(e, a),
     updateAppointment:        (id, e, u) => appointmentStore.updateAppointment(id, e, u),
 
     createSchedulingResponse: async ({ tier, message, conversation, policy, extraSystemContext, tools }) => {
-      const systemParts = [`Tier: ${tier}`, policy.instructions];
+      // IMPORTANT: Do NOT include policy.instructions here — those are the
+      // text-messaging system prompts (boundary enforcement, scope creep, etc.)
+      // which are wrong context for the scheduling assistant. The scheduling
+      // instructions are already in extraSystemContext via getSchedulingInstructions().
+      const systemParts = [`Tier: ${tier}`];
       if (extraSystemContext) {
         systemParts.push(extraSystemContext);
       }
@@ -530,8 +567,8 @@ async function handler(event, context) {
   }
 }
 
-exports.createHandler        = createHandler;
-exports.createRuntimeHandler = createRuntimeHandler;
-exports.handler              = handler;
+exports.createHandler          = createHandler;
+exports.createRuntimeHandler   = createRuntimeHandler;
+exports.handler                = handler;
 exports.buildSchedulingContext = buildSchedulingContext;
-exports.SCHEDULING_TOOLS     = SCHEDULING_TOOLS;
+exports.SCHEDULING_TOOLS       = SCHEDULING_TOOLS;

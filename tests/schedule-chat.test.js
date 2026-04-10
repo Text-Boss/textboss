@@ -1,5 +1,14 @@
 const assert = require("node:assert/strict");
 
+const SAMPLE_PROFILE = {
+  occupation: "Mobile Hairdresser",
+  services: [{ name: "Cut & Style", duration_minutes: 60 }],
+  buffer_before_minutes: 15,
+  buffer_after_minutes: 15,
+  working_hours: null,
+  onboarding_complete: true,
+};
+
 function makeProDeps(overrides = {}) {
   return {
     verifySessionCookie: () => ({
@@ -24,7 +33,7 @@ function makeProDeps(overrides = {}) {
       toolCalls: [],
       rawOutput: [],
     }),
-    listAvailability: async () => [],
+    getBusinessProfile: async () => SAMPLE_PROFILE,
     listAppointments: async () => [],
     createAppointment: async () => { throw new Error("should not create"); },
     updateAppointment: async () => { throw new Error("should not update"); },
@@ -40,9 +49,7 @@ async function testProTierGetsSchedulingResponse() {
   let capturedInput = null;
 
   const handler = createHandler(makeProDeps({
-    listAvailability: async () => [
-      { id: "s1", day_of_week: 1, start_time: "09:00", end_time: "17:00" },
-    ],
+    getBusinessProfile: async () => SAMPLE_PROFILE,
     listAppointments: async () => [
       { id: "a1", scheduled_date: "2026-04-13", scheduled_time: "10:00",
         duration_minutes: 60, client_name: "Jane", status: "confirmed" },
@@ -74,8 +81,8 @@ async function testProTierGetsSchedulingResponse() {
   assert.ok(capturedInput, "createSchedulingResponse was not called");
   assert.ok(capturedInput.extraSystemContext.includes("pro-scheduling-instructions"),
     "scheduling instructions missing from context");
-  assert.ok(capturedInput.extraSystemContext.includes("Monday: 09:00 – 17:00"),
-    "availability missing from context");
+  assert.ok(capturedInput.extraSystemContext.includes("Mobile Hairdresser"),
+    "business profile occupation missing from context");
   assert.ok(capturedInput.extraSystemContext.includes("2026-04-13"),
     "appointment date missing from context");
   assert.ok(capturedInput.extraSystemContext.includes("Jane"),
@@ -116,7 +123,7 @@ async function testBlackTierGetsSchedulingResponse() {
         rawOutput: [],
       };
     },
-    listAvailability: async () => [],
+    getBusinessProfile: async () => null,
     listAppointments: async () => [],
     createAppointment: async () => { throw new Error("should not create"); },
     updateAppointment: async () => { throw new Error("should not update"); },
@@ -151,7 +158,7 @@ async function testCoreTierDenied() {
     getTierPolicy: () => ({ tier: "Core", instructions: "", inputLimit: 4000 }),
     getSchedulingInstructions: () => null,
     createSchedulingResponse: async () => { throw new Error("should not call OpenAI for Core"); },
-    listAvailability: async () => { throw new Error("should not query availability"); },
+    getBusinessProfile: async () => { throw new Error("should not query profile"); },
     listAppointments: async () => { throw new Error("should not query appointments"); },
     createAppointment: async () => { throw new Error("should not create"); },
     updateAppointment: async () => { throw new Error("should not update"); },
@@ -179,7 +186,7 @@ async function testMissingSessionDenied() {
     getTierPolicy: () => { throw new Error("should not get policy"); },
     getSchedulingInstructions: () => { throw new Error("should not get instructions"); },
     createSchedulingResponse: async () => { throw new Error("should not call OpenAI"); },
-    listAvailability: async () => { throw new Error("should not query"); },
+    getBusinessProfile: async () => { throw new Error("should not query"); },
     listAppointments: async () => { throw new Error("should not query"); },
     createAppointment: async () => { throw new Error("should not create"); },
     updateAppointment: async () => { throw new Error("should not update"); },
@@ -251,10 +258,13 @@ async function testNonPostMethodRejected() {
 async function testBuildSchedulingContextFormat() {
   const { buildSchedulingContext } = require("../netlify/functions/schedule-chat");
 
-  const availability = [
-    { id: "s1", day_of_week: 1, start_time: "09:00", end_time: "17:00" },
-    { id: "s2", day_of_week: 3, start_time: "10:00", end_time: "14:00" },
-  ];
+  const profile = {
+    occupation: "Plumber",
+    services: [{ name: "Emergency call-out", duration_minutes: 90 }],
+    buffer_before_minutes: 20,
+    buffer_after_minutes: 20,
+    working_hours: null,
+  };
   const appointments = [
     {
       id: "a1",
@@ -268,13 +278,13 @@ async function testBuildSchedulingContextFormat() {
     },
   ];
 
-  const ctx = buildSchedulingContext(availability, appointments);
+  const ctx = buildSchedulingContext(profile, appointments);
 
-  assert.ok(ctx.includes("Monday: 09:00 – 17:00"), "Monday availability missing");
-  assert.ok(ctx.includes("Wednesday: 10:00 – 14:00"), "Wednesday availability missing");
+  assert.ok(ctx.includes("Plumber"), "occupation missing from context");
+  assert.ok(ctx.includes("Emergency call-out"), "service name missing");
+  assert.ok(ctx.includes("90 min"), "service duration or appt duration missing");
   assert.ok(ctx.includes("2026-04-13"), "appointment date missing");
   assert.ok(ctx.includes("11:00"), "appointment time missing");
-  assert.ok(ctx.includes("90 min"), "duration missing");
   assert.ok(ctx.includes("Jane Smith"), "client name missing");
   assert.ok(ctx.includes("jane@example.com"), "client contact missing");
   assert.ok(ctx.includes("Consultation"), "title missing");
@@ -284,9 +294,8 @@ async function testBuildSchedulingContextFormat() {
 async function testBuildSchedulingContextEmpty() {
   const { buildSchedulingContext } = require("../netlify/functions/schedule-chat");
 
-  const ctx = buildSchedulingContext([], []);
+  const ctx = buildSchedulingContext(null, []);
 
-  assert.ok(ctx.includes("No availability configured"), "empty availability message missing");
   assert.ok(ctx.includes("No upcoming appointments"), "empty appointments message missing");
 }
 
@@ -507,6 +516,89 @@ async function testThreadMessagesPersisted() {
   assert.equal(saved[1].content, "Done.");
 }
 
+async function testSystemPromptExcludesTextMessagingInstructions() {
+  const { createHandler } = require("../netlify/functions/schedule-chat");
+
+  let capturedInput = null;
+
+  // Use realistic text-messaging instructions that should NOT appear in the scheduling prompt
+  const textMessagingInstructions = "You are Text Boss at the Pro tier. You handle situations that require structured boundary enforcement and firm authority.";
+
+  const handler = createHandler(makeProDeps({
+    getTierPolicy: () => ({
+      tier: "Pro",
+      instructions: textMessagingInstructions,
+      inputLimit: 6000,
+      responseMaxTokens: 600,
+    }),
+    getSchedulingInstructions: () => "You are the Text Boss scheduling assistant.",
+    createSchedulingResponse: async (input) => {
+      capturedInput = input;
+      return { output: "Done.", usage: { total_tokens: 5 }, toolCalls: [], rawOutput: [] };
+    },
+  }));
+
+  await handler({
+    httpMethod: "POST",
+    headers: {},
+    queryStringParameters: {},
+    body: JSON.stringify({ message: "What's my schedule today?" }),
+  });
+
+  assert.ok(capturedInput, "createSchedulingResponse was not called");
+  // The scheduling instructions must be present
+  assert.ok(capturedInput.extraSystemContext.includes("scheduling assistant"),
+    "scheduling instructions missing from extraSystemContext");
+  // The text-messaging instructions must NOT be in the extraSystemContext
+  assert.ok(!capturedInput.extraSystemContext.includes("boundary enforcement"),
+    "text-messaging instructions leaked into scheduling context");
+}
+
+async function testSchedulingPromptContainsOffTopicRefusal() {
+  const { getSchedulingInstructions } = require("../netlify/functions/_lib/tier-policy");
+
+  const proInstructions = getSchedulingInstructions("Pro");
+  const blackInstructions = getSchedulingInstructions("Black");
+
+  // Both tiers must instruct the AI to refuse non-scheduling requests
+  assert.ok(proInstructions.includes("Messages tab"),
+    "Pro scheduling instructions missing off-topic refusal");
+  assert.ok(blackInstructions.includes("Messages tab"),
+    "Black scheduling instructions missing off-topic refusal");
+
+  // Neither should contain text-messaging language
+  assert.ok(!proInstructions.includes("scope creep"),
+    "Pro scheduling instructions contain text-messaging language");
+  assert.ok(!blackInstructions.includes("scope creep"),
+    "Black scheduling instructions contain text-messaging language");
+}
+
+async function testSchedulingPromptRequiresToolCallBeforeConfirming() {
+  const { getSchedulingInstructions } = require("../netlify/functions/_lib/tier-policy");
+
+  const proInstructions = getSchedulingInstructions("Pro");
+  const blackInstructions = getSchedulingInstructions("Black");
+
+  // Both must require find_available_slots before suggesting times
+  assert.ok(proInstructions.includes("find_available_slots"),
+    "Pro scheduling instructions missing find_available_slots requirement");
+  assert.ok(blackInstructions.includes("find_available_slots"),
+    "Black scheduling instructions missing find_available_slots requirement");
+
+  // Both must require explicit user confirmation before booking
+  assert.ok(proInstructions.includes("explicitly confirmed") || proInstructions.includes("explicit confirmation"),
+    "Pro scheduling instructions missing booking confirmation requirement");
+  assert.ok(blackInstructions.includes("explicitly confirmed") || blackInstructions.includes("explicit confirmation"),
+    "Black scheduling instructions missing booking confirmation requirement");
+}
+
+async function testCoreHasNoSchedulingInstructions() {
+  const { getSchedulingInstructions } = require("../netlify/functions/_lib/tier-policy");
+
+  const coreInstructions = getSchedulingInstructions("Core");
+  assert.equal(coreInstructions, null, "Core should have no scheduling instructions");
+}
+
 async function testSchedulingToolsExported() {
   const { SCHEDULING_TOOLS } = require("../netlify/functions/schedule-chat");
 
@@ -514,11 +606,57 @@ async function testSchedulingToolsExported() {
   assert.equal(SCHEDULING_TOOLS.length, 5);
 
   const toolNames = SCHEDULING_TOOLS.map(t => t.name);
-  assert.ok(toolNames.includes("get_availability"));
+  assert.ok(toolNames.includes("find_available_slots"), "find_available_slots missing");
   assert.ok(toolNames.includes("list_appointments"));
   assert.ok(toolNames.includes("book_appointment"));
   assert.ok(toolNames.includes("cancel_appointment"));
   assert.ok(toolNames.includes("reschedule_appointment"));
+  assert.ok(!toolNames.includes("get_availability"), "old get_availability tool still present");
+}
+
+async function testBookAppointmentEmitsNotification() {
+  const { createHandler } = require("../netlify/functions/schedule-chat");
+
+  let round = 0;
+
+  const handler = createHandler(makeProDeps({
+    createSchedulingResponse: async () => {
+      round++;
+      if (round === 1) {
+        return {
+          output: "",
+          usage: { total_tokens: 10 },
+          toolCalls: [{
+            call_id: "call_notif",
+            name: "book_appointment",
+            arguments: JSON.stringify({ scheduled_date: "2026-04-15", scheduled_time: "10:00" }),
+          }],
+          rawOutput: [{ type: "function_call", call_id: "call_notif", name: "book_appointment" }],
+        };
+      }
+      return { output: "Booked.", usage: { total_tokens: 5 }, toolCalls: [], rawOutput: [] };
+    },
+    createAppointment: async (email, appt) => ({
+      id: "notif-appt",
+      ...appt,
+      status: "confirmed",
+    }),
+  }));
+
+  const res = await handler({
+    httpMethod: "POST",
+    headers: {},
+    queryStringParameters: {},
+    body: JSON.stringify({ message: "Book me Tuesday 10am." }),
+  });
+
+  const body = JSON.parse(res.body);
+  assert.equal(res.statusCode, 200);
+  assert.ok(body.notification, "notification field missing after booking");
+  assert.equal(body.notification.type, "appointment_created");
+  assert.equal(body.notification.appointment.id, "notif-appt");
+  // _notify internal flag must be stripped from actions
+  assert.ok(!body.actions[0].result._notify, "_notify flag leaked into response");
 }
 
 async function run() {
@@ -535,7 +673,12 @@ async function run() {
   await testToolCallCancelAppointment();
   await testToolCallRescheduleAppointment();
   await testThreadMessagesPersisted();
+  await testSystemPromptExcludesTextMessagingInstructions();
+  await testSchedulingPromptContainsOffTopicRefusal();
+  await testSchedulingPromptRequiresToolCallBeforeConfirming();
+  await testCoreHasNoSchedulingInstructions();
   await testSchedulingToolsExported();
+  await testBookAppointmentEmitsNotification();
   console.log("schedule-chat tests passed");
 }
 
