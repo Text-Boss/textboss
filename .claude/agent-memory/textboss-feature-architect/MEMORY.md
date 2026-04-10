@@ -1,1 +1,2 @@
 - [AI Scheduler Feature](project_scheduler_feature.md) — Tool-calling pattern, tier separation, reminder system design decisions from 2026-04-08
+- [Client Follow-Up System](project_followup_feature.md) — Two-table design, draft-at-creation pattern, tier limits from 2026-04-10

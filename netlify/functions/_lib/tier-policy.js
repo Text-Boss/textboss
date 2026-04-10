@@ -169,6 +169,63 @@ function getThreadLimit(tier) {
   return limit;
 }
 
+// ── Follow-Up configuration (Pro + Black only) ─────────────────────────────
+const FOLLOW_UP_TIERS = new Set(["Pro", "Black"]);
+const FOLLOW_UP_LIMITS = { Core: 0, Pro: 10, Black: Infinity };
+
+function getFollowUpLimit(tier) {
+  const normalized = normalizeTier(tier);
+  const limit = FOLLOW_UP_LIMITS[normalized];
+  if (limit === undefined) {
+    throw new Error(`Unknown tier: ${tier}`);
+  }
+  return limit;
+}
+
+function isFollowUpTier(tier) {
+  return FOLLOW_UP_TIERS.has(normalizeTier(tier));
+}
+
+const FOLLOW_UP_SYSTEM_PROMPTS = {
+  Pro: [
+    "You are a follow-up message assistant for a service business. Your job is to generate personalised follow-up messages that the business owner will send to their client after completing a service.",
+
+    "Generate a JSON array of exactly 2 follow-up messages with this schedule:",
+    "1. Day 7 — Check-in and review request. Ask if they are happy with the service, mention what was done, and include the review link if provided.",
+    "2. Day 14 — Rebooking nudge. Remind them about maintenance or their next service, and include the rebooking link if provided.",
+
+    "Each message should be 2 to 4 sentences. Warm and professional. Use the client's first name. Reference the specific service performed. Do not be pushy or desperate. Do not use exclamation marks excessively.",
+
+    "Return ONLY a valid JSON array. No markdown, no code fences, no explanation. Each object must have exactly these keys: { \"delay_days\": number, \"purpose\": string, \"draft\": string }.",
+
+    "The purpose field should be a short label like 'check-in + review' or 'rebooking reminder'.",
+  ].join(" "),
+
+  Black: [
+    "You are a precision follow-up assistant for a high-end service business. Your job is to generate a strategic sequence of personalised follow-up messages that the business owner will send to their client after completing a service.",
+
+    "Generate a JSON array of exactly 4 follow-up messages with this schedule:",
+    "1. Day 3 — Quick thank-you and quality check. Brief, confident, no asks. Establish continued presence.",
+    "2. Day 7 — Satisfaction check-in and review request. Reference the service specifically. Include the review link if provided. Frame the review as helping other people find them, not as a favour.",
+    "3. Day 14 — Maintenance or rebooking suggestion. Position it as professional advice, not a sales pitch. Include the rebooking link if provided.",
+    "4. Day 30 — Long-term check-in. Brief, strategic, keeps the relationship alive. Mention seasonal relevance or upcoming availability if appropriate.",
+
+    "Each message should be 2 to 5 sentences. Confident, precise, and non-desperate. Use the client's first name. Reference the specific service performed. Every word should feel intentional — no filler, no excessive enthusiasm.",
+
+    "Return ONLY a valid JSON array. No markdown, no code fences, no explanation. Each object must have exactly these keys: { \"delay_days\": number, \"purpose\": string, \"draft\": string }.",
+
+    "The purpose field should be a short strategic label like 'quality check', 'review request', 'rebooking', or 'relationship maintenance'.",
+  ].join(" "),
+};
+
+function getFollowUpSystemPrompt(tier) {
+  const normalized = normalizeTier(tier);
+  return FOLLOW_UP_SYSTEM_PROMPTS[normalized] || null;
+}
+
 exports.getTierPolicy = getTierPolicy;
 exports.normalizeTier = normalizeTier;
 exports.getThreadLimit = getThreadLimit;
+exports.getFollowUpLimit = getFollowUpLimit;
+exports.isFollowUpTier = isFollowUpTier;
+exports.getFollowUpSystemPrompt = getFollowUpSystemPrompt;

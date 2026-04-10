@@ -1,3 +1,4 @@
+const crypto = require("node:crypto");
 const { createEntitlementStore, createBusinessProfileStore } = require("./_lib/supabase");
 const sessionLib    = require("./_lib/session");
 const { normalizeTier } = require("./_lib/tier-policy");
@@ -119,6 +120,18 @@ function createHandler(deps) {
 
       if (body.onboarding_complete !== undefined) {
         updates.onboarding_complete = Boolean(body.onboarding_complete);
+      }
+
+      if (body.booking_slug !== undefined) {
+        const slug = String(body.booking_slug || "").trim();
+        if (slug && (slug.length < 4 || slug.length > 32 || !/^[a-zA-Z0-9_-]+$/.test(slug))) {
+          return deny(400, "invalid_booking_slug");
+        }
+        updates.booking_slug = slug || null;
+      }
+
+      if (body.generateSlug) {
+        updates.booking_slug = crypto.randomBytes(6).toString("base64url").slice(0, 8);
       }
 
       if (Object.keys(updates).length === 0) {

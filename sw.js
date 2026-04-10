@@ -37,6 +37,13 @@ self.addEventListener("notificationclick", (event) => {
 
   if (event.action === "dismiss") return;
 
+  // Determine target URL based on notification type
+  var notifData = (event.notification.data) || {};
+  var targetUrl = "/";
+  if (notifData.type === "follow_up") {
+    targetUrl = "/#follow-ups";
+  }
+
   event.waitUntil(
     clients
       .matchAll({ type: "window", includeUncontrolled: true })
@@ -46,7 +53,7 @@ self.addEventListener("notificationclick", (event) => {
           if ("focus" in client) return client.focus();
         }
         // Otherwise open a new window
-        return clients.openWindow("/");
+        return clients.openWindow(targetUrl);
       })
   );
 });

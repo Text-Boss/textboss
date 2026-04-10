@@ -326,6 +326,8 @@
       row.appendChild(info);
       row.appendChild(badge);
       card.appendChild(row);
+      var calDrop = buildCalendarDropdown(appt);
+      if (calDrop) card.appendChild(calDrop);
       container.appendChild(card);
     });
   }
@@ -461,6 +463,60 @@
       });
     });
     container.appendChild(addBtn);
+  }
+
+  // ── Client Booking Link ────────────────────────────────────────────────────────
+  function renderBookingLink() {
+    var container = document.getElementById('booking-link-section');
+    if (!container) return;
+    container.innerHTML = '';
+
+    var slug = (cachedProfile && cachedProfile.booking_slug) ? cachedProfile.booking_slug : null;
+
+    if (slug) {
+      var bookingUrl = 'https://textboss.com.au/book.html?owner=' + encodeURIComponent(slug);
+      var urlEl = document.createElement('div');
+      urlEl.className = 'booking-link-url';
+      urlEl.textContent = bookingUrl;
+      container.appendChild(urlEl);
+
+      var copyBtn = document.createElement('button');
+      copyBtn.className = 'booking-link-copy';
+      copyBtn.textContent = 'Copy Link';
+      copyBtn.addEventListener('click', function () {
+        navigator.clipboard.writeText(bookingUrl).then(function () {
+          copyBtn.textContent = 'Copied!';
+          setTimeout(function () { copyBtn.textContent = 'Copy Link'; }, 2000);
+        }).catch(function () {
+          // Fallback: select text
+          var ta = document.createElement('textarea');
+          ta.value = bookingUrl;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          copyBtn.textContent = 'Copied!';
+          setTimeout(function () { copyBtn.textContent = 'Copy Link'; }, 2000);
+        });
+      });
+      container.appendChild(copyBtn);
+    } else {
+      var genBtn = document.createElement('button');
+      genBtn.className = 'booking-link-generate';
+      genBtn.textContent = 'Generate Booking Link';
+      genBtn.addEventListener('click', async function () {
+        genBtn.disabled = true;
+        genBtn.textContent = 'Generating...';
+        var ok = await saveBusinessProfile({ generateSlug: true });
+        if (ok) {
+          renderBookingLink();
+        } else {
+          genBtn.disabled = false;
+          genBtn.textContent = 'Generate Booking Link';
+        }
+      });
+      container.appendChild(genBtn);
+    }
   }
 
   // ── Onboarding wizard ─────────────────────────────────────────────────────────
@@ -769,6 +825,94 @@
     });
   }
 
+  // ── Per-appointment "Add to Calendar" ────────────────────────────────────────
+  function _padZ(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function buildCalendarDropdown(appt) {
+    if (appt.status === 'cancelled') return null;
+    var d    = (appt.scheduled_date || '').replace(/-/g, '');
+    var tRaw = (appt.scheduled_time || '00:00').split(':');
+    var h    = parseInt(tRaw[0], 10) || 0;
+    var m    = parseInt(tRaw[1] || '0', 10) || 0;
+    var dur  = appt.duration_minutes || 60;
+    var eH   = Math.floor((h * 60 + m + dur) / 60) % 24;
+    var eM   = (h * 60 + m + dur) % 60;
+    var startDt = d + 'T' + _padZ(h) + _padZ(m) + '00';
+    var endDt   = d + 'T' + _padZ(eH) + _padZ(eM) + '00';
+    var title   = appt.title || appt.client_name || 'Appointment';
+    var descr   = appt.client_name ? 'Client: ' + appt.client_name : '';
+
+    var googleUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+      '&text=' + encodeURIComponent(title) +
+      '&dates=' + startDt + '/' + endDt +
+      (descr ? '&details=' + encodeURIComponent(descr) : '');
+
+    var startIso = appt.scheduled_date + 'T' + _padZ(h) + ':' + _padZ(m) + ':00';
+    var endIso   = appt.scheduled_date + 'T' + _padZ(eH) + ':' + _padZ(eM) + ':00';
+    var outlookUrl = 'https://outlook.live.com/calendar/0/action/compose' +
+      '?subject=' + encodeURIComponent(title) +
+      '&startdt=' + encodeURIComponent(startIso) +
+      '&enddt='   + encodeURIComponent(endIso) +
+      (descr ? '&body=' + encodeURIComponent(descr) : '');
+
+    var icsContent = [
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Text Boss//EN',
+      'BEGIN:VEVENT',
+      'DTSTART:' + startDt,
+      'DTEND:'   + endDt,
+      'SUMMARY:' + title,
+      descr ? 'DESCRIPTION:' + descr : '',
+      'UID:' + appt.id + '-single@textboss',
+      'END:VEVENT', 'END:VCALENDAR'
+    ].filter(Boolean).join('\r\n');
+
+    var wrap = document.createElement('div');
+    wrap.className = 'cal-add-wrap';
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cal-add-btn';
+    btn.textContent = '+ Add to Calendar';
+
+    var drop = document.createElement('div');
+    drop.className = 'cal-dropdown';
+
+    var gLink = document.createElement('a');
+    gLink.href = googleUrl; gLink.target = '_blank'; gLink.rel = 'noopener noreferrer';
+    gLink.textContent = 'Google Calendar';
+
+    var oLink = document.createElement('a');
+    oLink.href = outlookUrl; oLink.target = '_blank'; oLink.rel = 'noopener noreferrer';
+    oLink.textContent = 'Outlook';
+
+    var iLink = document.createElement('a');
+    iLink.href = '#'; iLink.textContent = 'Apple / iCal (.ics)';
+    iLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      var blob = new Blob([icsContent], { type: 'text/calendar' });
+      var url  = URL.createObjectURL(blob);
+      var a    = document.createElement('a');
+      a.href = url; a.download = 'appointment.ics';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+    });
+
+    drop.appendChild(gLink);
+    drop.appendChild(oLink);
+    drop.appendChild(iLink);
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = drop.classList.contains('open');
+      document.querySelectorAll('.cal-dropdown.open').forEach(function (el) { el.classList.remove('open'); });
+      if (!open) drop.classList.add('open');
+    });
+
+    wrap.appendChild(btn);
+    wrap.appendChild(drop);
+    return wrap;
+  }
+
   // ── iCal export ──────────────────────────────────────────────────────────────
   function bindIcalExport() {
     if (!_enableIcalExport) return;
@@ -810,6 +954,10 @@
     _inputLimit      = (config && config.inputLimit)       || 6000;
     _enableIcalExport = !!(config && config.enableIcalExport);
 
+    document.addEventListener('click', function () {
+      document.querySelectorAll('.cal-dropdown.open').forEach(function (el) { el.classList.remove('open'); });
+    });
+
     var now = new Date();
     calMonth = now.getMonth();
     calYear  = now.getFullYear();
@@ -837,6 +985,7 @@
     // Render sidebar panels
     renderWorkingHours();
     renderServices();
+    renderBookingLink();
 
     // Notification prompt
     checkNotificationPrompt();
