@@ -703,6 +703,22 @@
     }
     .svc-row-remove:hover { color: #ef4444; border-color: #ef4444; }
 
+    /* ── Booking Link ── */
+    .booking-link-section { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .booking-link-url {
+      font-size: 11px; color: var(--accent); word-break: break-all;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+      padding: 8px 10px; margin-bottom: 8px;
+    }
+    .booking-link-copy, .booking-link-generate {
+      padding: 5px 12px; border-radius: 6px; border: 1px solid var(--accent);
+      background: transparent; color: var(--accent); font: inherit; font-size: 11px;
+      font-weight: 700; cursor: pointer; transition: background .12s;
+    }
+    .booking-link-copy:hover, .booking-link-generate:hover {
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+
     /* ── Action chips ── */
     .action-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
     .action-chip {
@@ -1058,6 +1074,7 @@
             <!-- Services panel -->
             <div class="sidebar-panel" id="sidebar-services">
               <div id="svc-list"></div>
+              <div class="booking-link-section" id="booking-link-section"></div>
             </div>
 
           </aside>

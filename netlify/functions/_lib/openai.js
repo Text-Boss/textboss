@@ -34,7 +34,7 @@ function createResponsesClient(options = {}) {
       if (extraSystemContext) {
         systemParts.push(extraSystemContext);
       }
-      const systemText = systemParts.join("\n\n");
+      const instructions = systemParts.join("\n\n");
 
       const response = await fetchImpl("https://api.openai.com/v1/responses", {
         method: "POST",
@@ -44,16 +44,8 @@ function createResponsesClient(options = {}) {
         },
         body: JSON.stringify({
           model,
+          instructions,
           input: [
-            {
-              role: "system",
-              content: [
-                {
-                  type: "input_text",
-                  text: systemText,
-                },
-              ],
-            },
             ...conversation,
             {
               role: "user",

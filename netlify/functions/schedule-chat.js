@@ -434,14 +434,9 @@ function createRuntimeHandler(overrides = {}) {
       if (extraSystemContext) {
         systemParts.push(extraSystemContext);
       }
-      const systemText = systemParts.join("\n\n");
+      const instructions = systemParts.join("\n\n");
 
-      const input = [
-        {
-          role: "system",
-          content: [{ type: "input_text", text: systemText }],
-        },
-      ];
+      const input = [];
 
       // Add conversation history, filtering out raw function_call_output entries
       for (const item of conversation) {
@@ -473,6 +468,7 @@ function createRuntimeHandler(overrides = {}) {
 
       const requestBody = {
         model,
+        instructions,
         input,
         max_output_tokens: policy.responseMaxTokens,
         tools,

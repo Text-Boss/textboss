@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!--
+    =====================================================================
+    STRIPE PAYMENT LINK REDIRECT CONFIGURATION
+    =====================================================================
+    For each Payment Link (Core, Pro, Black), configure the post-payment
+    redirect in Stripe Dashboard:
+
+      Stripe Dashboard → Payment Links → [select link] → After payment
+        → "Don't show confirmation page"
+        → Redirect to: https://textboss.com.au/success.html
+
+    Repeat for every active Payment Link.
+    =====================================================================
+  -->
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="shortcut icon" href="assets/favicon-32.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Welcome — TEXT BOSS</title>
+  <style>
+    :root {
+      --bg:      #020203;
+      --surface: #0c0e11;
+      --line:    #191d22;
+      --line-hi: #232830;
+      --text:    #e4ecf2;
+      --muted:   #52606d;
+      --muted-hi:#8896a4;
+      --green:   #22c55e;
+      --cyan:    #22d3ee;
+      --mono: Consolas, Monaco, 'Courier New', ui-monospace, monospace;
+      --container: min(960px, calc(100% - 40px));
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 15px;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background-image: radial-gradient(ellipse 60% 30% at 50% 0%,
+        rgba(34,197,94,.07), transparent);
+    }
+
+    .wordmark {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .wordmark span { color: var(--green); }
+
+    .card {
+      width: min(100%, 520px);
+      border: 1px solid var(--line-hi);
+      border-radius: 20px;
+      background: var(--surface);
+      padding: 40px 32px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.55);
+      text-align: center;
+    }
+
+    .card-label {
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .card-label .sl { color: var(--green); font-weight: 700; }
+
+    .check-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(34,197,94,.12);
+      border: 1px solid rgba(34,197,94,.25);
+      margin-bottom: 20px;
+    }
+    .check-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--green);
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    h1 {
+      font-size: clamp(20px, 4vw, 26px);
+      letter-spacing: -.2px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted-hi);
+      line-height: 1.65;
+      margin-bottom: 28px;
+      max-width: 44ch;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .steps {
+      text-align: left;
+      margin: 0 auto 32px;
+      max-width: 400px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+    }
+    .step + .step {
+      border-top: 1px solid var(--line);
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(34,197,94,.12);
+      border: 1px solid rgba(34,197,94,.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--green);
+      margin-top: 1px;
+    }
+
+    .step-text {
+      font-size: 13px;
+      color: var(--muted-hi);
+      line-height: 1.6;
+    }
+    .step-text strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 46px;
+      min-width: 240px;
+      border-radius: 10px;
+      padding: 0 24px;
+      border: none;
+      background: var(--green);
+      color: #040e07;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: filter .15s;
+    }
+    .btn-primary:hover { filter: brightness(1.08); text-decoration: none; }
+
+    .back-link {
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .15s;
+    }
+    .back-link:hover { color: var(--text); }
+
+    .site-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px 24px;
+      text-align: center;
+      background: var(--bg);
+    }
+    .site-footer .footer-links {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .site-footer .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .15s;
+    }
+    .site-footer .footer-links a:hover { color: var(--muted-hi); }
+    .site-footer .footer-links .sep { margin: 0 8px; color: var(--line-hi); }
+    .site-footer .copyright {
+      font-size: 11px;
+      color: var(--line-hi);
+    }
+
+    @media (max-width: 640px) {
+      .card { padding: 32px 24px; }
+    }
+    @media (max-width: 400px) {
+      body { padding: 16px; }
+      .card { padding: 24px 18px; }
+      .btn-primary { min-width: 100%; }
+      .site-footer { position: static; margin-top: 40px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wordmark">Text <span>Boss</span></div>
+
+  <div class="card">
+    <div class="card-label"><span class="sl">//</span> payment confirmed</div>
+
+    <div class="check-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+
+    <h1>You're in. Subscription active.</h1>
+    <p class="subtitle">Your payment was successful and your Text Boss subscription is now live.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Check your inbox</strong> for a confirmation from Stripe sent to the email you used at checkout.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Log in with that email</strong> at the Access Portal below to launch your Text Boss app.</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="btn-primary" href="access.html">Go to Access Portal</a>
+      <a class="back-link" href="index.html">&larr; Back to homepage</a>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="privacy.html">Privacy Policy</a>
+      <span class="sep">&middot;</span>
+      <a href="terms.html">Terms of Service</a>
+      <span class="sep">&middot;</span>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="copyright">&copy; 2026 Text Boss. All rights reserved.</div>
+  </footer>
+
+</body>
+</html>
