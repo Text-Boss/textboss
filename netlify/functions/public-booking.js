@@ -1,4 +1,4 @@
-const { createPublicBookingStore, createAppointmentStore, createPushSubscriptionStore, createServiceRoleClient } = require("./_lib/supabase");
+const { createPublicBookingStore, createAppointmentStore, createPushSubscriptionStore, createBusyBlockStore, createServiceRoleClient } = require("./_lib/supabase");
 const { json, denied } = require("./_lib/http");
 const { normalizeTier } = require("./_lib/tier-policy");
 const { findAvailableSlots, workingHoursToArray } = require("./_lib/scheduler");
@@ -101,6 +101,7 @@ function createHandler(deps) {
     getProfileBySlug,
     getEntitlementByEmail,
     listAppointments,
+    listBusyBlocks,
     createAppointment,
     generateICSData,
     sendOwnerNotification,
@@ -116,6 +117,7 @@ function createHandler(deps) {
         const today = new Date().toISOString().split("T")[0];
         const slots = findAvailableSlots({
           appointments: context.appointments,
+          busyBlocks:   context.busyBlocks || [],
           workingHours: workingHoursToArray(profile.working_hours),
           durationMinutes: args.duration_minutes,
           preBuffer: bufferBefore,
@@ -245,10 +247,15 @@ function createHandler(deps) {
       return json(400, { ok: false, reason: "conversation_too_long" });
     }
 
-    // ── Load owner's appointments for availability checking ────────────────
+    // ── Load owner's appointments and busy blocks for availability checking ──
     let appointments = [];
+    let busyBlocks   = [];
     try {
-      appointments = await listAppointments(profile.email, true);
+      const today = new Date().toISOString().split("T")[0];
+      [appointments, busyBlocks] = await Promise.all([
+        listAppointments(profile.email, true),
+        listBusyBlocks  ? listBusyBlocks(profile.email, today) : Promise.resolve([]),
+      ]);
     } catch (_) {
       // continue with empty
     }
@@ -256,6 +263,7 @@ function createHandler(deps) {
     const toolContext = {
       profile,
       appointments,
+      busyBlocks,
       ownerEmail: profile.email,
     };
 
@@ -280,6 +288,15 @@ function createHandler(deps) {
         if (toolCalls.length === 0) {
           finalOutput = response.output;
           break;
+        }
+
+        // Persist the user message on the first round so subsequent rounds
+        // have context for why the tool was called (message=null on round 1+).
+        if (round === 0) {
+          currentConversation.push({
+            role: "user",
+            content: [{ type: "input_text", text: message }],
+          });
         }
 
         // Add raw assistant output to conversation for continuation
@@ -339,9 +356,10 @@ function createHandler(deps) {
 }
 
 function createRuntimeHandler(overrides = {}) {
-  const bookingStore = overrides.bookingStore || createPublicBookingStore();
+  const bookingStore     = overrides.bookingStore     || createPublicBookingStore();
   const appointmentStore = overrides.appointmentStore || createAppointmentStore();
-  const pushStore = overrides.pushStore || createPushSubscriptionStore();
+  const busyBlockStore   = overrides.busyBlockStore   || createBusyBlockStore();
+  const pushStore        = overrides.pushStore        || createPushSubscriptionStore();
 
   // Configure VAPID once
   let vapidReady = false;
@@ -358,6 +376,7 @@ function createRuntimeHandler(overrides = {}) {
     getProfileBySlug: (slug) => bookingStore.getProfileBySlug(slug),
     getEntitlementByEmail: (email) => bookingStore.getEntitlementByEmail(email),
     listAppointments: (email, upcoming) => appointmentStore.listAppointments(email, upcoming),
+    listBusyBlocks:   (email, start)   => busyBlockStore.listBusyBlocks(email, start, null),
 
     createAppointment: (email, appt) => appointmentStore.createAppointment(email, appt),
 

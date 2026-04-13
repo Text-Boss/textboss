@@ -74,6 +74,9 @@ function parseDateToLocal(dateStr) {
  * @param {number} params.postBuffer       - minutes of buffer after each appointment (default 0)
  * @param {Array}  params.appointments     - existing confirmed appointments
  *   Each: { scheduled_date, scheduled_time, duration_minutes }
+ * @param {Array}  params.busyBlocks       - one-off non-bookable time ranges (optional)
+ *   Each: { block_date: "YYYY-MM-DD", start_time: "HH:MM", end_time: "HH:MM" }
+ *   Subtracted from availability with no additional buffer.
  * @param {Array}  params.workingHours     - weekly working-hours envelope (optional)
  *   Each: { day_of_week: 0-6, start_time: "HH:MM", end_time: "HH:MM" }
  *   If empty/missing, defaults to Mon-Fri 09:00-17:00.
@@ -90,6 +93,7 @@ function findAvailableSlots(params) {
     preBuffer = 0,
     postBuffer = 0,
     appointments = [],
+    busyBlocks = [],
     workingHours = [],
     maxSlotsPerDay = 5,
   } = params;
@@ -132,6 +136,18 @@ function findAvailableSlots(params) {
       blockStart: apptStart - preBuffer,
       blockEnd: apptStart + apptDuration + postBuffer,
     });
+  }
+
+  // Index busy blocks by date — exact range, no buffer applied
+  for (const block of busyBlocks) {
+    const d = String(block.block_date || "");
+    if (!d) continue;
+    if (!apptsByDate[d]) apptsByDate[d] = [];
+    const bs = parseTime(block.start_time);
+    const be = parseTime(block.end_time);
+    if (be > bs) {
+      apptsByDate[d].push({ blockStart: bs, blockEnd: be });
+    }
   }
 
   // Sort blocked ranges per date

@@ -19,6 +19,10 @@
   var selectedDate = todayStr();
   var calMonth, calYear;
 
+  // Busy block state
+  var cachedBusyBlocks = [];
+  var lastImportBatchId = null;
+
   // Wizard state
   var wizStep = 1;
   var wizData = {};
@@ -109,6 +113,167 @@
     } catch (_) {}
     renderCalendar();
     renderDayDetail(selectedDate);
+  }
+
+  // ── Busy Blocks API ──────────────────────────────────────────────────────────
+  async function loadBusyBlocks() {
+    try {
+      var result = await getJson('/.netlify/functions/busy-blocks', {
+        method: 'GET', credentials: 'same-origin'
+      });
+      if (result.data.denied) { window.location.href = '/access.html'; return; }
+      if (result.data.ok) {
+        cachedBusyBlocks = result.data.blocks || [];
+      }
+    } catch (_) {}
+    renderBusyBlocks();
+  }
+
+  async function deleteBusyBlock(id) {
+    try {
+      await fetch('/.netlify/functions/busy-blocks?id=' + encodeURIComponent(id), {
+        method: 'DELETE', credentials: 'same-origin'
+      });
+      cachedBusyBlocks = cachedBusyBlocks.filter(function (b) { return b.id !== id; });
+      renderBusyBlocks();
+    } catch (_) {}
+  }
+
+  async function undoLastImport() {
+    if (!lastImportBatchId) return;
+    try {
+      await fetch('/.netlify/functions/busy-blocks?batch=' + encodeURIComponent(lastImportBatchId), {
+        method: 'DELETE', credentials: 'same-origin'
+      });
+      lastImportBatchId = null;
+      await loadBusyBlocks();
+      var statusEl = document.getElementById('import-status');
+      if (statusEl) { statusEl.textContent = 'Import undone.'; statusEl.className = 'import-status'; }
+    } catch (_) {}
+  }
+
+  function renderBusyBlocks() {
+    var container = document.getElementById('busy-block-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    // Show undo button if there's a recent import batch
+    if (lastImportBatchId) {
+      var undoBtn = document.createElement('button');
+      undoBtn.className = 'undo-import-btn';
+      undoBtn.type = 'button';
+      undoBtn.textContent = 'Undo last import';
+      undoBtn.addEventListener('click', undoLastImport);
+      container.appendChild(undoBtn);
+    }
+
+    // Show up to 20 upcoming busy blocks
+    var upcoming = cachedBusyBlocks
+      .filter(function (b) { return b.block_date >= todayStr(); })
+      .slice(0, 20);
+
+    if (upcoming.length === 0 && !lastImportBatchId) {
+      var empty = document.createElement('div');
+      empty.className = 'day-empty';
+      empty.style.marginTop = '8px';
+      empty.textContent = 'No busy blocks. Tell the AI to block time, or import an .ics file.';
+      container.appendChild(empty);
+      return;
+    }
+
+    upcoming.forEach(function (block) {
+      var item = document.createElement('div');
+      item.className = 'busy-block-item';
+
+      var info = document.createElement('div');
+      info.className = 'busy-block-info';
+
+      var dateEl = document.createElement('div');
+      dateEl.className = 'busy-block-date';
+      dateEl.textContent = block.block_date;
+
+      var timeEl = document.createElement('div');
+      timeEl.className = 'busy-block-time';
+      timeEl.textContent = block.start_time + '\u2013' + block.end_time;
+
+      info.appendChild(dateEl);
+      info.appendChild(timeEl);
+
+      if (block.label) {
+        var labelEl = document.createElement('div');
+        labelEl.className = 'busy-block-label';
+        labelEl.textContent = escapeHtml(block.label);
+        info.appendChild(labelEl);
+      }
+
+      var srcBadge = document.createElement('span');
+      srcBadge.className = 'busy-block-src ' + (block.source === 'ical_import' ? 'ical' : 'ai');
+      srcBadge.textContent = block.source === 'ical_import' ? 'ics' : 'ai';
+
+      var removeBtn = document.createElement('button');
+      removeBtn.className = 'busy-block-remove';
+      removeBtn.type = 'button';
+      removeBtn.textContent = 'Remove';
+      (function (bid) {
+        removeBtn.addEventListener('click', function () { deleteBusyBlock(bid); });
+      })(block.id);
+
+      item.appendChild(info);
+      item.appendChild(srcBadge);
+      item.appendChild(removeBtn);
+      container.appendChild(item);
+    });
+  }
+
+  function bindIcalImport() {
+    var importBtn  = document.getElementById('ical-import-btn');
+    var fileInput  = document.getElementById('ical-import-file');
+    var statusEl   = document.getElementById('import-status');
+    if (!importBtn || !fileInput) return;
+
+    importBtn.addEventListener('click', function () { fileInput.click(); });
+
+    fileInput.addEventListener('change', async function () {
+      var file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      fileInput.value = '';
+
+      if (statusEl) { statusEl.textContent = 'Importing\u2026'; statusEl.className = 'import-status'; }
+      importBtn.disabled = true;
+
+      try {
+        var text = await file.text();
+        var result = await getJson('/.netlify/functions/ical-import', {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ icsContent: text })
+        });
+
+        if (result.data.ok) {
+          var n = result.data.imported || 0;
+          if (statusEl) {
+            statusEl.textContent = n + ' event' + (n === 1 ? '' : 's') + ' imported' +
+              (result.data.skipped ? ' (' + result.data.skipped + ' outside window or cancelled)' : '') + '.';
+            statusEl.className = 'import-status ok';
+          }
+          if (result.data.batch_id) {
+            lastImportBatchId = result.data.batch_id;
+          }
+          await loadBusyBlocks();
+        } else {
+          var reason = result.data.reason || 'unknown';
+          var msg = reason === 'invalid_ics_format' ? 'Not a valid .ics file.'
+                  : reason === 'file_too_large'     ? 'File too large (max 800 KB).'
+                  : reason === 'block_limit_reached' ? 'Busy block limit reached. Remove some before importing more.'
+                  : 'Import failed (' + reason + ').';
+          if (statusEl) { statusEl.textContent = msg; statusEl.className = 'import-status err'; }
+        }
+      } catch (_) {
+        if (statusEl) { statusEl.textContent = 'Import failed \u2014 check your connection.'; statusEl.className = 'import-status err'; }
+      }
+
+      importBtn.disabled = false;
+    });
   }
 
   // ── Push subscription ─────────────────────────────────────────────────────────
@@ -691,6 +856,11 @@
       icon = '\u2715'; label = 'Appointment cancelled'; cls = 'chip-red';
     } else if (tool === 'reschedule_appointment') {
       icon = '\u21bb'; label = 'Appointment updated'; cls = 'chip-amber';
+    } else if (tool === 'add_busy_block') {
+      var n = (action.result && action.result.blocked) ? action.result.blocked : 1;
+      icon = '\uD83D\uDEAB'; label = n + ' time ' + (n === 1 ? 'block' : 'blocks') + ' added'; cls = 'chip-amber';
+      // Reload busy block list so sidebar updates immediately
+      loadBusyBlocks();
     } else {
       return;
     }
@@ -1003,7 +1173,7 @@
 
     // Load data
     await loadBusinessProfile();
-    await loadAppointments();
+    await Promise.all([loadAppointments(), loadBusyBlocks()]);
 
     // Onboarding check
     if (!cachedProfile || !cachedProfile.onboarding_complete) showWizard();
@@ -1021,6 +1191,7 @@
     bindSchedulerChat();
     bindWizardButtons();
     bindIcalExport();
+    bindIcalImport();
 
     // Unlock form now that all handlers are registered
     if (submitBtn) submitBtn.disabled = false;

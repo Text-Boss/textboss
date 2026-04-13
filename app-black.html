@@ -719,6 +719,46 @@
       background: color-mix(in srgb, var(--accent) 12%, transparent);
     }
 
+    /* ── Busy blocks / Calendar import ── */
+    .import-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+    .import-section h3 { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .import-hint { font-size: 11px; color: var(--muted); line-height: 1.55; margin-bottom: 10px; }
+    .import-btn {
+      padding: 5px 12px; border-radius: 6px; border: 1px dashed var(--line-hi);
+      background: transparent; color: var(--muted-hi); font: inherit; font-size: 11px;
+      cursor: pointer; transition: color .12s, border-color .12s;
+    }
+    .import-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .import-status { font-size: 11px; color: var(--muted); margin-top: 8px; min-height: 16px; }
+    .import-status.ok  { color: #22c55e; }
+    .import-status.err { color: #ef4444; }
+    .busy-block-list { margin-top: 12px; }
+    .busy-block-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 11px;
+    }
+    .busy-block-item:last-of-type { border-bottom: none; }
+    .busy-block-info { flex: 1; min-width: 0; }
+    .busy-block-date { color: var(--text); font-weight: 600; }
+    .busy-block-time { color: var(--muted); }
+    .busy-block-label { color: var(--muted); font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
+    .busy-block-src { font-size: 9px; padding: 1px 5px; border-radius: 3px; margin-left: 4px; flex-shrink: 0; }
+    .busy-block-src.ical { color: #60a5fa; border: 1px solid rgba(96,165,250,.3); }
+    .busy-block-src.ai   { color: #a78bfa; border: 1px solid rgba(167,139,250,.3); }
+    .busy-block-remove {
+      background: none; border: 1px solid var(--line); border-radius: 4px;
+      color: var(--muted); cursor: pointer; font-size: 10px; padding: 2px 6px; flex-shrink: 0;
+      transition: color .12s, border-color .12s;
+    }
+    .busy-block-remove:hover { color: #ef4444; border-color: #ef4444; }
+    .undo-import-btn {
+      margin-top: 8px; padding: 4px 10px; border-radius: 5px;
+      border: 1px solid var(--line-hi); background: transparent;
+      color: var(--muted); font: inherit; font-size: 10px; cursor: pointer;
+      transition: color .12s, border-color .12s;
+    }
+    .undo-import-btn:hover { color: #ef4444; border-color: #ef4444; }
+
     /* ── Action chips ── */
     .action-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
     .action-chip {
@@ -1062,6 +1102,16 @@
                   <input type="time" name="wh-end" value="17:00">
                   <button type="submit">Add</button>
                 </form>
+              </div>
+
+              <!-- Busy blocks / calendar import -->
+              <div class="import-section">
+                <h3>Busy blocks</h3>
+                <p class="import-hint">Tell the scheduler AI "Block Thursday 2–4pm — dentist" or import your existing calendar as an .ics file. Conflicts with booked appointments are flagged automatically.</p>
+                <button type="button" class="import-btn" id="ical-import-btn">Import .ics file</button>
+                <input type="file" id="ical-import-file" accept=".ics,text/calendar" style="display:none">
+                <div id="import-status" class="import-status"></div>
+                <div id="busy-block-list" class="busy-block-list"></div>
               </div>
             </div>
 

@@ -603,7 +603,7 @@ async function testSchedulingToolsExported() {
   const { SCHEDULING_TOOLS } = require("../netlify/functions/schedule-chat");
 
   assert.ok(Array.isArray(SCHEDULING_TOOLS), "SCHEDULING_TOOLS not an array");
-  assert.equal(SCHEDULING_TOOLS.length, 5);
+  assert.equal(SCHEDULING_TOOLS.length, 6);
 
   const toolNames = SCHEDULING_TOOLS.map(t => t.name);
   assert.ok(toolNames.includes("find_available_slots"), "find_available_slots missing");
@@ -611,6 +611,7 @@ async function testSchedulingToolsExported() {
   assert.ok(toolNames.includes("book_appointment"));
   assert.ok(toolNames.includes("cancel_appointment"));
   assert.ok(toolNames.includes("reschedule_appointment"));
+  assert.ok(toolNames.includes("add_busy_block"), "add_busy_block missing");
   assert.ok(!toolNames.includes("get_availability"), "old get_availability tool still present");
 }
 

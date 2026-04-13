@@ -403,6 +403,77 @@ function createFollowUpStore(options = {}) {
   };
 }
 
+function createBusyBlockStore(options = {}) {
+  const client = options.client || createServiceRoleClient();
+
+  return {
+    async listBusyBlocks(email, startDate, endDate) {
+      const normalized = String(email || "").trim().toLowerCase();
+      let query = client
+        .from("busy_blocks")
+        .select("id, block_date, start_time, end_time, label, source, import_batch, created_at")
+        .ilike("owner_email", normalized)
+        .order("block_date", { ascending: true })
+        .order("start_time", { ascending: true });
+      if (startDate) query = query.gte("block_date", startDate);
+      if (endDate)   query = query.lte("block_date", endDate);
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+
+    async createBusyBlocks(email, blocks) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const rows = blocks.map((b) => ({
+        owner_email:  normalized,
+        block_date:   b.block_date,
+        start_time:   b.start_time,
+        end_time:     b.end_time,
+        label:        b.label        || null,
+        source:       b.source       || "manual",
+        import_batch: b.import_batch || null,
+        expires_at:   b.expires_at   || null,
+      }));
+      const { data, error } = await client
+        .from("busy_blocks")
+        .insert(rows)
+        .select("id, block_date, start_time, end_time, label, source, import_batch");
+      if (error) throw error;
+      return data || [];
+    },
+
+    async deleteBusyBlock(id, email) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { error } = await client
+        .from("busy_blocks")
+        .delete()
+        .eq("id", id)
+        .ilike("owner_email", normalized);
+      if (error) throw error;
+    },
+
+    async deleteBusyBlocksByBatch(batchId, email) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { error } = await client
+        .from("busy_blocks")
+        .delete()
+        .eq("import_batch", batchId)
+        .ilike("owner_email", normalized);
+      if (error) throw error;
+    },
+
+    async countBusyBlocks(email) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { count, error } = await client
+        .from("busy_blocks")
+        .select("id", { count: "exact", head: true })
+        .ilike("owner_email", normalized);
+      if (error) throw error;
+      return count || 0;
+    },
+  };
+}
+
 exports.createServiceRoleClient      = createServiceRoleClient;
 exports.createEntitlementStore       = createEntitlementStore;
 exports.createAvailabilityStore      = createAvailabilityStore;
@@ -411,3 +482,4 @@ exports.createBusinessProfileStore   = createBusinessProfileStore;
 exports.createPushSubscriptionStore  = createPushSubscriptionStore;
 exports.createPublicBookingStore     = createPublicBookingStore;
 exports.createFollowUpStore          = createFollowUpStore;
+exports.createBusyBlockStore         = createBusyBlockStore;

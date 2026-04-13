@@ -1,4 +1,4 @@
-const { createEntitlementStore, createAppointmentStore, createBusinessProfileStore, createServiceRoleClient } = require("./_lib/supabase");
+const { createEntitlementStore, createAppointmentStore, createBusinessProfileStore, createBusyBlockStore, createServiceRoleClient } = require("./_lib/supabase");
 const sessionLib    = require("./_lib/session");
 const tierPolicyLib = require("./_lib/tier-policy");
 const { createResponsesClient } = require("./_lib/openai");
@@ -148,6 +148,34 @@ const SCHEDULING_TOOLS = [
     },
     strict: false,
   },
+  {
+    type: "function",
+    name: "add_busy_block",
+    description: "Mark specific date/time ranges as unavailable — personal commitments, travel, illness, or any time that should not be bookable. These are not client appointments. Always confirm the proposed block(s) with the user before calling this tool. For recurring commitments, insert one block per date.",
+    parameters: {
+      type: "object",
+      properties: {
+        blocks: {
+          type: "array",
+          description: "One or more time ranges to block off.",
+          items: {
+            type: "object",
+            properties: {
+              block_date:  { type: "string", description: "Date in YYYY-MM-DD format." },
+              start_time:  { type: "string", description: "Start time in HH:MM 24-hour format." },
+              end_time:    { type: "string", description: "End time in HH:MM 24-hour format." },
+              label:       { type: "string", description: "Short reason e.g. 'Dentist', 'School pickup', 'Travel'." },
+            },
+            required: ["block_date", "start_time", "end_time"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["blocks"],
+      additionalProperties: false,
+    },
+    strict: false,
+  },
 ];
 
 const MAX_TOOL_ROUNDS = 5;
@@ -161,8 +189,10 @@ function createHandler(deps) {
     createSchedulingResponse,
     getBusinessProfile,
     listAppointments,
+    listBusyBlocks,
     createAppointment,
     updateAppointment,
+    createBusyBlocks,
     loadThreadMessages,
     saveMessage,
   } = deps;
@@ -177,6 +207,7 @@ function createHandler(deps) {
         const today        = new Date().toISOString().split("T")[0];
         const slots = findAvailableSlots({
           appointments:  context.appointments,
+          busyBlocks:    context.busyBlocks || [],
           workingHours:  workingHoursToArray(profile.working_hours),
           durationMinutes: args.duration_minutes,
           preBuffer:     bufferBefore,
@@ -216,6 +247,51 @@ function createHandler(deps) {
         updates.status = "confirmed";
         const appt = await updateAppointment(args.appointment_id, email, updates);
         return { rescheduled: true, appointment: appt };
+      }
+      case "add_busy_block": {
+        const incoming = Array.isArray(args.blocks) ? args.blocks : [];
+        if (incoming.length === 0) return { error: "no_blocks_provided" };
+
+        // For Black tier: detect conflicts with confirmed appointments
+        const conflicts = [];
+        if (context.tier === "Black" && Array.isArray(context.appointments)) {
+          for (const block of incoming) {
+            for (const appt of context.appointments) {
+              if (appt.status !== "confirmed") continue;
+              if (appt.scheduled_date !== block.block_date) continue;
+              // Simple overlap check
+              const apptStart = appt.scheduled_time;
+              const apptEnd   = (() => {
+                const [h, m] = appt.scheduled_time.split(":").map(Number);
+                const dur = appt.duration_minutes || 60;
+                const end = h * 60 + m + dur;
+                return `${String(Math.floor(end/60)).padStart(2,"0")}:${String(end%60).padStart(2,"0")}`;
+              })();
+              if (block.start_time < apptEnd && block.end_time > apptStart) {
+                conflicts.push({ block, appointment: appt });
+              }
+            }
+          }
+        }
+
+        const validated = incoming
+          .filter((b) => b.block_date && b.start_time && b.end_time)
+          .map((b) => ({
+            block_date: b.block_date,
+            start_time: b.start_time,
+            end_time:   b.end_time,
+            label:      b.label || null,
+            source:     "ai_parsed",
+          }));
+
+        if (validated.length === 0) return { error: "no_valid_blocks" };
+
+        const created = await createBusyBlocks(email, validated);
+        return {
+          blocked:   created.length,
+          blocks:    created,
+          conflicts: conflicts.length > 0 ? conflicts : undefined,
+        };
       }
       default:
         return { error: "unknown_tool" };
@@ -292,10 +368,13 @@ function createHandler(deps) {
 
     let profile = null;
     let appointments = [];
+    let busyBlocks = [];
     try {
-      [profile, appointments] = await Promise.all([
+      const today = new Date().toISOString().split("T")[0];
+      [profile, appointments, busyBlocks] = await Promise.all([
         getBusinessProfile(session.email),
         listAppointments(session.email, true),
+        listBusyBlocks ? listBusyBlocks(session.email, today) : Promise.resolve([]),
       ]);
     } catch (_) {
       // Tables may not exist yet — continue with empty context
@@ -309,7 +388,7 @@ function createHandler(deps) {
       : contextBlock;
 
     // Shared context passed to every tool call in this request
-    const toolContext = { profile, appointments };
+    const toolContext = { profile, appointments, busyBlocks, tier: sessionTier };
 
     // Tool-calling loop: send to OpenAI, execute any tool calls, feed results back
     let currentConversation = conversation.slice();
@@ -339,8 +418,19 @@ function createHandler(deps) {
         break;
       }
 
-      // Execute each tool call and build the continuation
-      // Add the assistant message with tool calls to conversation
+      // Execute each tool call and build the continuation.
+      // Persist the user message on the first round so it is available in all
+      // subsequent rounds — round 1+ call createSchedulingResponse with
+      // message=null, so without this the original request disappears from
+      // context and OpenAI sees tool results with no explanation of why.
+      if (round === 0) {
+        currentConversation.push({
+          role: "user",
+          content: [{ type: "input_text", text: message }],
+        });
+      }
+
+      // Add the assistant's response (including function_call items) to conversation
       currentConversation.push({
         type: "function_call_output",
         _raw: response.rawOutput,
@@ -403,6 +493,7 @@ function createRuntimeHandler(overrides = {}) {
   const entitlementStore  = overrides.entitlementStore  || createEntitlementStore();
   const profileStore      = overrides.profileStore      || createBusinessProfileStore();
   const appointmentStore  = overrides.appointmentStore  || createAppointmentStore();
+  const busyBlockStore    = overrides.busyBlockStore    || createBusyBlockStore();
   const runtimeSessionLib = overrides.sessionLib        || sessionLib;
   const runtimePolicyLib  = overrides.tierPolicyLib     || tierPolicyLib;
   const openaiClient      = overrides.openaiClient      || createResponsesClient();
@@ -422,8 +513,10 @@ function createRuntimeHandler(overrides = {}) {
     getSchedulingInstructions:(t) => runtimePolicyLib.getSchedulingInstructions(t),
     getBusinessProfile:       (e) => profileStore.getProfile(e),
     listAppointments:         (e, u) => appointmentStore.listAppointments(e, u),
+    listBusyBlocks:           (e, s) => busyBlockStore.listBusyBlocks(e, s, null),
     createAppointment:        (e, a) => appointmentStore.createAppointment(e, a),
     updateAppointment:        (id, e, u) => appointmentStore.updateAppointment(id, e, u),
+    createBusyBlocks:         (e, b) => busyBlockStore.createBusyBlocks(e, b),
 
     createSchedulingResponse: async ({ tier, message, conversation, policy, extraSystemContext, tools }) => {
       // IMPORTANT: Do NOT include policy.instructions here — those are the
