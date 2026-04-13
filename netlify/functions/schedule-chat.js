@@ -1,7 +1,6 @@
 const { createEntitlementStore, createAppointmentStore, createBusinessProfileStore, createBusyBlockStore, createServiceRoleClient } = require("./_lib/supabase");
 const sessionLib    = require("./_lib/session");
 const tierPolicyLib = require("./_lib/tier-policy");
-const { createResponsesClient } = require("./_lib/openai");
 const { normalizeTier } = require("./_lib/tier-policy");
 const { findAvailableSlots, formatBusinessProfile, formatAppointments, workingHoursToArray } = require("./_lib/scheduler");
 
@@ -321,7 +320,13 @@ function createHandler(deps) {
     const threadId = body.threadId || null;
 
     const session = verification.session;
-    const entitlement = await findEntitlementByEmail(session.email);
+    let entitlement;
+    try {
+      entitlement = await findEntitlementByEmail(session.email);
+    } catch (err) {
+      console.error("[schedule-chat] entitlement lookup failed:", err);
+      return deny(500, "entitlement_lookup_failed");
+    }
     if (!entitlement) return deny(403, "not_found");
 
     if (normalizeStatus(entitlement.subscription_status) !== "active" &&
@@ -490,13 +495,18 @@ function createHandler(deps) {
 }
 
 function createRuntimeHandler(overrides = {}) {
-  const entitlementStore  = overrides.entitlementStore  || createEntitlementStore();
-  const profileStore      = overrides.profileStore      || createBusinessProfileStore();
-  const appointmentStore  = overrides.appointmentStore  || createAppointmentStore();
-  const busyBlockStore    = overrides.busyBlockStore    || createBusyBlockStore();
-  const runtimeSessionLib = overrides.sessionLib        || sessionLib;
-  const runtimePolicyLib  = overrides.tierPolicyLib     || tierPolicyLib;
-  const openaiClient      = overrides.openaiClient      || createResponsesClient();
+  let entitlementStore, profileStore, appointmentStore, busyBlockStore;
+  try {
+    entitlementStore = overrides.entitlementStore || createEntitlementStore();
+    profileStore     = overrides.profileStore     || createBusinessProfileStore();
+    appointmentStore = overrides.appointmentStore || createAppointmentStore();
+    busyBlockStore   = overrides.busyBlockStore   || createBusyBlockStore();
+  } catch (err) {
+    console.error("[schedule-chat] store construction failed:", err);
+    return async () => deny(500, "store_init_failed");
+  }
+  const runtimeSessionLib = overrides.sessionLib  || sessionLib;
+  const runtimePolicyLib  = overrides.tierPolicyLib || tierPolicyLib;
 
   let _supabase;
   function getSupabase() {
@@ -657,6 +667,7 @@ async function handler(event, context) {
   try {
     return await createRuntimeHandler()(event, context);
   } catch (err) {
+    console.error("[schedule-chat] unhandled error:", err);
     return deny(500, "server_error");
   }
 }
