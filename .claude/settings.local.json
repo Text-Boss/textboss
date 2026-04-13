@@ -38,7 +38,8 @@
       "Bash(curl -sL -o /dev/null -w \"%{url_effective}\\\\n%{http_code}\\\\n\" \"https://buy.stripe.com/test_fZu4gAe78cBX4C96o2ebu01\")",
       "Bash(curl -sL -o /dev/null -w \"%{url_effective}\\\\n%{http_code}\\\\n\" \"https://buy.stripe.com/test_9B6eVe6EGbxT4C9eUyebu02\")",
       "Bash(curl -sI https://textboss.com.au/access)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "mcp__plugin_Notion_notion__notion-search"
     ]
   }
 }

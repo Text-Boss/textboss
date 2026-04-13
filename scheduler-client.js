@@ -72,6 +72,7 @@
       var result = await getJson('/.netlify/functions/business-profile', {
         method: 'GET', credentials: 'same-origin'
       });
+      if (result.data.denied) { window.location.href = '/access.html'; return null; }
       cachedProfile = (result.data.ok) ? (result.data.profile || null) : null;
     } catch (_) {
       cachedProfile = null;
@@ -101,6 +102,7 @@
       var result = await getJson('/.netlify/functions/appointments', {
         method: 'GET', credentials: 'same-origin'
       });
+      if (result.data.denied) { window.location.href = '/access.html'; return; }
       if (result.data.ok) {
         cachedAppointments = result.data.appointments || [];
       }
@@ -642,6 +644,8 @@
           renderWizardStep();
         } else if (wizStep === 3) {
           saveWizardStep3();
+          nextBtn.disabled = true;
+          nextBtn.textContent = 'Saving\u2026';
           var ok = await saveBusinessProfile({
             occupation: wizData.occupation,
             services: wizData.services.filter(function (s) { return s.name; }),
@@ -649,10 +653,22 @@
             buffer_after_minutes: wizData.bufferAfter,
             onboarding_complete: true
           });
+          nextBtn.disabled = false;
+          nextBtn.textContent = 'Finish';
           if (ok) {
             hideWizard();
             renderWorkingHours();
             renderServices();
+          } else {
+            var errEl = document.getElementById('wizard-save-error');
+            if (!errEl) {
+              errEl = document.createElement('p');
+              errEl.id = 'wizard-save-error';
+              errEl.style.cssText = 'color:#ef4444;font-size:12px;margin-top:10px;text-align:center;';
+              var footer = document.querySelector('.wizard-footer');
+              if (footer) footer.insertAdjacentElement('afterbegin', errEl);
+            }
+            errEl.textContent = 'Save failed \u2014 check your connection and try again.';
           }
         }
       });
@@ -673,7 +689,7 @@
       icon = '\u2713'; label = 'Appointment created'; cls = 'chip-green';
     } else if (tool === 'cancel_appointment') {
       icon = '\u2715'; label = 'Appointment cancelled'; cls = 'chip-red';
-    } else if (tool === 'update_appointment') {
+    } else if (tool === 'reschedule_appointment') {
       icon = '\u21bb'; label = 'Appointment updated'; cls = 'chip-amber';
     } else {
       return;
@@ -785,6 +801,10 @@
         if (typing) typing.remove();
         if (!result.data.ok) {
           schedConversation.pop();
+          if (result.data.denied) {
+            window.location.href = '/access.html';
+            return;
+          }
           schedStatus.textContent = 'Error: ' + (result.data.reason || 'unknown');
           schedBusy = false;
           return;
@@ -954,6 +974,12 @@
     _inputLimit      = (config && config.inputLimit)       || 6000;
     _enableIcalExport = !!(config && config.enableIcalExport);
 
+    // Block the form until fully initialised — prevents submit before handlers are bound
+    var submitBtn = document.querySelector('#sched-form button[type="submit"]');
+    var schedStatusEl = document.getElementById('sched-status');
+    if (submitBtn) submitBtn.disabled = true;
+    if (schedStatusEl) schedStatusEl.textContent = 'Loading\u2026';
+
     document.addEventListener('click', function () {
       document.querySelectorAll('.cal-dropdown.open').forEach(function (el) { el.classList.remove('open'); });
     });
@@ -995,6 +1021,10 @@
     bindSchedulerChat();
     bindWizardButtons();
     bindIcalExport();
+
+    // Unlock form now that all handlers are registered
+    if (submitBtn) submitBtn.disabled = false;
+    if (schedStatusEl) schedStatusEl.textContent = 'Ready.';
   }
 
   global.initScheduler = initScheduler;

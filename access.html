@@ -194,6 +194,7 @@
         try {
           const response = await fetch("/.netlify/functions/verify-email", {
             method: "POST",
+            credentials: "same-origin",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({ email: emailInput.value }),
           });

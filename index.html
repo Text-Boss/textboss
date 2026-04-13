@@ -764,6 +764,42 @@ hr.sep {
   color: var(--line-hi);
 }
 
+/* Lead magnet opt-in */
+.optin-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: center;
+  margin-top: 28px;
+  padding: 32px;
+  background: var(--surface);
+  border: 1px solid rgba(34,211,238,.2);
+  border-radius: 18px;
+}
+.optin-wrap h2 { font-size: clamp(18px, 3vw, 24px); line-height: 1.25; margin-bottom: 12px; }
+.optin-form { display: flex; flex-direction: column; gap: 10px; }
+.optin-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.optin-input {
+  flex: 1;
+  min-width: 180px;
+  padding: 9px 14px;
+  min-height: 44px;
+  background: rgba(0,0,0,.3);
+  border: 1px solid var(--line-hi);
+  border-radius: 10px;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .15s;
+}
+.optin-input::placeholder { color: var(--muted); }
+.optin-input:focus { border-color: rgba(34,211,238,.5); }
+.optin-btn { flex-shrink: 0; }
+.optin-micro { font-size: 11px; color: var(--muted); }
+.optin-success { font-size: 13px; color: var(--green); }
+.optin-error { font-size: 13px; color: var(--danger); }
+
 /* Responsive */
 @media (max-width: 820px) {
   .hero { grid-template-columns: 1fr; }
@@ -774,6 +810,7 @@ hr.sep {
   .features { grid-template-columns: 1fr; }
   .scheduler-spotlight { grid-template-columns: 1fr; }
   .proof-cards { grid-template-columns: 1fr; }
+  .optin-wrap { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
   .sticky-inner { flex-direction: column; align-items: stretch; text-align: center; }
@@ -836,24 +873,21 @@ hr.sep {
              loading="eager" />
       </div>
       <div>
-        <h1>Stop losing money to bad client messages — and missed appointments.</h1>
+        <h1>Your next reply is already costing you.</h1>
         <p class="kicker">
-          Every improvised reply is a risk. A soft boundary becomes a pricing concession. A missed confirmation becomes a no-show.
+          Every soft sentence trains your clients to push harder. Every unconfirmed booking is a no-show waiting to happen. You know this.
         </p>
         <p class="kicker">
-          Structured templates cover known patterns. A tier-gated AI handles the situations templates can't.
-        </p>
-        <p class="kicker">
-          Pro and Black add a conversational AI that books, confirms, and manages appointments.
+          Text Boss replaces improvisation with precision — structured language for known patterns, tier-gated AI for the rest, and a scheduling system that books without the back-and-forth.
         </p>
 
         <div class="cta-row">
-          <a class="btn green" href="access.html">Access TextBoss</a>
-          <a class="btn primary" href="#pricing">Choose your tier</a>
+          <a class="btn green" href="access.html">Enter Text Boss</a>
+          <a class="btn primary" href="#pricing">See which tier fits</a>
         </div>
 
         <p class="small">
-          One pricing concession, one mishandled dispute, or one no-show can cost more than your subscription.
+          The cost of one soft reply already exceeds your subscription. You just haven't counted it yet.
         </p>
       </div>
 
@@ -863,14 +897,14 @@ hr.sep {
           <span class="cmd" data-typewriter data-speed="10">textboss : noun</span>
           <span class="cursor" aria-hidden="true"></span>
         </div>
-        <div class="line"><span class="out">→<b>  A communication control system</b> for businesses that can't afford message mistakes.</span></div>
-        <div class="line"><span class="out">→  Templates for known patterns + a tier-gated AI for real-time decisions.</span></div>
-        <div class="line"><span class="out">→  Pro/Black: conversational AI appointment booking — persistent, confirmable, no-show resistant.</span></div>
-        <div class="line" style="margin-top:8px; padding-top:8px; border-top:1px solid var(--line);"><span class="out"><span class="tok-cyan">→</span> <b>Prevent scope creep</b> before it starts.</span></div>
-        <div class="line"><span class="out"><span class="tok-cyan">→</span> <b>Shut down negotiation</b> without escalation.</span></div>
-        <div class="line"><span class="out"><span class="tok-cyan">→</span> <b>Book appointments by AI</b> — no back-and-forth.</span></div>
-        <div class="line"><span class="out"><span class="tok-cyan">→</span> <b>Get tier-specific AI guidance</b> when stakes rise.</span></div>
-        <div class="line console-tagline"><span class="out tok-purple" style="font-weight:700;">// say less. control more. protect everything.</span></div>
+        <div class="line"><span class="out">→<b>  Structured language for client communication.</b> Not advice. Not suggestions. Decisions.</span></div>
+        <div class="line"><span class="out">→  Templates close known patterns. AI handles what templates can't predict.</span></div>
+        <div class="line"><span class="out">→  Pro/Black: AI that books appointments, confirms them, and documents what happens next.</span></div>
+        <div class="line" style="margin-top:8px; padding-top:8px; border-top:1px solid var(--line);"><span class="out"><span class="tok-cyan">→</span> <b>Scope creep dies</b> in the first reply.</span></div>
+        <div class="line"><span class="out"><span class="tok-cyan">→</span> <b>Negotiation attempts</b> meet a closed door.</span></div>
+        <div class="line"><span class="out"><span class="tok-cyan">→</span> <b>Appointments lock</b> without a thread.</span></div>
+        <div class="line"><span class="out"><span class="tok-cyan">→</span> <b>The AI drafts</b> what you'd spend an hour writing.</span></div>
+        <div class="line console-tagline"><span class="out tok-purple" style="font-weight:700;">// say less. mean more. leave nothing open.</span></div>
       </div>
     </div>
 
@@ -882,30 +916,29 @@ hr.sep {
   <!-- 01 — PROBLEM -->
   <section class="sec">
     <div class="sec-label"><span class="sl">//</span> 01 — Why this exists</div>
-    <h2>You don't have "difficult clients."<br>You have moments where language drifts.</h2>
+    <h2>You don't have "difficult clients."<br>You have a language problem.</h2>
     <p class="body-text">
-      The soft ending. The extra explanation. The sentence that invites negotiation.
-      Text Boss reduces improvisation — and improvisation is where you leak time, pricing, and control.
+      One extra sentence. One unnecessary explanation. One opening you didn't notice. That's where discounts get created, timelines get extended, and authority gets quietly surrendered. Not by bad people — by unstructured replies sent under pressure.
     </p>
     <p class="body-text">
-      Then there's the scheduling gap: the DM chain that never got confirmed, the client who "thought it was next week," the no-show you couldn't prove was coming. Pro and Black members get an AI that closes that loop.
+      Then there's the appointment that was "confirmed" in a DM but never documented. The client who "thought it was next week." The no-show that cost you a morning and left no paper trail. Pro and Black members hand that entire problem to an AI that confirms, reminds, and records.
     </p>
   </section>
 
   <!-- 02 — BEFORE / AFTER -->
   <section class="sec">
     <div class="sec-label"><span class="sl">//</span> 02 — Before / after</div>
-    <h2>One sentence. Completely different outcome.</h2>
+    <h2>Same situation. Different sentence. Different outcome.</h2>
 
     <!-- Scenario A: Scope creep -->
     <p class="scenario-label"><span class="sc-tag amber">Scenario A</span> — Scope creep</p>
     <div class="split2">
       <div class="box">
-        <h3><span class="tok-danger">Before</span> — what most people send</h3>
+        <h3><span class="tok-danger">Before</span> — what you send when you're being "nice"</h3>
         <p class="mono-block">"Hey, just following up — I'm happy to adjust if needed."</p>
       </div>
       <div class="box">
-        <h3><span class="tok-green">After</span> — Text Boss version</h3>
+        <h3><span class="tok-green">After</span> — what control sounds like</h3>
         <p class="mono-block">"As outlined in the agreed scope, additional adjustments fall outside the original agreement. I'm happy to proceed once we confirm revised terms."</p>
       </div>
     </div>
@@ -914,11 +947,11 @@ hr.sep {
     <p class="scenario-label"><span class="sc-tag cyan">Scenario B</span> — Pricing pushback</p>
     <div class="split2">
       <div class="box">
-        <h3><span class="tok-danger">Before</span> — what most people send</h3>
+        <h3><span class="tok-danger">Before</span> — what you send when you're caught off guard</h3>
         <p class="mono-block">"I could probably do a small discount — let me see what I can work out."</p>
       </div>
       <div class="box">
-        <h3><span class="tok-green">After</span> — Text Boss version</h3>
+        <h3><span class="tok-green">After</span> — what boundaries sound like</h3>
         <p class="mono-block">"The pricing reflects the scope we agreed on. I'm not in a position to adjust it, but I'm happy to discuss what we can adjust within the current budget."</p>
       </div>
     </div>
@@ -927,39 +960,39 @@ hr.sep {
     <p class="scenario-label"><span class="sc-tag purple">Scenario C</span> — No-show follow-up <span class="tier-badge black" style="margin-left:6px;vertical-align:middle;">Black</span></p>
     <div class="split2">
       <div class="box">
-        <h3><span class="tok-danger">Before</span> — what most people send</h3>
+        <h3><span class="tok-danger">Before</span> — what you send when you're frustrated</h3>
         <p class="mono-block">"Hey — I was waiting for you today but you didn't show. Want to reschedule?"</p>
       </div>
       <div class="box">
-        <h3><span class="tok-green">After</span> — AI-drafted, Black tier</h3>
+        <h3><span class="tok-green">After</span> — what documentation sounds like</h3>
         <p class="mono-block">"This is a record that the scheduled appointment on [date] at [time] was not attended. Please confirm a new time at your earliest convenience. The original terms of engagement remain in effect."</p>
       </div>
     </div>
 
     <p class="small" style="margin-top:20px;">
-      Templates handle known patterns. The AI handles the unexpected. The scheduler handles the logistics.
+      The left column is how you sound when you're improvising. The right is how you sound when you're not.
     </p>
   </section>
 
   <!-- 03 — HOW IT WORKS -->
   <section class="sec" id="how">
     <div class="sec-label"><span class="sl">//</span> 03 — How it works</div>
-    <h2>Templates for patterns. AI for the unexpected. Scheduling for everything in between.</h2>
+    <h2>Three layers. No improvisation.</h2>
     <div class="steps">
       <div class="step-card">
         <div class="step-n">01</div>
-        <div class="step-t">Pick your tier</div>
-        <div class="step-d">Core handles friction. Pro handles the client who keeps coming back with "just one more thing." Black handles the one where you need to be right — not just firm.</div>
+        <div class="step-t">Choose your tier</div>
+        <div class="step-d">Core is for everyday friction. Pro is for the client who keeps testing. Black is for when the next message could become evidence. You already know which one you need.</div>
       </div>
       <div class="step-card">
         <div class="step-n">02</div>
-        <div class="step-t">Use templates for known situations</div>
-        <div class="step-d">The client asked for a discount. The retainer just grew by three hours. The project ended but they're still emailing. There's a template for each of these — and it's already written.</div>
+        <div class="step-t">Send the template, not the improvisation</div>
+        <div class="step-d">The discount request. The scope expansion. The post-project email that should have ended weeks ago. Each one already has a response written. You just send it.</div>
       </div>
       <div class="step-card">
         <div class="step-n">03</div>
-        <div class="step-t">Use the AI when it gets real</div>
-        <div class="step-d">When the template doesn't fit — when it's hostile, unprecedented, or high-stakes — paste it into the AI. It drafts a response constrained to your tier's risk tolerance. You send it. Done.</div>
+        <div class="step-t">Let the AI handle what templates can't</div>
+        <div class="step-d">The message that's hostile, unprecedented, or too specific for a template. Paste it. The AI drafts a response calibrated to your tier's risk tolerance. You review. You send. It's done.</div>
       </div>
     </div>
   </section>
@@ -967,22 +1000,22 @@ hr.sep {
   <!-- 03.5 — SOCIAL PROOF / DESIGNED FOR -->
   <section class="sec">
     <div class="sec-label"><span class="sl">//</span> Built around real scenarios</div>
-    <h2>Built for businesses where one message has consequences.</h2>
+    <h2>These are not hypotheticals. These are Tuesdays.</h2>
     <div class="proof-cards">
       <div class="proof-card">
         <div class="proof-comment">// scenario_01</div>
-        <p class="proof-scenario"><b>The consultant who gave a discount</b> because they didn't know how to say no cleanly — and set a precedent that followed them for six months.</p>
-        <p class="proof-outcome">→ Core prevents this.</p>
+        <p class="proof-scenario"><b>The consultant who gave a discount</b> because the "no" felt too hard to say in the moment. That discount became the new baseline. It followed them for six months.</p>
+        <p class="proof-outcome">→ Core closes this before it starts.</p>
       </div>
       <div class="proof-card">
         <div class="proof-comment">// scenario_02</div>
-        <p class="proof-scenario"><b>The agency owner who lost $3,200 to a chargeback</b> they couldn't document — because the original conversation was too casual to hold up as evidence.</p>
-        <p class="proof-outcome">→ Black contains this.</p>
+        <p class="proof-scenario"><b>The agency owner who lost $3,200 to a chargeback</b> because the original conversation was too casual to serve as documentation. The work was done. The money was gone.</p>
+        <p class="proof-outcome">→ Black makes this defensible.</p>
       </div>
       <div class="proof-card">
         <div class="proof-comment">// scenario_03</div>
-        <p class="proof-scenario"><b>The coach whose no-show rate dropped</b> after switching appointment management to an AI that confirms, reminds, and documents.</p>
-        <p class="proof-outcome">→ Pro + Black schedule this.</p>
+        <p class="proof-scenario"><b>The coach who stopped losing mornings to no-shows</b> once every appointment was confirmed, reminded, and documented by something that doesn't forget.</p>
+        <p class="proof-outcome">→ Pro + Black handle this end-to-end.</p>
       </div>
     </div>
   </section>
@@ -990,23 +1023,23 @@ hr.sep {
   <!-- 04 — AI APPOINTMENT SCHEDULER SPOTLIGHT -->
   <section class="sec" id="scheduler">
     <div class="sec-label"><span class="sl">//</span> 04 — AI Appointment Scheduler <span class="tier-badge pro" style="margin-left:8px;vertical-align:middle;">Pro</span> <span class="tier-badge black" style="margin-left:4px;vertical-align:middle;">Black</span></div>
-    <h2>Your AI that books, confirms, and holds appointments — conversationally.</h2>
+    <h2>An AI that books, confirms, and holds — so you never chase a time again.</h2>
     <p class="body-text">
-      Stop chasing replies to set a time. Pro and Black members get a persistent conversational AI that handles the entire booking flow: availability, confirmation, reminders, and rebooking.
+      Every appointment you manage manually is a thread that can drop, a confirmation that can be forgotten, and a no-show you can't prove. Pro and Black members hand the entire booking flow to a persistent AI — availability, confirmation, reminders, rebooking, and records.
     </p>
 
     <div class="scheduler-spotlight">
       <div>
-        <h3>No more <span class="tok-cyan">scheduling back-and-forth.</span></h3>
+        <h3>The thread <span class="tok-cyan">disappears. The booking doesn't.</span></h3>
         <p>
-          The AI Scheduler finds the time, locks the booking, and follows up. You see the outcome — not the thread.
+          The AI finds the time, locks the booking, and follows up. You see the confirmed appointment — not the twenty messages it took to get there.
         </p>
         <ul class="sched-bullets">
-          <li><span class="sdot"></span><span><strong>Conversational booking</strong> — clients respond naturally, AI handles the rest.</span></li>
-          <li><span class="sdot"></span><span><strong>Persistent memory</strong> — AI retains session context across conversations.</span></li>
-          <li><span class="sdot"></span><span><strong>Confirmation + reminders</strong> — automated follow-up reduces no-shows.</span></li>
-          <li><span class="sdot"></span><span><strong>Rebooking flows</strong> — cancellations and rescheduling handled cleanly, with full records.</span></li>
-          <li><span class="sdot"></span><span><strong>Tier-calibrated tone</strong> — Pro is firm and professional; Black is high-restraint and legally defensible.</span></li>
+          <li><span class="sdot"></span><span><strong>Conversational booking</strong> — clients respond in plain language. The AI resolves it.</span></li>
+          <li><span class="sdot"></span><span><strong>Persistent memory</strong> — nothing is repeated. Context carries across sessions.</span></li>
+          <li><span class="sdot"></span><span><strong>Confirmation + reminders</strong> — no-shows become harder to claim as accidents.</span></li>
+          <li><span class="sdot"></span><span><strong>Rebooking flows</strong> — cancellations and reschedules handled cleanly. Full records kept.</span></li>
+          <li><span class="sdot"></span><span><strong>Tier-calibrated tone</strong> — Pro is firm. Black is the kind of precise that holds up in disputes.</span></li>
         </ul>
       </div>
       <div class="sched-terminal">
@@ -1025,20 +1058,20 @@ hr.sep {
   <!-- 05 — WHAT YOU GET -->
   <section class="sec">
     <div class="sec-label"><span class="sl">//</span> 05 — What you get each month</div>
-    <h2>What's included at every tier.</h2>
+    <h2>What you get. Every month. No filler.</h2>
     <div class="features">
       <div class="feature">
         <div class="feature-dot"></div>
         <div>
           <strong>Categorised templates</strong>
-          <span>Pricing, scope creep, delays, pushback, escalation — structured and send-ready.</span>
+          <span>Pricing, scope, delays, pushback, escalation. Structured. Send-ready. No blank page.</span>
         </div>
       </div>
       <div class="feature">
         <div class="feature-dot"></div>
         <div>
           <strong>Boundary enforcement language</strong>
-          <span>Wording that closes doors. No negotiation invitations. No reinterpretation gaps.</span>
+          <span>Sentences that close doors. No room for reinterpretation. No accidental invitations to negotiate.</span>
         </div>
       </div>
       <div class="feature">
@@ -1052,21 +1085,21 @@ hr.sep {
         <div class="feature-dot"></div>
         <div>
           <strong>Tier-gated AI assistant</strong>
-          <span>Immediate course-of-action drafting, constrained to your tier's risk level.</span>
+          <span>Drafts a response calibrated to your risk level. Not generic. Not soft. Yours.</span>
         </div>
       </div>
       <div class="feature">
         <div class="feature-dot"></div>
         <div>
           <strong>Copy-paste responses</strong>
-          <span>Send as-is or adapt. No blank page when you're under pressure.</span>
+          <span>Send as-is or adapt. Either way, you're not staring at a cursor under pressure.</span>
         </div>
       </div>
       <div class="feature">
         <div class="feature-dot"></div>
         <div>
           <strong>Ongoing updates</strong>
-          <span>New patterns emerge. Your library and AI playbook evolve with them.</span>
+          <span>Client pressure evolves. So does your library and AI playbook. Quietly. Continuously.</span>
         </div>
       </div>
       <div class="feature pro-only">
@@ -1098,7 +1131,7 @@ hr.sep {
         <div>
           <span class="tier-badge black">Black only</span>
           <strong>No-show containment scripts</strong>
-          <span>AI-drafted follow-ups that document the missed appointment without escalating, conceding, or admitting anything.</span>
+          <span>AI-drafted follow-ups that document what happened without escalating, conceding, or admitting a thing.</span>
         </div>
       </div>
     </div>
@@ -1107,10 +1140,9 @@ hr.sep {
   <!-- 06 — COMPARE -->
   <section class="sec" id="compare">
     <div class="sec-label"><span class="sl">//</span> 06 — Tier comparison</div>
-    <h2>Upgrade by risk, not features.</h2>
+    <h2>You don't upgrade for more. You upgrade when the stakes change.</h2>
     <p class="body-text">
-      <span class="tok-amber">CORE</span> prevents friction. <span class="tok-cyan">PRO</span> manages patterns, sequences, and schedules. <span class="tok-purple">BLACK</span> protects exposure and locks language down.
-      You don't upgrade for "more" — you upgrade when one message becomes evidence.
+      <span class="tok-amber">CORE</span> stops everyday friction from becoming concessions. <span class="tok-cyan">PRO</span> handles the clients who keep pushing — and the bookings that keep slipping. <span class="tok-purple">BLACK</span> is for when the next message could end up in a dispute file.
     </p>
     <div class="tableWrap">
       <table>
@@ -1187,28 +1219,28 @@ hr.sep {
   <!-- 07 — EXPLORE TIERS -->
   <section class="sec">
     <div class="sec-label"><span class="sl">//</span> 07 — Explore tiers</div>
-    <h2>Pick your tier.</h2>
+    <h2>Three tiers. One question: how much is at stake.</h2>
     <div class="tier-cards">
       <a class="tier-card core" href="core.html" aria-label="Open Core page">
         <h3><span class="tok-amber">Core</span></h3>
-        <p>Everyday client control. Cleaner messages. Less back-and-forth.</p>
-        <div class="meta"><span class="tok-amber">Best for:</span> friction, follow-ups, minor pushback.</div>
+        <p>For the reply you almost sent without thinking. Clean language for everyday friction — before it becomes a pattern.</p>
+        <div class="meta"><span class="tok-amber">Best for:</span> freelancers, consultants, and service providers managing routine client pressure.</div>
         <div class="hint">enter →</div>
         <div class="arrow" style="color:var(--muted)">open →</div>
       </a>
       <a class="tier-card pro" href="pro.html" aria-label="Open Pro page">
         <div class="tc-badge">+ AI Scheduling</div>
         <h3><span class="tok-cyan">Pro</span></h3>
-        <p>Scope creep sequences, retainer resets, persistent objection ladders — plus conversational AI scheduling that books and confirms appointments in natural language.</p>
-        <div class="meta"><span class="tok-cyan">Best for:</span> recurring pushback, retainer dynamics, service businesses with booking volume.</div>
+        <p>For the client who always has "one more thing." Scope creep sequences, retainer resets, and an AI that handles your entire booking flow so you stop losing mornings to no-shows.</p>
+        <div class="meta"><span class="tok-cyan">Best for:</span> agencies, retainer-based businesses, and anyone tired of chasing confirmations.</div>
         <div class="hint">enter →</div>
         <div class="arrow" style="color:var(--muted)">open →</div>
       </a>
       <a class="tier-card black" href="black.html" aria-label="Open Black page">
         <div class="tc-badge">+ AI Scheduling</div>
         <h3><span class="tok-purple">Black</span></h3>
-        <p>Dispute containment, chargeback restraint, hostility finality — and scheduling language safe to screenshot and present to payment processors. Every word designed to document, not escalate.</p>
-        <div class="meta"><span class="tok-purple">Best for:</span> high-ticket risk where one message or one missed appointment becomes evidence.</div>
+        <p>For when the conversation might leave the conversation. Dispute containment, chargeback restraint, and scheduling language safe to screenshot. Every word written to document, not escalate.</p>
+        <div class="meta"><span class="tok-purple">Best for:</span> high-ticket operators where one message or one missed appointment becomes a liability.</div>
         <div class="hint">enter →</div>
         <div class="arrow" style="color:var(--muted)">open →</div>
       </a>
@@ -1218,7 +1250,7 @@ hr.sep {
   <!-- 08 — PRICING -->
   <section class="sec" id="pricing">
     <div class="sec-label"><span class="sl">//</span> 08 — Pricing</div>
-    <h2>Pricing.</h2>
+    <h2>What it costs. What it prevents.</h2>
     <div class="price-grid">
 
       <div class="price-card">
@@ -1227,7 +1259,7 @@ hr.sep {
           <span class="num">$29</span>
           <span class="per"> AUD/mo</span>
         </div>
-        <p class="price-desc">Clean, firm language and instant AI backup for everyday friction.</p>
+        <p class="price-desc">For the person who keeps giving discounts they didn't plan on. Structured replies and AI backup for the friction that happens every week.</p>
         <ul class="price-includes">
           <li><span class="pi-dot on"></span><b>All categorised templates</b></li>
           <li><span class="pi-dot on"></span><b>Core-tier AI assistant</b></li>
@@ -1236,7 +1268,7 @@ hr.sep {
           <li><span class="pi-dot"></span><span style="color:var(--muted)">AI Appointment Scheduler</span></li>
           <li><span class="pi-dot"></span><span style="color:var(--muted)">Escalation sequences</span></li>
         </ul>
-        <p class="price-best">Best for: friction, follow-ups, minor pushback.</p>
+        <p class="price-best">Best for: the soft spots in your replies you haven't noticed yet.</p>
         <div>
           <button type="button" class="btn accent-amber" style="width:100%" data-checkout="https://buy.stripe.com/cNibJ03WQcVS68legm2Ji03">Buy Core</button>
           <p class="price-secure">Secure checkout via Stripe</p>
@@ -1249,7 +1281,7 @@ hr.sep {
           <span class="num">$79</span>
           <span class="per"> AUD/mo</span>
         </div>
-        <p class="price-desc">For recurring pushback, scope creep, retainer resets — and businesses that need scheduling handled without a back-and-forth thread.</p>
+        <p class="price-desc">For the business where clients keep testing and appointments keep slipping. Scope creep sequences, retainer resets, and an AI that books without the thread.</p>
         <ul class="price-includes">
           <li><span class="pi-dot on"></span><b>Everything in Core</b></li>
           <li><span class="pi-dot on"></span><b>Pro-tier AI assistant (advanced)</b></li>
@@ -1261,7 +1293,7 @@ hr.sep {
           <li><span class="pi-dot cyan"></span><b style="color:var(--cyan)">Booking confirmations + push reminders</b></li>
           <li><span class="pi-dot cyan"></span><b style="color:var(--cyan)">Add to Calendar (Google, Outlook, Apple)</b></li>
         </ul>
-        <p class="price-best">Best for: retainers, service businesses, repeat scenarios, booking volume.</p>
+        <p class="price-best">Best for: retainers, repeat pushback, and anyone who's lost a morning to a no-show.</p>
         <div>
           <button type="button" class="btn accent-cyan" style="width:100%" data-checkout="https://buy.stripe.com/cNicN4gJC2he40d7RY2Ji04">Buy Pro</button>
           <p class="price-secure">Secure checkout via Stripe</p>
@@ -1274,7 +1306,7 @@ hr.sep {
           <span class="num">$199</span>
           <span class="per"> AUD/mo</span>
         </div>
-        <p class="price-desc">For high-ticket, high-stakes situations. Messages that don't admit fault. Language safe to screenshot and present to payment processors. Scheduling that documents events without escalating them.</p>
+        <p class="price-desc">For when a client dispute could cost more than the project. Language that doesn't admit fault. Scheduling that documents everything. Every word safe to screenshot.</p>
         <ul class="price-includes">
           <li><span class="pi-dot on"></span><b>Everything in Pro</b></li>
           <li><span class="pi-dot on"></span><b>Black-tier AI assistant (high-risk)</b></li>
@@ -1285,7 +1317,7 @@ hr.sep {
           <li><span class="pi-dot purple"></span><b style="color:var(--purple)">No-show containment scripts</b></li>
           <li><span class="pi-dot purple"></span><b style="color:var(--purple)">Bulk .ics calendar export</b></li>
         </ul>
-        <p class="price-best">Best for: high-ticket risk where precision matters more than politeness.</p>
+        <p class="price-best">Best for: the situation you already have in mind reading this.</p>
         <div>
           <button type="button" class="btn accent-purple" style="width:100%" data-checkout="https://buy.stripe.com/6oU7sK9hacVS8gtfkq2Ji05">Buy Black</button>
           <p class="price-secure">Secure checkout via Stripe</p>
@@ -1294,22 +1326,22 @@ hr.sep {
 
     </div>
     <p class="small" style="margin-top:16px; text-align:center;">
-      No lock-in contract. Cancel at any time.
+      No lock-in. Cancel when you want. The damage you prevent in week one pays for the year.
     </p>
   </section>
 
   <!-- 09 — FAQ -->
   <section class="sec">
     <div class="sec-label"><span class="sl">//</span> 09 — FAQ</div>
-    <h2>Questions.</h2>
+    <h2>Answers before you ask.</h2>
     <div class="faq">
       <details>
         <summary>Is this just email templates?</summary>
-        <p>No. It's a structured communication system: templates for known patterns, a tier-gated AI assistant for real-time situations, and — for Pro and Black — a conversational AI that handles appointment booking end-to-end.</p>
+        <p>No. Templates are one layer. There's also a tier-gated AI that drafts responses in real time and — for Pro and Black — a conversational AI that books, confirms, and documents appointments without you managing the thread.</p>
       </details>
       <details>
         <summary>How does the AI Appointment Scheduler work?</summary>
-        <p>The scheduler is a persistent conversational AI available to Pro and Black members. It engages clients to find a time, locks the booking, sends confirmation, and handles rebooking if plans change — without you managing the thread.</p>
+        <p>It's a persistent conversational AI. It finds a time, locks the booking, sends confirmation, and handles changes — without you involved in the back-and-forth. Available to Pro and Black members.</p>
       </details>
       <details>
         <summary>Does the AI Scheduler integrate with my calendar?</summary>
@@ -1317,15 +1349,15 @@ hr.sep {
       </details>
       <details>
         <summary>Why not a one-time purchase?</summary>
-        <p>Client pressure patterns evolve — and so do the templates, AI behaviour, and scheduling flows. Subscription keeps everything current.</p>
+        <p>Client pressure patterns shift. New situations emerge. The templates, AI logic, and scheduling flows evolve with them. A one-time purchase goes stale. This doesn't.</p>
       </details>
       <details>
         <summary>Why not just use ChatGPT?</summary>
-        <p>Generic AI over-explains, introduces negotiation leakage, and ignores risk level. Text Boss is constrained by tier and risk profile — including how the scheduling AI communicates.</p>
+        <p>ChatGPT over-explains. It introduces negotiation leakage. It doesn't know what tier of risk you're operating at. Text Boss is constrained by your tier, your risk profile, and the specific situation — including how the scheduling AI speaks on your behalf.</p>
       </details>
       <details>
         <summary>Will this make me sound aggressive?</summary>
-        <p>No. Structured, calm, and decisive. Authority without emotional tone.</p>
+        <p>No. Structured, calm, decisive. The goal is authority without emotional charge. You'll sound like someone who has done this before — because now you have.</p>
       </details>
       <details>
         <summary>What happens if a client no-shows?</summary>
@@ -1333,22 +1365,44 @@ hr.sep {
       </details>
       <details>
         <summary>Can I cancel at any time?</summary>
-        <p>Yes. No lock-in contract. Cancel at any time — access continues through the end of your billing cycle.</p>
+        <p>Yes. No lock-in. Cancel whenever you decide you'd rather go back to improvising.</p>
       </details>
       <details>
         <summary>Can I customise the templates?</summary>
-        <p>Templates are send-ready as-is. Adapt them before sending if needed — they're starting points, not locked scripts.</p>
+        <p>Templates are send-ready as written. Adapt them if you want — but most people find the default version is already better than what they would have typed.</p>
       </details>
+    </div>
+  </section>
+
+  <!-- OPT-IN — Free lead magnet -->
+  <section class="sec" id="playbook">
+    <div class="sec-label"><span class="sl">//</span> Free resource</div>
+    <div class="optin-wrap">
+      <div class="optin-text">
+        <h2>Stop writing these messages<br>from scratch.</h2>
+        <p class="body-text">
+          Get 15 word-for-word client messages — scope creep, late payments, no-shows, ghosting. Free. Instant delivery.
+        </p>
+      </div>
+      <form class="optin-form" id="playbookForm" novalidate>
+        <div class="optin-row">
+          <input class="optin-input" type="email" name="email" placeholder="your@email.com" required autocomplete="email" />
+          <button class="btn accent-cyan optin-btn" type="submit">Send Me the Playbook →</button>
+        </div>
+        <p class="optin-micro">No spam. Instant delivery. Unsubscribe anytime.</p>
+        <p class="optin-success" id="playbookSuccess" hidden>✓ Check your inbox — the playbook is on its way.</p>
+        <p class="optin-error" id="playbookError" hidden>Something went wrong. Try again in a moment.</p>
+      </form>
     </div>
   </section>
 
   <!-- 10 — FINAL CTA -->
   <div class="final-cta">
-    <h2>Stop negotiating against yourself — and stop chasing appointments.</h2>
-    <p class="kicker">Choose your tier. Use templates for patterns. Use the AI when it gets real. Let the scheduler handle the rest.</p>
+    <h2>The version of you that waits sends another soft reply tomorrow.</h2>
+    <p class="kicker">The templates are written. The AI is calibrated. The scheduler is ready. The only variable left is whether you start now or keep improvising.</p>
     <div class="cta-row">
-      <a class="btn green" href="access.html">Access TextBoss</a>
-      <a class="btn primary" href="#pricing">Choose your tier</a>
+      <a class="btn green" href="access.html">Enter Text Boss</a>
+      <a class="btn primary" href="#pricing">See which tier fits</a>
     </div>
   </div>
 
@@ -1357,7 +1411,7 @@ hr.sep {
 <div class="sticky" role="region" aria-label="Sticky pricing call to action">
   <div class="sticky-inner">
     <div class="sticky-text">
-      <b>Core:</b> messaging control. <b>Pro + Black:</b> messaging + <span style="color:var(--cyan)">AI scheduling</span>.
+      <b>Core:</b> stop the leaks. <b>Pro + Black:</b> stop the leaks + <span style="color:var(--cyan)">own the schedule</span>.
     </div>
     <div class="sticky-actions">
       <a class="btn" href="core.html">Core</a>
@@ -1400,6 +1454,43 @@ hr.sep {
       if (!url) { e.preventDefault(); alert("Checkout link missing."); return; }
       window.location.href = url;
     });
+  });
+})();
+
+(function () {
+  var form = document.getElementById("playbookForm");
+  if (!form) return;
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    var btn = form.querySelector(".optin-btn");
+    var emailInput = form.querySelector("[name='email']");
+    var success = document.getElementById("playbookSuccess");
+    var error = document.getElementById("playbookError");
+    success.hidden = true;
+    error.hidden = true;
+    btn.disabled = true;
+    var orig = btn.textContent;
+    btn.textContent = "Sending…";
+    try {
+      var res = await fetch("/.netlify/functions/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailInput.value.trim() }),
+      });
+      if (res.ok) {
+        emailInput.value = "";
+        success.hidden = false;
+        btn.textContent = "Sent ✓";
+      } else {
+        error.hidden = false;
+        btn.disabled = false;
+        btn.textContent = orig;
+      }
+    } catch (_) {
+      error.hidden = false;
+      btn.disabled = false;
+      btn.textContent = orig;
+    }
   });
 })();
 </script>
