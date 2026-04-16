@@ -462,6 +462,7 @@ function createHandler(deps) {
       }
     }
     } catch (err) {
+      console.error("[schedule-chat] ai loop error:", err?.message || err);
       return deny(500, "ai_error");
     }
 
@@ -569,6 +570,8 @@ function createRuntimeHandler(overrides = {}) {
       const model = process.env.OPENAI_MODEL;
       const fetchImpl = overrides.fetchImpl || fetch;
 
+      console.log("[schedule-chat] OpenAI request model=%s inputItems=%d hasKey=%s", model, input.length, !!apiKey);
+
       const requestBody = {
         model,
         instructions,
@@ -587,7 +590,10 @@ function createRuntimeHandler(overrides = {}) {
       });
 
       if (!response.ok) {
-        throw new Error("OpenAI request failed");
+        let errBody;
+        try { errBody = await response.json(); } catch (_) { errBody = await response.text().catch(() => "(unreadable)"); }
+        console.error("[schedule-chat] OpenAI error", response.status, JSON.stringify(errBody));
+        throw new Error(`OpenAI request failed: ${response.status}`);
       }
 
       const data = await response.json();
