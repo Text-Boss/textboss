@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0d10">
+  <title>Text Boss</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="/app-mobile.css">
+  <meta name="vapid-public-key" content="">
+</head>
+<body>
+
+<div id="offline-banner">You're offline — messages cannot be sent until your connection is restored.</div>
+
+<div id="app">
+
+  <!-- Header -->
+  <header id="app-header">
+    <button id="sidebar-toggle" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div id="header-center">
+      <div class="wordmark">Text Boss</div>
+      <div class="section-label" id="section-label">Chat</div>
+    </div>
+    <button id="header-action" aria-label="New chat">+</button>
+  </header>
+
+  <!-- Thread chip strip (Chat section only) -->
+  <div id="thread-chips" style="display:none;"></div>
+
+  <!-- Hidden threads-list used by app-client.js internally -->
+  <div id="threads-list" aria-hidden="true"></div>
+
+  <!-- Content area -->
+  <main id="content-area">
+
+    <!-- Chat section -->
+    <div class="section-panel active" id="panel-chat">
+      <div id="app-output"></div>
+      <div id="input-bar">
+        <form id="chat-form" autocomplete="off">
+          <textarea
+            id="chat-message"
+            placeholder="Describe the situation..."
+            rows="1"
+            maxlength="4000"
+          ></textarea>
+          <button type="submit" id="chat-submit" aria-label="Send">
+            <svg viewBox="0 0 24 24"><path d="M2 12L22 2 12 22 10 14z"/></svg>
+          </button>
+        </form>
+        <div id="char-count"></div>
+        <div id="app-status"></div>
+      </div>
+    </div>
+
+    <!-- Schedule section (Pro/Black) -->
+    <div class="section-panel" id="panel-schedule">
+      <div class="sched-sub-tabs">
+        <div class="sched-sub-tab active" data-sched="chat">AI Chat</div>
+        <div class="sched-sub-tab" data-sched="calendar">Calendar</div>
+        <div class="sched-sub-tab" data-sched="settings">Settings</div>
+      </div>
+
+      <!-- AI Chat sub-panel -->
+      <div class="sched-sub-panel active" id="sched-chat-panel">
+        <div id="sched-output" style="flex:1;overflow-y:auto;padding:12px;"></div>
+        <div style="padding:8px 12px;padding-bottom:calc(8px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid var(--border);flex-shrink:0;">
+          <form id="sched-form" autocomplete="off" style="display:flex;gap:8px;align-items:flex-end;">
+            <textarea id="sched-message" placeholder="Tell me what to book..." rows="1"
+              style="flex:1;background:var(--surface);border:1px solid var(--border-hi);border-radius:20px;padding:10px 16px;font-size:14px;color:var(--text);resize:none;max-height:120px;outline:none;font-family:inherit;"></textarea>
+            <button type="submit"
+              style="width:40px;height:40px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#0a0d10;"><path d="M2 12L22 2 12 22 10 14z"/></svg>
+            </button>
+          </form>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+            <div id="sched-char-count" style="font-size:11px;color:var(--muted);"></div>
+            <div id="sched-status" style="font-size:12px;color:var(--muted);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calendar sub-panel -->
+      <div class="sched-sub-panel" id="sched-calendar-panel" style="overflow-y:auto;padding:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <button id="cal-prev" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px;">&#8249;</button>
+          <div id="cal-month-label" style="text-align:center;color:var(--muted);font-size:13px;"></div>
+          <button id="cal-next" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px;">&#8250;</button>
+        </div>
+        <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;"></div>
+        <div id="day-detail" style="margin-top:12px;"></div>
+        <div style="margin-top:12px;text-align:right;">
+          <button id="ical-export" style="background:var(--surface);border:1px solid var(--border-hi);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--muted);cursor:pointer;">Export .ics</button>
+        </div>
+      </div>
+
+      <!-- Scheduler settings sub-panel -->
+      <div class="sched-sub-panel" id="sched-settings-panel" style="overflow-y:auto;padding:12px;">
+        <div id="wh-list"></div>
+        <form id="wh-add-form" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+          <select name="wh-day" style="background:var(--surface);border:1px solid var(--border-hi);border-radius:8px;padding:6px;color:var(--text);font-size:13px;">
+            <option value="1">Mon</option><option value="2">Tue</option>
+            <option value="3">Wed</option><option value="4">Thu</option>
+            <option value="5">Fri</option><option value="6">Sat</option>
+            <option value="0">Sun</option>
+          </select>
+          <input type="time" name="wh-start" style="background:var(--surface);border:1px solid var(--border-hi);border-radius:8px;padding:6px;color:var(--text);font-size:13px;">
+          <input type="time" name="wh-end" style="background:var(--surface);border:1px solid var(--border-hi);border-radius:8px;padding:6px;color:var(--text);font-size:13px;">
+          <button type="submit" style="background:var(--accent);color:#0a0d10;border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;">Add</button>
+        </form>
+        <div id="svc-list" style="margin-top:16px;"></div>
+        <div id="booking-link-section" style="margin-top:16px;"></div>
+        <div id="import-status" style="font-size:12px;color:var(--muted);margin-top:8px;"></div>
+        <div style="margin-top:12px;">
+          <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:6px;">Import .ics calendar</label>
+          <input type="file" id="ical-import-file" accept=".ics" style="display:none;">
+          <button id="ical-import-btn" style="background:var(--surface);border:1px solid var(--border-hi);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--muted);cursor:pointer;">Choose .ics file</button>
+        </div>
+        <div id="busy-block-list" style="margin-top:12px;"></div>
+        <div id="notify-prompt" style="display:none;margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;">
+          <p style="font-size:13px;color:var(--text);margin-bottom:8px;">Get reminders before your appointments.</p>
+          <div style="display:flex;gap:8px;">
+            <button id="notify-enable" style="background:var(--accent);color:#0a0d10;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;">Enable</button>
+            <button id="notify-dismiss" style="background:none;border:1px solid var(--border-hi);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--muted);cursor:pointer;">Dismiss</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompts section (Pro/Black) -->
+    <div class="section-panel" id="panel-prompts">
+      <div id="prompts-search-bar">
+        <input id="prompts-search" type="search" placeholder="Search 100 templates...">
+      </div>
+      <div id="prompts-cat-strip"></div>
+      <div id="prompts-list"></div>
+    </div>
+
+    <!-- Threads section -->
+    <div class="section-panel" id="panel-threads">
+      <div id="threads-search-bar">
+        <input id="threads-search" type="search" placeholder="Search threads...">
+      </div>
+      <div id="threads-full-list"></div>
+    </div>
+
+    <!-- Settings section -->
+    <div class="section-panel" id="panel-settings">
+      <div id="settings-scroll" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:16px;">
+        <div class="settings-group">
+          <div class="settings-group-title">Your Profile</div>
+          <div class="settings-row">
+            <label>First name</label>
+            <input type="text" id="settings-fname" placeholder="Alex">
+          </div>
+          <div class="settings-row">
+            <label>Business name</label>
+            <input type="text" id="settings-biz" placeholder="Bright Studio">
+          </div>
+          <div class="settings-row">
+            <label>Phone</label>
+            <input type="tel" id="settings-phone" placeholder="04xx xxx xxx">
+          </div>
+          <div class="settings-row">
+            <label>ABN (optional)</label>
+            <input type="text" id="settings-abn" placeholder="12 345 678 901">
+          </div>
+          <div class="settings-row">
+            <label>Location (optional)</label>
+            <input type="text" id="settings-location" placeholder="Melbourne">
+          </div>
+        </div>
+        <button class="settings-save-btn" id="settings-save">Save profile</button>
+        <div id="settings-status" style="font-size:12px;color:var(--muted);text-align:center;"></div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Subscription</div>
+          <div class="settings-row">
+            <label>Tier</label>
+            <div><span class="tier-badge-settings" id="tier-badge">—</span></div>
+          </div>
+        </div>
+
+        <button class="sign-out-btn" id="logout-button">Sign out</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Drawer -->
+<nav id="threads-sidebar" role="dialog" aria-label="Navigation">
+  <div class="drawer-header">
+    <span class="drawer-wordmark">TEXT BOSS</span>
+    <span class="drawer-tier" id="drawer-tier">—</span>
+    <button id="sidebar-close" aria-label="Close menu">×</button>
+  </div>
+  <div class="drawer-nav" id="drawer-nav">
+    <div class="drawer-nav-item active" data-section="chat">
+      <span class="nav-icon">💬</span><span class="nav-label">Chat</span>
+    </div>
+    <div class="drawer-nav-item pro-only" data-section="schedule" style="display:none;">
+      <span class="nav-icon">📅</span><span class="nav-label">Schedule</span>
+    </div>
+    <div class="drawer-nav-item pro-only" data-section="prompts" style="display:none;">
+      <span class="nav-icon">📋</span><span class="nav-label">Prompts</span>
+    </div>
+    <div class="drawer-nav-item" data-section="threads">
+      <span class="nav-icon">🗂️</span><span class="nav-label">Threads</span>
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-nav-item" data-section="settings">
+      <span class="nav-icon">⚙️</span><span class="nav-label">Settings</span>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <div style="font-size:12px;color:var(--muted);" id="drawer-email"></div>
+  </div>
+</nav>
+
+<!-- Dim overlay -->
+<div id="sidebar-backdrop"></div>
+
+<!-- Hidden new-chat-button (triggered by header-action and + chip) -->
+<button id="new-chat-button" style="display:none;" aria-hidden="true"></button>
+
+<!-- Onboarding wizard (scheduler-client.js manages this) -->
+<div class="wizard-overlay hidden" id="wizard-overlay">
+  <div class="wizard">
+    <div class="wizard-header">
+      <div class="wizard-step-indicator" id="wizard-steps"></div>
+      <h2 id="wizard-title"></h2>
+      <p class="wizard-sub" id="wizard-sub"></p>
+    </div>
+    <div class="wizard-body" id="wizard-body"></div>
+    <div class="wizard-footer">
+      <button class="wizard-next" id="wizard-next">Next</button>
+    </div>
+  </div>
+</div>
+
+<script src="/app-client.js"></script>
+<script src="/scheduler-client.js"></script>
+<script>
+(function () {
+  const PRO_TIERS = new Set(['Pro', 'Black']);
+  let currentSection = 'chat';
+  let appTier = null;
+  let appEmail = null;
+  let schedulerInitialised = false;
+  let promptsLoaded = false;
+
+  // Boot: verify session
+  async function boot() {
+    try {
+      const res = await fetch('/.netlify/functions/session-verify', { credentials: 'same-origin' });
+      const data = await res.json();
+      if (!data.ok) { window.location.href = '/access.html'; return; }
+      appTier  = data.tier;
+      appEmail = data.email;
+      applyTier(appTier, appEmail);
+      initShell();
+    } catch (e) {
+      handleOffline();
+    }
+  }
+
+  function applyTier(tier, email) {
+    const app = document.getElementById('app');
+    app.setAttribute('data-app-tier', tier);
+    app.setAttribute('data-tier', tier);
+    app.setAttribute('data-input-limit', tier === 'Black' ? 8000 : tier === 'Pro' ? 6000 : 4000);
+
+    document.getElementById('drawer-tier').textContent = tier;
+    document.getElementById('tier-badge').textContent  = tier;
+    document.getElementById('drawer-email').textContent = email || '';
+    document.title = 'Text Boss \u00b7 ' + tier;
+
+    if (PRO_TIERS.has(tier)) {
+      document.querySelectorAll('.pro-only').forEach(el => el.style.display = '');
+    }
+  }
+
+  function initShell() {
+    initDrawer();
+    initSectionNav();
+    initThreadChips();
+    initOfflineBanner();
+    loadSettingsProfile();
+  }
+
+  // Drawer
+  function initDrawer() {
+    const toggle   = document.getElementById('sidebar-toggle');
+    const drawer   = document.getElementById('threads-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const closeBtn = document.getElementById('sidebar-close');
+
+    function openDrawer() {
+      drawer.classList.add('open');
+      backdrop.classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeDrawer() {
+      drawer.classList.remove('open');
+      backdrop.classList.remove('visible');
+      document.body.style.overflow = '';
+    }
+
+    toggle.addEventListener('click', openDrawer);
+    closeBtn.addEventListener('click', closeDrawer);
+    backdrop.addEventListener('click', closeDrawer);
+  }
+
+  // Section navigation
+  function initSectionNav() {
+    document.querySelectorAll('.drawer-nav-item[data-section]').forEach(item => {
+      item.addEventListener('click', () => {
+        switchSection(item.dataset.section);
+        document.getElementById('threads-sidebar').classList.remove('open');
+        document.getElementById('sidebar-backdrop').classList.remove('visible');
+        document.body.style.overflow = '';
+      });
+    });
+
+    document.querySelectorAll('.sched-sub-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.sched-sub-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.sched-sub-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('sched-' + tab.dataset.sched + '-panel').classList.add('active');
+      });
+    });
+  }
+
+  function switchSection(section) {
+    currentSection = section;
+
+    const labels = { chat: 'Chat', schedule: 'Schedule', prompts: 'Prompts', threads: 'Threads', settings: 'Settings' };
+    document.getElementById('section-label').textContent = labels[section] || section;
+
+    const headerAction = document.getElementById('header-action');
+    headerAction.classList.toggle('hidden', section !== 'chat' && section !== 'threads');
+
+    document.getElementById('thread-chips').style.display = section === 'chat' ? 'flex' : 'none';
+
+    document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('panel-' + section);
+    if (target) target.classList.add('active');
+
+    document.querySelectorAll('.drawer-nav-item[data-section]').forEach(item => {
+      item.classList.toggle('active', item.dataset.section === section);
+    });
+
+    if (section === 'schedule' && !schedulerInitialised && PRO_TIERS.has(appTier)) {
+      schedulerInitialised = true;
+      const inputLimit = appTier === 'Black' ? 8000 : 6000;
+      window.initScheduler({ tier: appTier, inputLimit, enableIcalExport: true });
+    }
+    if (section === 'prompts' && !promptsLoaded) {
+      promptsLoaded = true;
+      initPromptsSection();
+    }
+    if (section === 'threads') {
+      renderThreadsList('');
+    }
+  }
+
+  document.getElementById('header-action').addEventListener('click', () => {
+    if (currentSection === 'chat' || currentSection === 'threads') {
+      document.getElementById('new-chat-button').click();
+    }
+  });
+
+  // Thread chip strip
+  function initThreadChips() {
+    const threadsList = document.getElementById('threads-list');
+    const chipsStrip  = document.getElementById('thread-chips');
+
+    function renderChips() {
+      const items = threadsList.querySelectorAll('[data-thread-id]');
+      chipsStrip.innerHTML = '';
+      items.forEach(item => {
+        const chip = document.createElement('div');
+        chip.className = 'thread-chip' + (item.classList.contains('active') ? ' active' : '');
+        chip.textContent = item.querySelector('.thread-name')?.textContent || item.dataset.threadId;
+        chip.dataset.threadId = item.dataset.threadId;
+        chip.addEventListener('click', () => item.click());
+        chipsStrip.appendChild(chip);
+      });
+      const newChip = document.createElement('div');
+      newChip.className = 'thread-chip';
+      newChip.textContent = '+ New';
+      newChip.addEventListener('click', () => document.getElementById('new-chat-button').click());
+      chipsStrip.appendChild(newChip);
+    }
+
+    const observer = new MutationObserver(renderChips);
+    observer.observe(threadsList, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    renderChips();
+  }
+
+  // Threads section
+  function renderThreadsList(query) {
+    const threadsList = document.getElementById('threads-list');
+    const fullList    = document.getElementById('threads-full-list');
+    const items       = Array.from(threadsList.querySelectorAll('[data-thread-id]'));
+    const q = query.toLowerCase();
+
+    fullList.innerHTML = '';
+    const filtered = items.filter(item => !q || item.textContent.toLowerCase().includes(q));
+
+    if (filtered.length === 0) {
+      fullList.innerHTML = '<p style="padding:20px;color:var(--muted);font-size:14px;text-align:center;">No threads yet.</p>';
+      return;
+    }
+
+    filtered.forEach(item => {
+      const name    = item.querySelector('.thread-name')?.textContent || 'Thread';
+      const preview = item.querySelector('.thread-preview')?.textContent || '';
+      const time    = item.querySelector('.thread-time')?.textContent || '';
+      const row = document.createElement('div');
+      row.className = 'thread-row';
+      row.innerHTML =
+        '<div class="thread-row-top">' +
+          '<span class="thread-row-name">' + name + '</span>' +
+          '<span class="thread-row-time">' + time + '</span>' +
+        '</div>' +
+        '<div class="thread-row-preview">' + preview + '</div>';
+      row.addEventListener('click', () => {
+        item.click();
+        switchSection('chat');
+      });
+      fullList.appendChild(row);
+    });
+  }
+
+  document.getElementById('threads-search').addEventListener('input', e => {
+    renderThreadsList(e.target.value);
+  });
+
+  // Prompts section
+  async function initPromptsSection() {
+    const list = document.getElementById('prompts-list');
+    list.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">Loading...</p>';
+
+    let data;
+    try {
+      const res = await fetch('/prompts-data.json');
+      data = await res.json();
+    } catch (e) {
+      list.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">Could not load templates.</p>';
+      return;
+    }
+
+    const catStrip = document.getElementById('prompts-cat-strip');
+    let activeCat = 'All';
+    const allChip = document.createElement('div');
+    allChip.className = 'cat-chip active';
+    allChip.textContent = 'All';
+    allChip.dataset.cat = 'All';
+    catStrip.appendChild(allChip);
+
+    data.categories.forEach(cat => {
+      const chip = document.createElement('div');
+      chip.className = 'cat-chip';
+      chip.textContent = cat;
+      chip.dataset.cat = cat;
+      catStrip.appendChild(chip);
+    });
+
+    catStrip.addEventListener('click', e => {
+      const chip = e.target.closest('.cat-chip');
+      if (!chip) return;
+      activeCat = chip.dataset.cat;
+      catStrip.querySelectorAll('.cat-chip').forEach(c => c.classList.toggle('active', c === chip));
+      renderPrompts(data, activeCat, '');
+      document.getElementById('prompts-search').value = '';
+    });
+
+    document.getElementById('prompts-search').addEventListener('input', e => {
+      renderPrompts(data, activeCat, e.target.value);
+    });
+
+    renderPrompts(data, 'All', '');
+  }
+
+  function renderPrompts(data, cat, query) {
+    const list = document.getElementById('prompts-list');
+    list.innerHTML = '';
+    const q = query.toLowerCase();
+
+    const cats = cat === 'All' ? data.categories : [cat];
+    cats.forEach(c => {
+      const prompts = (data.prompts[c] || []).filter(p =>
+        !q || p.title.toLowerCase().includes(q) || p.body.toLowerCase().includes(q)
+      );
+      if (prompts.length === 0) return;
+
+      if (cat === 'All') {
+        const heading = document.createElement('div');
+        heading.style.cssText = 'font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:8px 0 4px;';
+        heading.textContent = c;
+        list.appendChild(heading);
+      }
+
+      prompts.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'prompt-card-mobile';
+        const bodyHtml = p.body.replace(/\{\{([^}]+)\}\}/g, '<span class="var-highlight">{{$1}}</span>');
+        card.innerHTML =
+          '<div class="prompt-card-mobile-head">' +
+            '<span class="prompt-num">' + p.num + '</span>' +
+            '<h4>' + p.title + '</h4>' +
+            '<span class="expand-icon">\u25be</span>' +
+          '</div>' +
+          '<div class="prompt-card-mobile-body">' +
+            '<div class="prompt-text">' + bodyHtml + '</div>' +
+            '<div class="prompt-actions">' +
+              '<button class="prompt-copy-btn">Copy to clipboard</button>' +
+              '<button class="prompt-send-btn">Send to Chat</button>' +
+            '</div>' +
+          '</div>';
+        card.querySelector('.prompt-card-mobile-head').addEventListener('click', () => {
+          card.classList.toggle('expanded');
+        });
+        card.querySelector('.prompt-copy-btn').addEventListener('click', async (e) => {
+          e.stopPropagation();
+          await navigator.clipboard.writeText(p.body);
+          const btn = card.querySelector('.prompt-copy-btn');
+          btn.textContent = 'Copied!';
+          setTimeout(() => { btn.textContent = 'Copy to clipboard'; }, 1500);
+        });
+        card.querySelector('.prompt-send-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const chatInput = document.getElementById('chat-message');
+          if (chatInput) {
+            chatInput.value = p.body;
+            chatInput.dispatchEvent(new Event('input'));
+            switchSection('chat');
+          }
+        });
+        list.appendChild(card);
+      });
+    });
+
+    if (list.children.length === 0) {
+      list.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No templates match.</p>';
+    }
+  }
+
+  // Settings profile
+  function loadSettingsProfile() {
+    const saved = JSON.parse(localStorage.getItem('tb_profile') || '{}');
+    if (saved.fname)    document.getElementById('settings-fname').value    = saved.fname;
+    if (saved.biz)      document.getElementById('settings-biz').value      = saved.biz;
+    if (saved.phone)    document.getElementById('settings-phone').value    = saved.phone;
+    if (saved.abn)      document.getElementById('settings-abn').value      = saved.abn;
+    if (saved.location) document.getElementById('settings-location').value = saved.location;
+  }
+
+  document.getElementById('settings-save').addEventListener('click', () => {
+    const profile = {
+      fname:    document.getElementById('settings-fname').value.trim(),
+      biz:      document.getElementById('settings-biz').value.trim(),
+      phone:    document.getElementById('settings-phone').value.trim(),
+      abn:      document.getElementById('settings-abn').value.trim(),
+      location: document.getElementById('settings-location').value.trim(),
+    };
+    localStorage.setItem('tb_profile', JSON.stringify(profile));
+    const status = document.getElementById('settings-status');
+    status.textContent = 'Profile saved.';
+    setTimeout(() => { status.textContent = ''; }, 2000);
+  });
+
+  // Offline banner
+  function initOfflineBanner() {
+    const banner = document.getElementById('offline-banner');
+    window.addEventListener('online',  () => banner.classList.remove('visible'));
+    window.addEventListener('offline', () => banner.classList.add('visible'));
+    if (!navigator.onLine) banner.classList.add('visible');
+  }
+
+  function handleOffline() {
+    document.getElementById('offline-banner').classList.add('visible');
+  }
+
+  // Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+
+  boot();
+}());
+</script>
+</body>
+</html>
