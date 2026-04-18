@@ -1,0 +1,551 @@
+{
+  "categories": [
+    "Appointment Scheduling",
+    "Payment Reminders",
+    "Follow-Up",
+    "Scope Clarification",
+    "Declining Requests",
+    "Delivery Updates",
+    "Wrap-Up",
+    "Onboarding",
+    "Scope Creep",
+    "Scope Creep Escalation",
+    "Retainer Boundaries",
+    "Persistent Objections",
+    "Entitlement",
+    "Relationship Reset",
+    "Pricing Pushback"
+  ],
+  "prompts": {
+    "Appointment Scheduling": [
+      {
+        "num": "#1",
+        "title": "New Consultation Booking",
+        "body": "Hi {{CLIENT_NAME}}, this is {{YOUR_FIRST_NAME}} from {{BUSINESS_NAME}}. I have openings on [DATE] at [TIME] and [DATE] at [TIME] for your consultation. Let me know which suits you and I'll lock it in. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#2",
+        "title": "Confirming a Phone Consultation",
+        "body": "Hi {{CLIENT_NAME}}, confirming your phone consultation with {{BUSINESS_NAME}} on [DATE] at [TIME]. I'll call you on the number you provided. Please have any relevant documents ready so we can make the most of our time. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#3",
+        "title": "Same-Day Appointment Reminder",
+        "body": "Hi {{CLIENT_NAME}}, just a reminder your appointment with {{YOUR_FIRST_NAME}} at {{BUSINESS_NAME}} is today at [TIME]. If you need to reach me before then, call or text {{BUSINESS_PHONE}}. See you shortly."
+      },
+      {
+        "num": "#4",
+        "title": "Client Requesting Unavailable Time",
+        "body": "Hi {{CLIENT_NAME}}, that time slot isn't available. My next openings at {{BUSINESS_NAME}} are [DATE] at [TIME] or [DATE] at [TIME]. Let me know which works for you and I'll confirm it straight away. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#5",
+        "title": "On-Site Visit Confirmation",
+        "body": "Hi {{CLIENT_NAME}}, confirming my on-site visit to your property on [DATE] at [TIME]. Please ensure access to [AREA/ROOM] is available when I arrive. If anything changes, contact me at {{BUSINESS_PHONE}} with at least 24 hours notice. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#6",
+        "title": "Follow-Up After Missed Appointment",
+        "body": "Hi {{CLIENT_NAME}}, I noticed we missed our scheduled appointment today. I hope everything is alright. If you'd like to rebook, my next available time is [DATE] at [TIME]. Please note our cancellation policy requires 24 hours notice. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#7",
+        "title": "Recurring Appointment Setup",
+        "body": "Hi {{CLIENT_NAME}}, based on our discussion, I'd like to set up a recurring [WEEKLY/FORTNIGHTLY/MONTHLY] appointment on [DAY] at [TIME]. I'll send a reminder before each session. Let me know if this schedule works for you. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#8",
+        "title": "Virtual Meeting Link Sent",
+        "body": "Hi {{CLIENT_NAME}}, here's the link for our virtual meeting on [DATE] at [TIME]: [MEETING LINK]. Please test the link beforehand to avoid any delays. If you have trouble connecting, call me at {{BUSINESS_PHONE}} and we'll sort it out. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      }
+    ],
+    "Payment Reminders": [
+      {
+        "num": "#9",
+        "title": "Invoice Sent Notification",
+        "body": "Hi {{CLIENT_NAME}}, I've just sent invoice [#INVOICE] for [AMOUNT] to your email. Payment is due by [DUE DATE]. If you have any questions about the breakdown, let me know. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#10",
+        "title": "Upcoming Payment Reminder - 3 Days",
+        "body": "Hi {{CLIENT_NAME}}, this is a reminder that your payment of [AMOUNT] for invoice [#INVOICE] is due in 3 days on [DUE DATE]. You can pay via the link in the invoice or by direct transfer. Let me know if you need the details resent. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#11",
+        "title": "Payment Overdue - 14 Days",
+        "body": "Hi {{CLIENT_NAME}}, invoice [#INVOICE] for [AMOUNT] is now 14 days overdue. I'd appreciate it if you could arrange payment at your earliest convenience. If there's a reason for the delay, please let me know so we can work something out. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#12",
+        "title": "Partial Payment Received",
+        "body": "Hi {{CLIENT_NAME}}, I've received a partial payment of [AMOUNT RECEIVED] toward invoice [#INVOICE]. The remaining balance is [REMAINING AMOUNT]. Please arrange payment of the balance by [DATE]. Let me know if you'd like to discuss a payment plan. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#13",
+        "title": "Retainer Renewal Invoice",
+        "body": "Hi {{CLIENT_NAME}}, your retainer with {{BUSINESS_NAME}} renews on [DATE]. I've sent the renewal invoice for [AMOUNT]. Please process payment before the renewal date so there's no interruption to your service. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#14",
+        "title": "Payment Method Failed",
+        "body": "Hi {{CLIENT_NAME}}, I attempted to process your payment of [AMOUNT] but it was declined. Could you please update your payment method or arrange an alternative? Let me know if you need me to resend the invoice with different payment options. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#15",
+        "title": "Late Fee Notice",
+        "body": "Hi {{CLIENT_NAME}}, as per our agreement, a late fee of [FEE AMOUNT] has been applied to invoice [#INVOICE], which is now [DAYS] days overdue. The updated total is [NEW TOTAL]. Please arrange payment as soon as possible. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#16",
+        "title": "Final Payment Before File Handover",
+        "body": "Hi {{CLIENT_NAME}}, your project files are ready for handover. As per our agreement, the final payment of [AMOUNT] needs to be received before I can release them. Once payment clears, I'll send everything through immediately. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      }
+    ],
+    "Follow-Up": [
+      {
+        "num": "#17",
+        "title": "First Check-In After Proposal",
+        "body": "Hi {{CLIENT_NAME}}, just circling back on the proposal I sent on [DATE]. I wanted to make sure you had a chance to review it. If you have any questions or want to discuss adjustments, I'm available this week. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#18",
+        "title": "Follow-Up on Unanswered Design Concepts",
+        "body": "Hi {{CLIENT_NAME}}, I sent through the initial concepts on [DATE] and haven't heard back yet. I'd love your feedback so I can refine the direction. Even a quick note on what you like or don't like would be helpful. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#19",
+        "title": "Follow-Up After Site Inspection",
+        "body": "Hi {{CLIENT_NAME}}, following up after the site inspection on [DATE]. I sent the report and recommendations to your email. Let me know when you've had a chance to review so we can discuss next steps. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#20",
+        "title": "Checking In After Free Consultation",
+        "body": "Hi {{CLIENT_NAME}}, it was great chatting with you during our consultation. I wanted to follow up and see if you had any further questions or if you'd like to move forward. I'm happy to put together a formal proposal whenever you're ready. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#21",
+        "title": "Follow-Up - Contract Not Yet Returned",
+        "body": "Hi {{CLIENT_NAME}}, I sent the contract on [DATE] and haven't received it back yet. I'm holding your spot in my schedule, but I can only do so until [DATE]. If you'd like to proceed, please sign and return it at your earliest convenience. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#22",
+        "title": "Closing File After Extended Silence",
+        "body": "Hi {{CLIENT_NAME}}, I've followed up a few times now regarding [TOPIC] and understand things may have shifted on your end. I'll close out your file for now, but if you'd like to revisit in the future, you're welcome to reach out at {{BUSINESS_EMAIL}}. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      }
+    ],
+    "Scope Clarification": [
+      {
+        "num": "#23",
+        "title": "Defining Project Boundaries Up Front",
+        "body": "Hi {{CLIENT_NAME}}, before we begin, I want to make sure we're aligned on what this project includes. The scope covers [INCLUSIONS]. Anything beyond that can be handled as a separate engagement. Let me know if you'd like to adjust anything before I start. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#24",
+        "title": "Redirecting an Off-Scope Request",
+        "body": "Hi {{CLIENT_NAME}}, that's a great idea, but it falls outside the current project scope. I can add it as a separate line item with its own quote and timeline. Would you like me to price that up for you? - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#25",
+        "title": "Explaining What Revisions Cover",
+        "body": "Hi {{CLIENT_NAME}}, just to clarify, your package includes [NUMBER] rounds of revisions. Each round covers adjustments to [SPECIFIC ELEMENTS]. Changes to the overall concept or structure after approval would be treated as new work. Happy to explain further if needed. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#26",
+        "title": "Clarifying Maintenance vs. New Work",
+        "body": "Hi {{CLIENT_NAME}}, the request you've described is new work rather than maintenance. Maintenance covers [MAINTENANCE ITEMS]. New feature development or design changes are quoted separately. I can send through a quote for this if you'd like to proceed. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#27",
+        "title": "Setting Expectations on Response Times",
+        "body": "Hi {{CLIENT_NAME}}, I want to clarify how communication works during your project. I respond to messages within [TIMEFRAME] during business hours ([HOURS]). Urgent matters should be flagged in the subject line. Calls outside these hours are not included in the project scope. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#28",
+        "title": "Confirming Change Order Details",
+        "body": "Hi {{CLIENT_NAME}}, I've noted the changes you'd like. Here's the updated scope: [UPDATED SCOPE]. The additional cost is [AMOUNT] and the new timeline is [TIMEFRAME]. Please confirm in writing and I'll proceed. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      }
+    ],
+    "Declining Requests": [
+      {
+        "num": "#29",
+        "title": "Declining a Project Outside Your Specialty",
+        "body": "Hi {{CLIENT_NAME}}, thanks for considering {{BUSINESS_NAME}} for this. That type of work is outside my area of expertise and I wouldn't want to deliver anything less than professional quality. I'd recommend looking for a specialist in [AREA]. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#30",
+        "title": "Declining Work Due to Conflict of Interest",
+        "body": "Hi {{CLIENT_NAME}}, I appreciate the opportunity, but I have an existing commitment that would create a conflict of interest with this project. I wouldn't be able to serve you with full integrity. I'd be happy to refer you to a trusted colleague. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#31",
+        "title": "Declining Spec Work",
+        "body": "Hi {{CLIENT_NAME}}, I appreciate your interest. {{BUSINESS_NAME}} doesn't do spec work or unpaid trials. I'm confident in the quality I deliver, and my portfolio reflects that. If you'd like to move forward with a paid engagement, I'm happy to discuss next steps. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#32",
+        "title": "Declining Scope Expansion Without Budget",
+        "body": "Hi {{CLIENT_NAME}}, I understand you'd like to add [ITEM] to the project. I'm not able to include additional work without adjusting the budget. I can send a revised quote that includes this, or we can keep the original scope as-is. Let me know your preference. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#33",
+        "title": "Declining an Unrealistic Deadline",
+        "body": "Hi {{CLIENT_NAME}}, I've reviewed the timeline and I'm not able to deliver quality work in that timeframe. The earliest I can complete this properly is [REALISTIC DATE]. I'd rather be upfront now than deliver something below standard. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#34",
+        "title": "Declining a Personal Favor Request",
+        "body": "Hi {{CLIENT_NAME}}, I appreciate you thinking of me. I keep things professional at {{BUSINESS_NAME}} and handle all work through my standard process and pricing. If you'd like to engage me for this, I'm happy to send through a quote. - {{YOUR_FIRST_NAME}}"
+      }
+    ],
+    "Delivery Updates": [
+      {
+        "num": "#35",
+        "title": "Work Has Officially Begun",
+        "body": "Hi {{CLIENT_NAME}}, I've officially started work on your project today. You can expect the first draft or update by [DATE]. I'll keep you posted along the way. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#36",
+        "title": "Phase One Complete",
+        "body": "Hi {{CLIENT_NAME}}, phase one of your project is complete. I've delivered [DELIVERABLE] to your email. Please review and provide feedback by [DATE] so I can move into phase two on schedule. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#37",
+        "title": "Delay Due to Third-Party Dependency",
+        "body": "Hi {{CLIENT_NAME}}, I wanted to let you know there's a delay on your project due to [THIRD PARTY] not delivering their part on time. The revised delivery date is [NEW DATE]. I'm doing everything I can to keep things moving on my end. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#38",
+        "title": "Sending a Progress Preview",
+        "body": "Hi {{CLIENT_NAME}}, I wanted to share a quick preview of where your project is at. I've attached [PREVIEW ITEM]. This is still a work in progress, so please don't share it externally yet. Final delivery is still on track for [DATE]. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#39",
+        "title": "Final Delivery Incoming",
+        "body": "Hi {{CLIENT_NAME}}, your final [DELIVERABLE] will be delivered tomorrow by [TIME]. Please keep an eye on your email. Once you've received everything, let me know if there's anything you need adjusted within your included revisions. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#40",
+        "title": "Timeline Adjusted After Client Delay",
+        "body": "Hi {{CLIENT_NAME}}, since I received [ITEM] on [DATE] instead of the originally agreed [ORIGINAL DATE], the project timeline has shifted. The new estimated completion date is [NEW DATE]. I'll do my best to stay ahead of schedule where I can. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      }
+    ],
+    "Wrap-Up": [
+      {
+        "num": "#41",
+        "title": "All Files Delivered",
+        "body": "Hi {{CLIENT_NAME}}, all final files for your project have been delivered to your email. Please download and save them to your own storage. I'll retain copies on my end for [TIMEFRAME] and then they'll be archived. Let me know if anything is missing. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#42",
+        "title": "Requesting a Google Review",
+        "body": "Hi {{CLIENT_NAME}}, thanks for a great project. If you have a moment, a Google review would be a huge help for {{BUSINESS_NAME}}. Here's the link: [REVIEW LINK]. A couple of sentences about your experience is all it takes. I appreciate your support. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#43",
+        "title": "Post-Project Check-In (30 Days)",
+        "body": "Hi {{CLIENT_NAME}}, it's been about a month since we wrapped up your project. I wanted to check in and see how everything is going. If you've noticed anything that needs attention, let me know. Otherwise, I'm glad it's working well for you. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#44",
+        "title": "Handing Over Credentials / Access",
+        "body": "Hi {{CLIENT_NAME}}, as part of project wrap-up, I've transferred all account credentials and access to your email. Please update the passwords immediately for security. If you need help with the transition, I'm here for the next [TIMEFRAME]. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#45",
+        "title": "Offering Ongoing Maintenance",
+        "body": "Hi {{CLIENT_NAME}}, now that your project is complete, I offer ongoing maintenance packages starting at [AMOUNT]/month. This covers [INCLUSIONS]. No obligation, but it's there if you need it. Let me know if you'd like more details. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      }
+    ],
+    "Onboarding": [
+      {
+        "num": "#46",
+        "title": "Welcome and Next Steps",
+        "body": "Hi {{CLIENT_NAME}}, welcome aboard. I'm {{YOUR_FIRST_NAME}} and I'll be handling your project at {{BUSINESS_NAME}}. Here's what happens next: I'll send a brief questionnaire, then a formal agreement, and once the deposit is received, we'll lock in your start date. Any questions, reach out at {{BUSINESS_EMAIL}}."
+      },
+      {
+        "num": "#47",
+        "title": "Requesting Brand Assets",
+        "body": "Hi {{CLIENT_NAME}}, to get started on your project, I'll need the following from you: [LIST OF ASSETS]. Please send them to {{BUSINESS_EMAIL}} by [DATE]. If you don't have some of these, let me know and we'll work out alternatives. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#48",
+        "title": "Project Timeline Shared",
+        "body": "Hi {{CLIENT_NAME}}, I've put together your project timeline. Key milestones: [MILESTONE 1] by [DATE], [MILESTONE 2] by [DATE], final delivery by [DATE]. This timeline depends on receiving your materials and feedback on schedule. Please review and confirm. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#49",
+        "title": "Introducing Your Process",
+        "body": "Hi {{CLIENT_NAME}}, here's a quick overview of how I work at {{BUSINESS_NAME}}. I start with a discovery phase, then move into [PHASE 2], followed by [PHASE 3], and wrap up with final delivery and revisions. Updates are sent at each phase. You'll always know where things stand. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#50",
+        "title": "Deposit Received - Project Scheduled",
+        "body": "Hi {{CLIENT_NAME}}, your deposit has been received. Your project is now scheduled to begin on [START DATE]. I'll be in touch before then with any final prep items. Thanks for choosing {{BUSINESS_NAME}} - I'm looking forward to getting started. - {{YOUR_FIRST_NAME}}"
+      }
+    ],
+    "Scope Creep": [
+      {
+        "num": "#51",
+        "title": "Additional Pages Requested Mid-Project (Web Dev)",
+        "body": "{{CLIENT_NAME}}, the additional pages you've requested are outside the agreed scope. Your project covers [ORIGINAL PAGE COUNT] pages. I can add the new pages at [RATE] per page with a revised timeline. Let me know if you'd like a quote for the additions, or if you'd prefer to proceed with the original scope. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#52",
+        "title": "Client Requesting Extra Edits After Final Delivery (Photographer)",
+        "body": "{{CLIENT_NAME}}, your package included [NUMBER] edited images, and those have all been delivered and approved. Additional edits are available at [RATE] per image. I'm happy to continue if you'd like, but I need your confirmation before I begin additional work. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#53",
+        "title": "Expanding the Brief After Agreement (Graphic Designer)",
+        "body": "{{CLIENT_NAME}}, the new items you've mentioned weren't part of our original brief. Our agreement covers [ORIGINAL DELIVERABLES]. Adding [NEW ITEMS] would require a scope extension. I'll send a revised quote today so you can decide how you'd like to proceed. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#54",
+        "title": "Client Adding Rooms to a Renovation Quote (Contractor)",
+        "body": "{{CLIENT_NAME}}, the original quote covers work on [ORIGINAL ROOMS]. Adding [NEW ROOMS] changes the scope, materials, and timeline. I'll need to requote before I can commit to the additional work. I can have the updated quote to you by [DATE]. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#55",
+        "title": "Extra Coaching Sessions Expected for Free (Coach)",
+        "body": "{{CLIENT_NAME}}, your package includes [NUMBER] sessions. I noticed you've been requesting additional time outside those sessions. I value our work together, but extra sessions need to be booked and paid for separately at [RATE]. I'm happy to add more to your plan if you'd like. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#56",
+        "title": "Requesting Social Media Management on a Web Project (Agency)",
+        "body": "{{CLIENT_NAME}}, social media management wasn't included in our website build agreement. That's a separate service with its own scope and pricing. I can provide a proposal for it if you're interested, but it won't be bundled into the current project cost. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#57",
+        "title": "Client Requesting Ongoing Support Post-Project (Consultant)",
+        "body": "{{CLIENT_NAME}}, the project deliverables have been completed as agreed. Ongoing advisory support is available through a separate retainer arrangement at [RATE/MONTH]. If you'd like to set that up, I can send the details. The current engagement is now complete. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#58",
+        "title": "Adding Video to a Photography Package (Videographer)",
+        "body": "{{CLIENT_NAME}}, your booking is for photography only. Video requires different equipment, editing time, and deliverables. I can add a video component starting at [AMOUNT], but I need to know before the shoot date so I can prepare accordingly. Let me know by [DATE]. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      }
+    ],
+    "Scope Creep Escalation": [
+      {
+        "num": "#59",
+        "title": "Repeated Feature Requests After Scope Lock (Web Dev)",
+        "body": "// Step 1 — Initial Redirect\n{{CLIENT_NAME}}, I've noted the new feature requests. As a reminder, the scope was locked on [DATE] and these items fall outside it. I've attached the signed scope document for reference. I can quote these separately if you'd like to proceed after the current build is complete.\n\n// Step 2 — Firm Boundary\n{{CLIENT_NAME}}, I understand you'd like these additions. However, continuing to add requests outside the locked scope will delay the project and increase costs. I need to complete the agreed work first. Once that's delivered, I'm happy to discuss a phase two engagement.\n\n// Step 3 — Final Position\n{{CLIENT_NAME}}, I need to be direct. The current scope cannot absorb additional features without a new agreement. I will complete the original deliverables by [DATE] as agreed. Any further additions require a separate signed scope and deposit. This is how I protect both your timeline and my capacity. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#60",
+        "title": "Client Keeps Adding Revision Rounds (Graphic Designer)",
+        "body": "// Step 1 — Reminder\n{{CLIENT_NAME}}, we've now completed [NUMBER] revision rounds. Your package includes [INCLUDED NUMBER]. I'm happy to continue refining, but additional rounds are billed at [RATE] per round. Let me know how you'd like to proceed.\n\n// Step 2 — Boundary Hold\n{{CLIENT_NAME}}, I've received another round of changes. As mentioned, we've exceeded the included revisions. I'll need payment of [AMOUNT] before I can begin this round. I want to make sure we're aligned before I continue work.\n\n// Step 3 — Clear Escalation\n{{CLIENT_NAME}}, I understand you want the design to be right. Going forward, each revision round requires prepayment. I will not begin additional work without a confirmed payment. This ensures the project stays manageable for both of us. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#61",
+        "title": "Client Expecting Free Training on Delivered System (Consultant)",
+        "body": "// Step 1 — Clarification\n{{CLIENT_NAME}}, the training you're requesting wasn't included in the project scope. I delivered the system as agreed, with documentation. Training sessions are available at [RATE] per hour. I can schedule one if you'd like.\n\n// Step 2 — Hold the Line\n{{CLIENT_NAME}}, I understand you'd like more support. The documentation I provided covers the core functions. If you need hands-on training, that's a separate engagement. I need your confirmation and payment before scheduling any training sessions."
+      },
+      {
+        "num": "#62",
+        "title": "Interior Design Client Adding Rooms After Contract (Interior Designer)",
+        "body": "// Step 1 — Redirect\n{{CLIENT_NAME}}, the additional rooms you've mentioned aren't covered in our current agreement. I can add them, but it will require a scope amendment with revised pricing and timeline. I'll send that through for your review.\n\n// Step 2 — Firm Restatement\n{{CLIENT_NAME}}, I've received another request to include [ROOM] in the current project. As I mentioned, this requires a formal scope amendment. I'm not able to absorb additional rooms into the existing budget. Please review the amendment I sent on [DATE] and let me know your decision.\n\n// Step 3 — Deadline for Decision\n{{CLIENT_NAME}}, I need a decision on the scope amendment by [DATE] so I can plan my schedule accordingly. If I don't hear back, I'll proceed with the original scope only. Either way, I'm committed to delivering excellent work on what's been agreed. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#63",
+        "title": "Personal Trainer Client Requesting Nutrition Plans (Trainer)",
+        "body": "// Step 1 — Initial Boundary\n{{CLIENT_NAME}}, nutrition planning isn't included in your training package. Your plan covers [INCLUDED SERVICES]. I offer nutrition coaching as a separate add-on at [RATE/MONTH]. Let me know if you'd like me to send the details.\n\n// Step 2 — Repeated Request\n{{CLIENT_NAME}}, I understand nutrition feels connected to your goals. However, it's a separate service that requires dedicated time and expertise. I'm not able to include it in your current training sessions. If you'd like to add it, I'll send the proposal today."
+      },
+      {
+        "num": "#64",
+        "title": "Client Requesting Raw Files Not in Agreement (Photographer)",
+        "body": "// Step 1 — Clarification\n{{CLIENT_NAME}}, your package includes [NUMBER] edited digital images. Raw/unedited files are not included in this package. If you'd like to purchase the raw files, they're available for an additional [AMOUNT]. Let me know if you'd like to add that.\n\n// Step 2 — Firm Hold\n{{CLIENT_NAME}}, I understand you'd prefer to have the raws. My policy on this is consistent across all clients. Raw files are a separate purchase. The edited images you've received are the final deliverables under our agreement. Let me know if you'd like to purchase the raws separately.\n\n// Step 3 — Final Statement\n{{CLIENT_NAME}}, I've explained the raw file policy twice now. The edited images are your deliverables. Raws are available at the price I quoted. I won't be releasing them without that purchase. This is a standard practice and it's non-negotiable. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#65",
+        "title": "Accountant Client Requesting Business Advisory (Accountant)",
+        "body": "// Step 1 — Scope Reminder\n{{CLIENT_NAME}}, the questions you're raising fall into business advisory rather than standard accounting. Your engagement covers [TAX/BAS/BOOKKEEPING]. Advisory services are available at [RATE/HOUR]. I can schedule an advisory session if you'd like.\n\n// Step 2 — Enforcing the Boundary\n{{CLIENT_NAME}}, I've noticed several recent requests that fall under advisory work. I want to help, but I need to charge appropriately for the time and expertise involved. Going forward, advisory questions will be handled in paid sessions only. Let me know if you'd like to book one."
+      },
+      {
+        "num": "#66",
+        "title": "Agency Client Expanding Campaign Scope (Agency)",
+        "body": "// Step 1 — Flag the Expansion\n{{CLIENT_NAME}}, the campaign deliverables have expanded beyond what was scoped. The original agreement covers [ORIGINAL SCOPE]. The additions you've requested represent approximately [HOURS/AMOUNT] in additional work. I'll send a change order for your approval.\n\n// Step 2 — Hold Pending Approval\n{{CLIENT_NAME}}, I've sent the change order on [DATE] and haven't received approval yet. I'm unable to begin the additional work until it's signed and the deposit is received. The original campaign deliverables remain on schedule.\n\n// Step 3 — Final Position\n{{CLIENT_NAME}}, I need the change order resolved. If approved, I'll begin the additional work immediately. If not, I'll deliver the original scope as agreed and we can revisit the additions in a future campaign. I need your decision by [DATE]. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      }
+    ],
+    "Retainer Boundaries": [
+      {
+        "num": "#67",
+        "title": "Hours Exceeded This Month (Agency)",
+        "body": "{{CLIENT_NAME}}, you've used all [NUMBER] retainer hours for this month. Additional work is billed at [OVERAGE RATE] per hour. I can continue working if you authorize the overage, or we can pause non-essential tasks until your hours reset on [DATE]. Let me know your preference. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#68",
+        "title": "Retainer Does Not Include Emergency Calls (Consultant)",
+        "body": "{{CLIENT_NAME}}, I'm happy to help with urgent matters, but after-hours emergency calls are not included in your retainer. Your retainer covers [INCLUDED SERVICES] during [BUSINESS HOURS]. I offer an emergency response add-on at [RATE] per incident. Would you like me to add that to your plan? - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#69",
+        "title": "Unused Hours Don't Roll Over (Web Dev)",
+        "body": "{{CLIENT_NAME}}, I understand you'd like to carry last month's unused hours forward. As outlined in our retainer agreement, hours don't roll over between months. Your [NUMBER] hours for this month reset on [DATE]. I'd recommend prioritizing your most important tasks within the current allocation. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#70",
+        "title": "Retainer Is for Maintenance, Not New Builds (Web Dev)",
+        "body": "{{CLIENT_NAME}}, the work you've described is a new build, not maintenance. Your retainer covers updates, bug fixes, and minor content changes. A new section or feature requires a separate project quote. I can send one through if you'd like to proceed, but it won't come out of your retainer hours. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#71",
+        "title": "Multiple Team Members Submitting Requests (Agency)",
+        "body": "{{CLIENT_NAME}}, I've been receiving requests from several people on your team. To keep things organized and within your retainer hours, I need a single point of contact for task submissions. All requests should come through [DESIGNATED CONTACT] or be submitted via [METHOD]. This ensures nothing gets missed or double-handled. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#72",
+        "title": "Retainer Scope Doesn't Cover Third-Party Tools (Consultant)",
+        "body": "{{CLIENT_NAME}}, your retainer covers [INCLUDED SERVICES]. Troubleshooting or managing third-party tools like [TOOL NAME] is outside that scope. I can help on an ad-hoc basis at [RATE/HOUR], or I'd recommend contacting [TOOL NAME] support directly for tool-specific issues. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#73",
+        "title": "Monthly Retainer Usage Report (Agency)",
+        "body": "{{CLIENT_NAME}}, here's your retainer usage for this month: [HOURS USED] of [TOTAL HOURS] used. Remaining: [REMAINING HOURS]. Top tasks: [TASK SUMMARY]. Hours reset on [DATE]. If you'd like to increase your retainer to cover recurring overages, I can send updated pricing. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#74",
+        "title": "Retainer Cancellation Terms Reminder",
+        "body": "{{CLIENT_NAME}}, I understand you're considering pausing or cancelling your retainer. As per our agreement, cancellation requires [NOTICE PERIOD] written notice. Your current period runs until [END DATE]. If you'd like to downgrade instead, I can offer alternative packages. Let me know how you'd like to proceed. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      }
+    ],
+    "Persistent Objections": [
+      {
+        "num": "#75",
+        "title": "Client Keeps Pushing After Price Was Confirmed",
+        "body": "{{CLIENT_NAME}}, I understand you'd like a lower price. The rate I quoted reflects the scope, quality, and timeframe involved. It's consistent with what I charge all clients at {{BUSINESS_NAME}}. The price is firm. If the budget doesn't work, I can suggest reducing the scope to bring the cost down. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#76",
+        "title": "Client Disputing a Policy Already Explained (Photographer)",
+        "body": "{{CLIENT_NAME}}, I understand this policy may not be what you expected. However, my position on [POLICY] was clearly outlined in the agreement you signed on [DATE]. I apply this consistently and I'm not able to make exceptions. I'm happy to answer any other questions, but the policy itself will not change. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#77",
+        "title": "Client Wanting to Revisit a Closed Decision (Contractor)",
+        "body": "{{CLIENT_NAME}}, we discussed this on [DATE] and reached a decision. Reopening it at this stage would delay the project and potentially increase costs. I made the recommendation based on [REASON], and I stand by it. I need us to move forward with what was agreed. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#78",
+        "title": "Client Challenging Your Professional Recommendation (Accountant)",
+        "body": "{{CLIENT_NAME}}, I hear your concerns. My recommendation is based on [PROFESSIONAL REASONING/COMPLIANCE REQUIREMENT]. I wouldn't recommend something I didn't believe was in your best interest. If you'd like a second opinion, I encourage it. But I won't change my advice to something I can't professionally stand behind. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#79",
+        "title": "Client Disagreeing with Project Direction After Approval (Agency)",
+        "body": "{{CLIENT_NAME}}, you approved this direction on [DATE] and work has progressed based on that approval. Changing direction now would mean [CONSEQUENCE - e.g., restarting from scratch, additional cost of $X, delay of X weeks]. If you'd like to pivot, I'll need a new brief and revised budget. Otherwise, I'll continue as approved. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#80",
+        "title": "Client Insisting on DIY Fix After Being Advised Against It (Plumber)",
+        "body": "{{CLIENT_NAME}}, I've given you my professional assessment. Attempting that fix without the right tools and experience could lead to [CONSEQUENCE]. I'm not able to endorse or support a DIY approach on this. If you choose to go ahead on your own, that's your decision, but I want it on record that my recommendation was [RECOMMENDATION]. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#81",
+        "title": "Client Repeatedly Requesting a Refund After Delivery (Coach)",
+        "body": "{{CLIENT_NAME}}, I understand your position. As discussed, the sessions were delivered as agreed and the refund policy in our agreement does not cover completed sessions. I've addressed this request on [PREVIOUS DATE] and my position has not changed. I value you as a client, but I'm not able to revisit this further. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#82",
+        "title": "Client Wanting Guarantees You Cannot Provide (Consultant)",
+        "body": "{{CLIENT_NAME}}, I understand you'd like guaranteed results. I can guarantee the quality and thoroughness of my work, but I'm not able to guarantee specific outcomes that depend on factors outside my control. What I can promise is [WHAT YOU CAN GUARANTEE]. That's the professional standard I hold at {{BUSINESS_NAME}}, and I stand behind it fully. - {{YOUR_FIRST_NAME}}"
+      }
+    ],
+    "Entitlement": [
+      {
+        "num": "#83",
+        "title": "Client Expecting Immediate Response at All Hours",
+        "body": "{{CLIENT_NAME}}, I received your messages overnight. My working hours at {{BUSINESS_NAME}} are [HOURS], and I respond to all messages within [TIMEFRAME] during those hours. I'm not available for immediate responses outside business hours. If you need faster turnaround, I offer a priority support add-on at [RATE]. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#84",
+        "title": "Client Demanding They Be Prioritized Over Others",
+        "body": "{{CLIENT_NAME}}, I understand your project feels urgent. I manage multiple clients at {{BUSINESS_NAME}} and give each one fair attention according to their agreed timeline. Your project is on track for [DEADLINE]. If you need priority scheduling, I can offer a rush fee arrangement, but I won't deprioritize other clients to accommodate. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#85",
+        "title": "Client Expecting Free Work Because of Past Spend",
+        "body": "{{CLIENT_NAME}}, I appreciate your loyalty to {{BUSINESS_NAME}} and the projects we've done together. Every project is scoped and priced individually. Previous spend doesn't create a credit toward future work. I'm happy to discuss a retainer arrangement if you'd like predictable ongoing support, but each engagement stands on its own. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#86",
+        "title": "Client Bypassing Process and Contacting You Directly (Agency)",
+        "body": "{{CLIENT_NAME}}, I appreciate you reaching out directly, but all project requests need to go through [PROCESS/CHANNEL]. This ensures nothing gets lost and your requests are actioned in order. I'm not able to accept tasks submitted outside our agreed workflow. Please resubmit through [CHANNEL] and I'll get to it promptly. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#87",
+        "title": "Client Requesting You Work Over a Holiday",
+        "body": "{{CLIENT_NAME}}, {{BUSINESS_NAME}} is closed on [HOLIDAY/DATES] and I won't be available for work during that period. I've planned the project timeline to account for this. If you need something before then, let me know by [DATE] and I'll make sure it's handled before I'm offline. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#88",
+        "title": "Client Comparing Your Rates to a Cheaper Provider",
+        "body": "{{CLIENT_NAME}}, I'm aware there are providers who charge less. My pricing at {{BUSINESS_NAME}} reflects my experience, the quality of deliverables, and the level of service I provide. I'm not in a position to match competitor rates, and I don't compete on price. If my services are the right fit, I'd love to work with you. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#89",
+        "title": "Client Expecting You to Manage Their Team (Consultant)",
+        "body": "{{CLIENT_NAME}}, my role at {{BUSINESS_NAME}} is to provide [YOUR SERVICE]. Managing your internal team members, chasing them for deliverables, or mediating between departments is outside my scope. I can provide recommendations, but execution and people management sit with your team. Let me know if you'd like to refine our working arrangement. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#90",
+        "title": "Client Insisting on Unlimited Revisions",
+        "body": "{{CLIENT_NAME}}, I understand you want the final product to be right. Your package includes [NUMBER] rounds of revisions, which I've found is sufficient for most projects. Unlimited revisions aren't something I offer because they make it impossible to manage timelines and resources. If you'd like additional rounds, they're available at [RATE] per round. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      }
+    ],
+    "Relationship Reset": [
+      {
+        "num": "#91",
+        "title": "Resetting Expectations After Informal Start",
+        "body": "{{CLIENT_NAME}}, I've enjoyed working with you, and I want to make sure things run smoothly going forward. I'm moving all my client relationships at {{BUSINESS_NAME}} to a more structured process. From now on, all requests will need to be submitted in writing, and work will follow a signed scope and payment schedule. I'll send the updated terms this week. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#92",
+        "title": "Re-establishing Communication Boundaries",
+        "body": "{{CLIENT_NAME}}, I need to re-establish some communication boundaries. Going forward, please contact me during business hours only ([HOURS]) via {{BUSINESS_EMAIL}} or {{BUSINESS_PHONE}}. Personal social media, after-hours texts, and unscheduled calls are not part of our professional arrangement. I'll respond to all messages received during business hours within [TIMEFRAME]. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#93",
+        "title": "Moving from Friend Pricing to Standard Rates",
+        "body": "{{CLIENT_NAME}}, when we started working together, I offered discounted rates. As {{BUSINESS_NAME}} has grown, I've standardized my pricing for all clients. Effective [DATE], your rate will move to [NEW RATE]. This reflects the full value of the service and ensures I can continue to deliver quality work. I appreciate your understanding. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#94",
+        "title": "Formalizing a Verbal Agreement",
+        "body": "{{CLIENT_NAME}}, I realize we've been working off verbal agreements up to this point. To protect both of us, I'd like to put a formal agreement in place. I've drafted one that reflects our current arrangement: [SCOPE SUMMARY]. Please review, sign, and return it by [DATE]. All future work will follow this process. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      },
+      {
+        "num": "#95",
+        "title": "Declining to Continue Under Current Terms",
+        "body": "{{CLIENT_NAME}}, I've valued our working relationship. After reviewing how things have been going, I've decided I can only continue under updated terms. The new terms include [KEY CHANGES]. I'll send the revised agreement this week. If these terms don't work for you, I understand, and I'll ensure a smooth transition to another provider. - {{YOUR_FIRST_NAME}}, {{BUSINESS_NAME}}"
+      }
+    ],
+    "Pricing Pushback": [
+      {
+        "num": "#96",
+        "title": "Client Asking for a Bulk Discount (Photographer)",
+        "body": "// Step 1 — Clear Decline\n{{CLIENT_NAME}}, I appreciate the volume of work. My pricing at {{BUSINESS_NAME}} is per-session and already reflects a competitive rate for the quality delivered. I don't offer bulk discounts. The quoted rate of [AMOUNT] per session is my standard and applies to all clients.\n\n// Step 2 — Final Position\n{{CLIENT_NAME}}, I understand you'd like a different arrangement. My rate is firm. If budget is a constraint, I can suggest a smaller package that fits your budget while still delivering professional results. Otherwise, I'd need you to confirm the original quote to proceed. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#97",
+        "title": "Client Saying \"My Last Provider Was Cheaper\" (Web Dev)",
+        "body": "// Step 1 — Acknowledge Without Budging\n{{CLIENT_NAME}}, I understand your previous provider had different pricing. My rates at {{BUSINESS_NAME}} are based on my experience, deliverable quality, and the support included. I'm confident in the value I provide at [AMOUNT]. I'm not in a position to adjust based on another provider's pricing.\n\n// Step 2 — Close the Loop\n{{CLIENT_NAME}}, I've given this thought and my pricing stands as quoted. If you'd like to explore a reduced scope to fit your budget, I can offer options. Otherwise, I'd need a decision by [DATE] so I can manage my schedule. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#98",
+        "title": "Client Offering \"Exposure\" Instead of Payment (Graphic Designer)",
+        "body": "// Step 1 — Respectful Decline\n{{CLIENT_NAME}}, I appreciate the offer, but {{BUSINESS_NAME}} operates on paid engagements only. Exposure doesn't cover the time, tools, and expertise that go into the work. I'd be happy to work with you on a paid basis. Here's what I can offer within [BUDGET RANGE].\n\n// Step 2 — Final Word\n{{CLIENT_NAME}}, my position on this hasn't changed. All work at {{BUSINESS_NAME}} is paid work. If your budget allows for a paid engagement in the future, I'd welcome the conversation. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#99",
+        "title": "Client Requesting Payment After Delivery (Contractor)",
+        "body": "// Step 1 — Decline\n{{CLIENT_NAME}}, my payment terms at {{BUSINESS_NAME}} require [DEPOSIT PERCENTAGE] upfront before work begins. This is standard across all projects and protects both parties. I'm not able to begin work on a post-delivery payment basis. Once the deposit is received, I'll schedule your start date.\n\n// Step 2 — Hold Firm\n{{CLIENT_NAME}}, I understand that's not your preference. My terms are non-negotiable on this point. The deposit ensures I can allocate time and resources to your project. If you'd like to proceed, please arrange the deposit of [AMOUNT] by [DATE]. - {{YOUR_FIRST_NAME}}"
+      },
+      {
+        "num": "#100",
+        "title": "Client Asking to \"Just Do This One Thing for Free\" (Personal Trainer)",
+        "body": "// Step 1 — Set the Boundary\n{{CLIENT_NAME}}, I understand it seems like a small request. Even small tasks require my time and expertise, and I price my services accordingly. I'm not able to do this one for free. I can add it to your next session, or I can quote it as a standalone. Let me know what works.\n\n// Step 2 — Reinforce\n{{CLIENT_NAME}}, I appreciate your understanding. My approach at {{BUSINESS_NAME}} is to charge fairly for all work, regardless of size. If you'd like to add this to a paid session, I'm happy to accommodate. Otherwise, I'll focus on your current plan as agreed. - {{YOUR_FIRST_NAME}}"
+      }
+    ]
+  }
+}
