@@ -29,11 +29,6 @@ async function testAlwaysReturnsSuccessForKnownEmail() {
       },
       sendEmail: async (email, token) => {
         emailSentTo = email;
-        const expectedUrl = `https://textboss.com.au/reset-password.html?token=${encodeURIComponent(capturedCreateToken)}`;
-        assert.ok(
-          token === capturedCreateToken || expectedUrl.includes(token),
-          "sendEmail received token should match the one created"
-        );
         assert.equal(token, capturedCreateToken);
       },
     }
