@@ -13,6 +13,9 @@ function makeHandler(entitlement, overrides = {}) {
 async function testAlwaysReturnsSuccessForKnownEmail() {
   let tokenSaved = null;
   let emailSentTo = null;
+  let capturedExpiresAt = null;
+
+  const now = Date.now();
 
   const handler = makeHandler(
     { email: "sub@example.com", entitled_tier: "Pro", subscription_status: "active" },
@@ -22,6 +25,7 @@ async function testAlwaysReturnsSuccessForKnownEmail() {
         assert.ok(typeof token === "string" && token.length === 64, "token should be 32 bytes hex");
         assert.ok(expiresAt instanceof Date && expiresAt > new Date(), "expiresAt should be in the future");
         tokenSaved = token;
+        capturedExpiresAt = expiresAt;
       },
       sendEmail: async (email, token) => {
         emailSentTo = email;
@@ -36,13 +40,18 @@ async function testAlwaysReturnsSuccessForKnownEmail() {
   assert.deepEqual(JSON.parse(response.body), { ok: true });
   assert.ok(tokenSaved !== null, "token should have been created");
   assert.equal(emailSentTo, "sub@example.com");
+
+  const oneHourMs = 60 * 60 * 1000;
+  assert.ok(capturedExpiresAt >= new Date(now + oneHourMs - 2000), 'expires too early');
+  assert.ok(capturedExpiresAt <= new Date(now + oneHourMs + 2000), 'expires too late');
 }
 
 async function testAlwaysReturnsSuccessForUnknownEmail() {
   let createTokenCalled = false;
+  let sendEmailCalled = false;
   const handler = makeHandler(null, {
     createToken: async () => { createTokenCalled = true; },
-    sendEmail:   async () => {},
+    sendEmail:   async () => { sendEmailCalled = true; },
   });
 
   const response = await handler({ httpMethod: "POST", body: JSON.stringify({ email: "nobody@example.com" }) });
@@ -50,6 +59,7 @@ async function testAlwaysReturnsSuccessForUnknownEmail() {
   assert.equal(response.statusCode, 200);
   assert.deepEqual(JSON.parse(response.body), { ok: true });
   assert.equal(createTokenCalled, false, "should not create token for unknown email");
+  assert.equal(sendEmailCalled, false, "should not send email for unknown email");
 }
 
 async function testDeletesExistingTokensBeforeCreating() {

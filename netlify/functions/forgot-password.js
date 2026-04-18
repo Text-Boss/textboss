@@ -22,9 +22,9 @@ function createHandler(deps) {
     try {
       const entitlement = await findEntitlementByEmail(email);
       if (entitlement) {
+        await deleteTokensByEmail(email);
         const token     = crypto.randomBytes(32).toString("hex");
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-        await deleteTokensByEmail(email);
         await createToken(email, token, expiresAt);
         await sendEmail(email, token);
       }
