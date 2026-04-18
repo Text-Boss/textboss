@@ -1,13 +1,6 @@
 const crypto = require("node:crypto");
 const { createEntitlementStore, createPasswordResetTokenStore } = require("./_lib/supabase");
-
-function json(statusCode, body, headers = {}) {
-  return {
-    statusCode,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...headers },
-    body: JSON.stringify(body),
-  };
-}
+const { json } = require("./_lib/http");
 
 function createHandler(deps) {
   const { findEntitlementByEmail, deleteTokensByEmail, createToken, sendEmail } = deps;
@@ -29,14 +22,11 @@ function createHandler(deps) {
     try {
       const entitlement = await findEntitlementByEmail(email);
       if (entitlement) {
-        const status = String(entitlement.subscription_status || "").trim().toLowerCase();
-        if (status === "active" || status === "trialing") {
-          const token     = crypto.randomBytes(32).toString("hex");
-          const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-          await deleteTokensByEmail(email);
-          await createToken(email, token, expiresAt);
-          await sendEmail(email, token);
-        }
+        const token     = crypto.randomBytes(32).toString("hex");
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+        await deleteTokensByEmail(email);
+        await createToken(email, token, expiresAt);
+        await sendEmail(email, token);
       }
     } catch (err) {
       console.error("[forgot-password] error:", err?.message || err);

@@ -54,14 +54,35 @@ async function testAlwaysReturnsSuccessForUnknownEmail() {
 
 async function testDeletesExistingTokensBeforeCreating() {
   const deletedEmails = [];
+  const callOrder = [];
   const handler = makeHandler(
     { email: "u@example.com", entitled_tier: "Core", subscription_status: "active" },
-    { deleteTokensByEmail: async (email) => deletedEmails.push(email) }
+    {
+      deleteTokensByEmail: async (email) => { callOrder.push("delete"); deletedEmails.push(email); },
+      createToken:         async () => { callOrder.push("create"); },
+    }
   );
 
   await handler({ httpMethod: "POST", body: JSON.stringify({ email: "u@example.com" }) });
 
   assert.ok(deletedEmails.includes("u@example.com"), "should delete existing tokens first");
+  assert.equal(callOrder[0], "delete", "delete should be called before create");
+  assert.equal(callOrder[1], "create", "create should be called after delete");
+}
+
+async function testErrorsAreSwallowed() {
+  const { createHandler } = require("../netlify/functions/forgot-password");
+  const handler = createHandler({
+    findEntitlementByEmail: async () => { throw new Error("db exploded"); },
+    deleteTokensByEmail:    async () => {},
+    createToken:            async () => {},
+    sendEmail:              async () => {},
+  });
+
+  const response = await handler({ httpMethod: "POST", body: JSON.stringify({ email: "err@example.com" }) });
+
+  assert.equal(response.statusCode, 200);
+  assert.deepEqual(JSON.parse(response.body), { ok: true });
 }
 
 async function testRejectsNonPost() {
@@ -83,6 +104,7 @@ async function run() {
   await testDeletesExistingTokensBeforeCreating();
   await testRejectsNonPost();
   await testMissingEmailReturns400();
+  await testErrorsAreSwallowed();
   console.log("forgot-password tests passed");
 }
 
