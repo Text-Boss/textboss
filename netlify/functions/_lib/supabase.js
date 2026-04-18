@@ -24,7 +24,7 @@ function createEntitlementStore(options = {}) {
       const normalizedEmail = String(email || "").trim().toLowerCase();
       const { data, error } = await client
         .from("entitlements")
-        .select("email, entitled_tier, subscription_status, current_period_end, updated_at")
+        .select("email, entitled_tier, subscription_status, current_period_end, updated_at, password_hash")
         .ilike("email", normalizedEmail)
         .maybeSingle();
 
@@ -33,6 +33,15 @@ function createEntitlementStore(options = {}) {
       }
 
       return data;
+    },
+
+    async updatePasswordHash(email, hash) {
+      const normalizedEmail = String(email || "").trim().toLowerCase();
+      const { error } = await client
+        .from("entitlements")
+        .update({ password_hash: hash, updated_at: new Date().toISOString() })
+        .ilike("email", normalizedEmail);
+      if (error) throw error;
     },
   };
 }
@@ -474,6 +483,47 @@ function createBusyBlockStore(options = {}) {
   };
 }
 
+function createPasswordResetTokenStore(options = {}) {
+  const client = options.client || createServiceRoleClient();
+
+  return {
+    async createToken(email, token, expiresAt) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { error } = await client
+        .from("password_reset_tokens")
+        .insert({ token, email: normalized, expires_at: expiresAt.toISOString() });
+      if (error) throw error;
+    },
+
+    async findToken(token) {
+      const { data, error } = await client
+        .from("password_reset_tokens")
+        .select("token, email, expires_at, used_at")
+        .eq("token", token)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+
+    async markTokenUsed(token) {
+      const { error } = await client
+        .from("password_reset_tokens")
+        .update({ used_at: new Date().toISOString() })
+        .eq("token", token);
+      if (error) throw error;
+    },
+
+    async deleteTokensByEmail(email) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { error } = await client
+        .from("password_reset_tokens")
+        .delete()
+        .ilike("email", normalized);
+      if (error) throw error;
+    },
+  };
+}
+
 exports.createServiceRoleClient      = createServiceRoleClient;
 exports.createEntitlementStore       = createEntitlementStore;
 exports.createAvailabilityStore      = createAvailabilityStore;
@@ -483,3 +533,4 @@ exports.createPushSubscriptionStore  = createPushSubscriptionStore;
 exports.createPublicBookingStore     = createPublicBookingStore;
 exports.createFollowUpStore          = createFollowUpStore;
 exports.createBusyBlockStore         = createBusyBlockStore;
+exports.createPasswordResetTokenStore = createPasswordResetTokenStore;
