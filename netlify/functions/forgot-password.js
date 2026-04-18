@@ -1,22 +1,22 @@
 const crypto = require("node:crypto");
 const { createEntitlementStore, createPasswordResetTokenStore } = require("./_lib/supabase");
-const { json } = require("./_lib/http");
+const { json, denied } = require("./_lib/http");
 
 function createHandler(deps) {
   const { findEntitlementByEmail, deleteTokensByEmail, createToken, sendEmail } = deps;
 
   return async function handler(event) {
     if (event.httpMethod !== "POST") {
-      return json(405, { ok: false, denied: true, reason: "method_not_allowed" });
+      return denied(405, "method_not_allowed");
     }
 
     let body;
     try { body = event.body ? JSON.parse(event.body) : {}; } catch {
-      return json(400, { ok: false, denied: true, reason: "invalid_json" });
+      return denied(400, "invalid_json");
     }
 
     const email = String(body.email || "").trim().toLowerCase();
-    if (!email) return json(400, { ok: false, denied: true, reason: "missing_email" });
+    if (!email) return denied(400, "missing_email");
 
     // Always return success — never reveal whether email is on file
     try {
@@ -44,18 +44,18 @@ function createRuntimeHandler(overrides = {}) {
     tokenStore       = overrides.tokenStore       || createPasswordResetTokenStore();
   } catch (err) {
     console.error("[forgot-password] store init failed:", err);
-    return async () => json(500, { ok: false, denied: true, reason: "store_init_failed" });
+    return async () => denied(500, "store_init_failed");
   }
 
   const { Resend } = require("resend");
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
   return createHandler({
     findEntitlementByEmail: (email) => entitlementStore.findEntitlementByEmail(email),
     deleteTokensByEmail:    (email) => tokenStore.deleteTokensByEmail(email),
     createToken:            (email, token, expiresAt) => tokenStore.createToken(email, token, expiresAt),
     sendEmail: async (email, token) => {
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      const resetUrl = `https://textboss.com.au/reset-password.html?token=${token}`;
+      const resetUrl = `https://textboss.com.au/reset-password.html?token=${encodeURIComponent(token)}`;
       await resend.emails.send({
         from:    "Text Boss <onboarding@resend.dev>",
         to:      email,
@@ -79,7 +79,7 @@ async function handler(event, context) {
     return await createRuntimeHandler()(event, context);
   } catch (err) {
     console.error("[forgot-password] unhandled error:", err?.message || err);
-    return json(500, { ok: false, denied: true, reason: "server_error" });
+    return denied(500, "server_error");
   }
 }
 

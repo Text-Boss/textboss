@@ -11,7 +11,7 @@ function makeHandler(entitlement, overrides = {}) {
 }
 
 async function testAlwaysReturnsSuccessForKnownEmail() {
-  let tokenSaved = null;
+  let capturedToken = null;
   let emailSentTo = null;
   let capturedExpiresAt = null;
 
@@ -24,12 +24,17 @@ async function testAlwaysReturnsSuccessForKnownEmail() {
         assert.equal(email, "sub@example.com");
         assert.ok(typeof token === "string" && token.length === 64, "token should be 32 bytes hex");
         assert.ok(expiresAt instanceof Date && expiresAt > new Date(), "expiresAt should be in the future");
-        tokenSaved = token;
+        capturedToken = token;
         capturedExpiresAt = expiresAt;
       },
       sendEmail: async (email, token) => {
         emailSentTo = email;
-        assert.equal(token, tokenSaved);
+        assert.ok(capturedToken !== null, "createToken must have been called before sendEmail");
+        assert.ok(
+          token === capturedToken || `https://textboss.com.au/reset-password.html?token=${encodeURIComponent(capturedToken)}`.includes(token),
+          "sendEmail received token should match the one created"
+        );
+        assert.equal(token, capturedToken);
       },
     }
   );
@@ -38,7 +43,7 @@ async function testAlwaysReturnsSuccessForKnownEmail() {
 
   assert.equal(response.statusCode, 200);
   assert.deepEqual(JSON.parse(response.body), { ok: true });
-  assert.ok(tokenSaved !== null, "token should have been created");
+  assert.ok(capturedToken !== null, "token should have been created");
   assert.equal(emailSentTo, "sub@example.com");
 
   const oneHourMs = 60 * 60 * 1000;
@@ -82,10 +87,12 @@ async function testDeletesExistingTokensBeforeCreating() {
 
 async function testErrorsAreSwallowed() {
   const { createHandler } = require("../netlify/functions/forgot-password");
+  let deleteTokensCalled = false;
+  let createTokenCalled = false;
   const handler = createHandler({
     findEntitlementByEmail: async () => { throw new Error("db exploded"); },
-    deleteTokensByEmail:    async () => {},
-    createToken:            async () => {},
+    deleteTokensByEmail:    async () => { deleteTokensCalled = true; },
+    createToken:            async () => { createTokenCalled = true; },
     sendEmail:              async () => {},
   });
 
@@ -93,6 +100,8 @@ async function testErrorsAreSwallowed() {
 
   assert.equal(response.statusCode, 200);
   assert.deepEqual(JSON.parse(response.body), { ok: true });
+  assert.equal(deleteTokensCalled, false, "deleteTokensByEmail should NOT be called when findEntitlementByEmail throws");
+  assert.equal(createTokenCalled, false, "createToken should NOT be called when findEntitlementByEmail throws");
 }
 
 async function testRejectsNonPost() {
