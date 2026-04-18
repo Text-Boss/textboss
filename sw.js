@@ -1,12 +1,22 @@
 /**
  * sw.js — Text Boss service worker
  *
- * Handles Web Push notification delivery.
+ * Handles Web Push notification delivery and app shell caching for offline use.
  * Register from the scheduler app pages:
  *   navigator.serviceWorker.register('/sw.js')
  */
 
 const CACHE_NAME = "textboss-v1";
+
+const APP_SHELL_CACHE = "tb-shell-v1";
+const APP_SHELL_FILES = [
+  "/app.html",
+  "/app-mobile.css",
+  "/app-client.js",
+  "/scheduler-client.js",
+  "/prompts-data.json",
+  "/manifest.json",
+];
 
 // ── Push event: show notification ────────────────────────────────────────────
 self.addEventListener("push", (event) => {
@@ -58,6 +68,46 @@ self.addEventListener("notificationclick", (event) => {
   );
 });
 
-// ── Install / activate: no caching strategy needed (push-only SW) ────────────
-self.addEventListener("install",  () => self.skipWaiting());
-self.addEventListener("activate", (event) => event.waitUntil(clients.claim()));
+// ── Install: cache app shell files and skip waiting ───────────────────────────
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(APP_SHELL_CACHE).then((cache) => cache.addAll(APP_SHELL_FILES))
+  );
+  self.skipWaiting();
+});
+
+// ── Activate: clean up old tb-shell-* caches and claim clients ────────────────
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((key) => key.startsWith("tb-shell-") && key !== APP_SHELL_CACHE)
+          .map((key) => caches.delete(key))
+      )
+    ).then(() => self.clients.claim())
+  );
+});
+
+// ── Fetch: network-first with shell cache fallback (skip API calls) ───────────
+self.addEventListener("fetch", (event) => {
+  const url = event.request.url;
+
+  // Let API calls pass through naturally — no service worker interception
+  if (url.includes("/.netlify/functions/")) return;
+
+  event.respondWith(
+    fetch(event.request)
+      .then((networkResponse) => {
+        // Optionally update the cache with a fresh copy on network success
+        return networkResponse;
+      })
+      .catch(() =>
+        caches.match(event.request).then((cached) => {
+          if (cached) return cached;
+          // Final fallback: serve the app shell root
+          return caches.match("/app.html");
+        })
+      )
+  );
+});
