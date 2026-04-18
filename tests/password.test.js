@@ -35,12 +35,21 @@ async function testMalformedStoredReturnsFalse() {
   assert.equal(verifyPassword("anything", ":"), false);
 }
 
+async function testNullPlaintextReturnsFalse() {
+  const { hashPassword, verifyPassword } = require("../netlify/functions/_lib/password");
+  const stored = hashPassword("some-password");
+  assert.equal(verifyPassword(null, stored), false);
+  assert.equal(verifyPassword(undefined, stored), false);
+  assert.equal(verifyPassword("", stored), false);
+}
+
 async function run() {
   await testHashIsDifferentEachTime();
   await testHashHasSaltColonHashFormat();
   await testCorrectPasswordVerifies();
   await testWrongPasswordFails();
   await testMalformedStoredReturnsFalse();
+  await testNullPlaintextReturnsFalse();
   console.log("password tests passed");
 }
 

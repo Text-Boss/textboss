@@ -12,6 +12,7 @@ function hashPassword(plaintext) {
 }
 
 function verifyPassword(plaintext, stored) {
+  if (!plaintext) return false;
   const parts = String(stored || "").split(":");
   if (parts.length !== 2 || !parts[0] || !parts[1]) return false;
   const [salt, expectedHash] = parts;
