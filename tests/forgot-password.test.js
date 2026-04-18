@@ -11,7 +11,7 @@ function makeHandler(entitlement, overrides = {}) {
 }
 
 async function testAlwaysReturnsSuccessForKnownEmail() {
-  let capturedToken = null;
+  let capturedCreateToken = null;
   let emailSentTo = null;
   let capturedExpiresAt = null;
 
@@ -24,17 +24,17 @@ async function testAlwaysReturnsSuccessForKnownEmail() {
         assert.equal(email, "sub@example.com");
         assert.ok(typeof token === "string" && token.length === 64, "token should be 32 bytes hex");
         assert.ok(expiresAt instanceof Date && expiresAt > new Date(), "expiresAt should be in the future");
-        capturedToken = token;
+        capturedCreateToken = token;
         capturedExpiresAt = expiresAt;
       },
       sendEmail: async (email, token) => {
         emailSentTo = email;
-        assert.ok(capturedToken !== null, "createToken must have been called before sendEmail");
+        const expectedUrl = `https://textboss.com.au/reset-password.html?token=${encodeURIComponent(capturedCreateToken)}`;
         assert.ok(
-          token === capturedToken || `https://textboss.com.au/reset-password.html?token=${encodeURIComponent(capturedToken)}`.includes(token),
+          token === capturedCreateToken || expectedUrl.includes(token),
           "sendEmail received token should match the one created"
         );
-        assert.equal(token, capturedToken);
+        assert.equal(token, capturedCreateToken);
       },
     }
   );
@@ -43,7 +43,7 @@ async function testAlwaysReturnsSuccessForKnownEmail() {
 
   assert.equal(response.statusCode, 200);
   assert.deepEqual(JSON.parse(response.body), { ok: true });
-  assert.ok(capturedToken !== null, "token should have been created");
+  assert.ok(capturedCreateToken !== null, "token should have been created");
   assert.equal(emailSentTo, "sub@example.com");
 
   const oneHourMs = 60 * 60 * 1000;
