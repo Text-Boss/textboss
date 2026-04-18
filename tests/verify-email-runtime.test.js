@@ -9,17 +9,19 @@ async function testRuntimeHandlerUsesSharedDeps() {
         email,
         entitled_tier: "Pro",
         subscription_status: "active",
+        password_hash: "salt:hash",
       }),
     },
     sessionLib: {
       createSessionCookie: ({ email, tier }) =>
         `textboss_session=${email}:${tier}; Path=/; HttpOnly; SameSite=Lax`,
     },
+    verifyPassword: () => true,
   });
 
   const response = await handler({
     httpMethod: "POST",
-    body: JSON.stringify({ email: "Pro@Example.com" }),
+    body: JSON.stringify({ email: "Pro@Example.com", password: "any" }),
   });
 
   assert.equal(response.statusCode, 200);
