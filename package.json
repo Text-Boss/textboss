@@ -23,6 +23,7 @@
   "homepage": "https://github.com/Text-Boss/textboss#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.95.3",
+    "resend": "^6.12.0",
     "stripe": "^20.3.1",
     "web-push": "^3.6.7"
   },
