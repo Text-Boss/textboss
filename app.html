@@ -256,6 +256,10 @@
   let schedulerInitialised = false;
   let promptsLoaded = false;
 
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
   // Boot: verify session
   async function boot() {
     try {
@@ -427,12 +431,21 @@
       const time    = item.querySelector('.thread-time')?.textContent || '';
       const row = document.createElement('div');
       row.className = 'thread-row';
-      row.innerHTML =
-        '<div class="thread-row-top">' +
-          '<span class="thread-row-name">' + name + '</span>' +
-          '<span class="thread-row-time">' + time + '</span>' +
-        '</div>' +
-        '<div class="thread-row-preview">' + preview + '</div>';
+      const top = document.createElement('div');
+      top.className = 'thread-row-top';
+      const nameEl = document.createElement('span');
+      nameEl.className = 'thread-row-name';
+      nameEl.textContent = name;
+      const timeEl = document.createElement('span');
+      timeEl.className = 'thread-row-time';
+      timeEl.textContent = time;
+      top.appendChild(nameEl);
+      top.appendChild(timeEl);
+      const previewEl = document.createElement('div');
+      previewEl.className = 'thread-row-preview';
+      previewEl.textContent = preview;
+      row.appendChild(top);
+      row.appendChild(previewEl);
       row.addEventListener('click', () => {
         item.click();
         switchSection('chat');
@@ -447,6 +460,7 @@
 
   // Prompts section
   async function initPromptsSection() {
+    if (!PRO_TIERS.has(appTier)) return;
     const list = document.getElementById('prompts-list');
     list.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">Loading...</p>';
 
@@ -513,31 +527,53 @@
       prompts.forEach(p => {
         const card = document.createElement('div');
         card.className = 'prompt-card-mobile';
-        const bodyHtml = p.body.replace(/\{\{([^}]+)\}\}/g, '<span class="var-highlight">{{$1}}</span>');
-        card.innerHTML =
-          '<div class="prompt-card-mobile-head">' +
-            '<span class="prompt-num">' + p.num + '</span>' +
-            '<h4>' + p.title + '</h4>' +
-            '<span class="expand-icon">\u25be</span>' +
-          '</div>' +
-          '<div class="prompt-card-mobile-body">' +
-            '<div class="prompt-text">' + bodyHtml + '</div>' +
-            '<div class="prompt-actions">' +
-              '<button class="prompt-copy-btn">Copy to clipboard</button>' +
-              '<button class="prompt-send-btn">Send to Chat</button>' +
-            '</div>' +
-          '</div>';
-        card.querySelector('.prompt-card-mobile-head').addEventListener('click', () => {
+        const bodyHtml = escHtml(p.body).replace(/\{\{([^}]+)\}\}/g, '<span class="var-highlight">{{$1}}</span>');
+
+        const head = document.createElement('div');
+        head.className = 'prompt-card-mobile-head';
+        const numEl = document.createElement('span');
+        numEl.className = 'prompt-num';
+        numEl.textContent = p.num;
+        const titleEl = document.createElement('h4');
+        titleEl.textContent = p.title;
+        const expandEl = document.createElement('span');
+        expandEl.className = 'expand-icon';
+        expandEl.textContent = '\u25be';
+        head.appendChild(numEl);
+        head.appendChild(titleEl);
+        head.appendChild(expandEl);
+
+        const body = document.createElement('div');
+        body.className = 'prompt-card-mobile-body';
+        const textEl = document.createElement('div');
+        textEl.className = 'prompt-text';
+        textEl.innerHTML = bodyHtml;
+        const actionsEl = document.createElement('div');
+        actionsEl.className = 'prompt-actions';
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'prompt-copy-btn';
+        copyBtn.textContent = 'Copy to clipboard';
+        const sendBtn = document.createElement('button');
+        sendBtn.className = 'prompt-send-btn';
+        sendBtn.textContent = 'Send to Chat';
+        actionsEl.appendChild(copyBtn);
+        actionsEl.appendChild(sendBtn);
+        body.appendChild(textEl);
+        body.appendChild(actionsEl);
+
+        card.appendChild(head);
+        card.appendChild(body);
+
+        head.addEventListener('click', () => {
           card.classList.toggle('expanded');
         });
-        card.querySelector('.prompt-copy-btn').addEventListener('click', async (e) => {
+        copyBtn.addEventListener('click', async (e) => {
           e.stopPropagation();
           await navigator.clipboard.writeText(p.body);
-          const btn = card.querySelector('.prompt-copy-btn');
-          btn.textContent = 'Copied!';
-          setTimeout(() => { btn.textContent = 'Copy to clipboard'; }, 1500);
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = 'Copy to clipboard'; }, 1500);
         });
-        card.querySelector('.prompt-send-btn').addEventListener('click', (e) => {
+        sendBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           const chatInput = document.getElementById('chat-message');
           if (chatInput) {
