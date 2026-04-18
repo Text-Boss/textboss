@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
-<link rel="shortcut icon" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="shortcut icon" href="assets/favicon-32.png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Text Boss — Access</title>
   <style>
@@ -17,12 +17,11 @@
       --muted:   #52606d;
       --muted-hi:#8896a4;
       --green:   #22c55e;
+      --amber:   #fbbf24;
       --danger:  #ef4444;
       --mono: Consolas, Monaco, 'Courier New', ui-monospace, monospace;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     html, body {
       min-height: 100vh;
       background: var(--bg);
@@ -30,122 +29,54 @@
       font-family: var(--mono);
       font-size: 15px;
     }
-
     body {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 24px;
-      background-image: radial-gradient(ellipse 60% 30% at 50% 0%,
-        rgba(34,197,94,.07), transparent);
+      background-image: radial-gradient(ellipse 60% 30% at 50% 0%, rgba(34,197,94,.07), transparent);
     }
-
-    .wordmark {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 28px;
-    }
+    .wordmark { font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 28px; }
     .wordmark span { color: var(--green); }
-
-    .card {
-      width: min(100%, 480px);
-      border: 1px solid var(--line-hi);
-      border-radius: 20px;
-      background: var(--surface);
-      padding: 32px;
-      box-shadow: 0 24px 80px rgba(0,0,0,.55);
-    }
-
-    .card-label {
-      font-size: 11px;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 16px;
-    }
+    .card { width: min(100%, 480px); border: 1px solid var(--line-hi); border-radius: 20px; background: var(--surface); padding: 32px; box-shadow: 0 24px 80px rgba(0,0,0,.55); }
+    .card-label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
     .card-label .sl { color: var(--green); font-weight: 700; }
-
     h1 { font-size: clamp(18px, 4vw, 22px); margin-bottom: 8px; }
-
-    .subtitle {
-      font-size: 13px;
-      color: var(--muted-hi);
-      line-height: 1.65;
-      margin-bottom: 24px;
-    }
-
-    label {
-      display: block;
-      font-size: 12px;
-      color: var(--muted-hi);
-      margin-bottom: 8px;
-      letter-spacing: .04em;
-    }
-
+    .subtitle { font-size: 13px; color: var(--muted-hi); line-height: 1.65; margin-bottom: 24px; }
+    label { display: block; font-size: 12px; color: var(--muted-hi); margin-bottom: 8px; letter-spacing: .04em; }
     input {
-      width: 100%;
-      border: 1px solid var(--line-hi);
-      border-radius: 12px;
-      background: rgba(0,0,0,.25);
-      color: var(--text);
-      padding: 13px 16px;
-      font: inherit;
-      font-size: 14px;
-      outline: none;
-      caret-color: var(--green);
-      transition: border-color .15s;
+      width: 100%; border: 1px solid var(--line-hi); border-radius: 12px;
+      background: rgba(0,0,0,.25); color: var(--text); padding: 13px 16px;
+      font: inherit; font-size: 14px; outline: none; caret-color: var(--green); transition: border-color .15s;
     }
     input:focus { border-color: rgba(34,197,94,.45); }
     input::placeholder { color: var(--muted); }
-
+    input:read-only { opacity: .55; cursor: default; }
+    .field { margin-bottom: 16px; }
+    .field:last-of-type { margin-bottom: 0; }
     .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
-
     button, .back-link {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 44px;
-      border-radius: 10px;
-      padding: 0 18px;
-      border: 1px solid var(--line-hi);
-      color: var(--text);
-      background: var(--surface);
-      font: inherit;
-      font-size: 13px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: border-color .15s, filter .15s;
-      white-space: nowrap;
+      display: inline-flex; justify-content: center; align-items: center;
+      min-height: 44px; border-radius: 10px; padding: 0 18px;
+      border: 1px solid var(--line-hi); color: var(--text); background: var(--surface);
+      font: inherit; font-size: 13px; cursor: pointer; text-decoration: none;
+      transition: border-color .15s, filter .15s; white-space: nowrap;
     }
     button:hover, .back-link:hover { border-color: rgba(255,255,255,.2); }
-
-    button.primary {
-      background: var(--green);
-      color: #040e07;
-      border-color: transparent;
-      font-weight: 700;
-    }
+    button.primary { background: var(--green); color: #040e07; border-color: transparent; font-weight: 700; }
     button.primary:hover { filter: brightness(1.08); }
-
-    .status {
-      margin-top: 16px;
-      min-height: 20px;
-      font-size: 12px;
-      color: var(--muted-hi);
-      line-height: 1.5;
-    }
+    .notice { font-size: 12px; line-height: 1.5; padding: 10px 14px; border-radius: 10px; margin-bottom: 20px; }
+    .notice.amber { color: var(--amber); background: rgba(251,191,36,.07); border: 1px solid rgba(251,191,36,.2); }
+    .notice.green  { color: var(--green);  background: rgba(34,197,94,.07);  border: 1px solid rgba(34,197,94,.2);  }
+    .status { margin-top: 16px; min-height: 20px; font-size: 12px; color: var(--muted-hi); line-height: 1.5; }
     .status.error { color: #fca5a5; }
-
+    .forgot-link { display: inline-block; margin-top: 12px; font-size: 12px; color: var(--muted); background: none; border: none; cursor: pointer; padding: 0; font: inherit; text-decoration: underline; }
+    .forgot-link:hover { color: var(--text); }
     .back-link { margin-top: 24px; font-size: 12px; color: var(--muted); border: none; background: none; padding: 0; min-height: 0; }
     .back-link:hover { color: var(--text); border: none; }
-
-    @media (max-width: 640px) {
-      input { font-size: 16px; }
-    }
+    .hidden { display: none !important; }
+    @media (max-width: 640px) { input { font-size: 16px; } }
     @media (max-width: 400px) {
       body { padding: 16px; }
       .card { padding: 24px 18px; }
@@ -155,67 +86,208 @@
   </style>
 </head>
 <body>
-
   <div class="wordmark">Text <span>Boss</span></div>
-
   <div class="card">
     <div class="card-label"><span class="sl">//</span> subscriber access</div>
-    <h1>Verify your access.</h1>
-    <p class="subtitle">Enter the email address linked to your active Text Boss subscription.</p>
 
-    <form id="access-form">
-      <label for="email">Subscription email</label>
-      <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
-      <div class="actions">
-        <button class="primary" type="submit">Verify access</button>
-      </div>
-    </form>
+    <!-- SIGN IN STATE -->
+    <div id="view-signin">
+      <h1>Sign in.</h1>
+      <p class="subtitle">Enter the email and password linked to your active Text Boss subscription.</p>
+      <form id="signin-form" novalidate>
+        <div class="field">
+          <label for="signin-email">Subscription email</label>
+          <input id="signin-email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="signin-password">Password</label>
+          <input id="signin-password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+        </div>
+        <div class="actions">
+          <button class="primary" type="submit">Sign in</button>
+        </div>
+      </form>
+      <button class="forgot-link" id="forgot-link" type="button">Forgot password?</button>
+      <div id="signin-status" class="status" aria-live="polite"></div>
+    </div>
 
-    <div id="status" class="status" aria-live="polite"></div>
+    <!-- SETUP STATE (first-time password creation) -->
+    <div id="view-setup" class="hidden">
+      <h1>Create your password.</h1>
+      <div class="notice amber" id="setup-notice">No password set yet — secure your account to continue.</div>
+      <form id="setup-form" novalidate>
+        <div class="field">
+          <label for="setup-email">Subscription email</label>
+          <input id="setup-email" type="email" autocomplete="off" readonly>
+        </div>
+        <div class="field">
+          <label for="setup-password">Create password <span style="color:var(--muted);font-size:11px">(min. 8 characters)</span></label>
+          <input id="setup-password" type="password" autocomplete="new-password" placeholder="••••••••" required>
+        </div>
+        <div class="field">
+          <label for="setup-confirm">Confirm password</label>
+          <input id="setup-confirm" type="password" autocomplete="new-password" placeholder="••••••••" required>
+        </div>
+        <div class="actions">
+          <button class="primary" type="submit">Set password &amp; sign in</button>
+        </div>
+      </form>
+      <div id="setup-status" class="status" aria-live="polite"></div>
+    </div>
+
+    <!-- FORGOT STATE -->
+    <div id="view-forgot" class="hidden">
+      <h1>Reset password.</h1>
+      <p class="subtitle">Enter your subscription email and we'll send you a reset link.</p>
+      <form id="forgot-form" novalidate>
+        <div class="field">
+          <label for="forgot-email">Subscription email</label>
+          <input id="forgot-email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <div class="actions">
+          <button class="primary" type="submit">Send reset link</button>
+        </div>
+      </form>
+      <div id="forgot-status" class="status" aria-live="polite"></div>
+    </div>
+
+    <!-- FORGOT SENT STATE -->
+    <div id="view-forgot-sent" class="hidden">
+      <div class="notice green">Reset link sent — check your inbox. It expires in 1 hour.</div>
+      <p class="subtitle">Didn't receive it? Check your spam folder, or <button class="forgot-link" id="resend-link" type="button">send again</button>.</p>
+    </div>
   </div>
 
   <a class="back-link" href="/index.html">← Back to pricing</a>
 
   <script>
-    (function () {
-      const form       = document.getElementById("access-form");
-      const emailInput = document.getElementById("email");
-      const statusNode = document.getElementById("status");
+  (function () {
+    // ── State ──────────────────────────────────────────────────────────────────
+    let currentEmail = "";
 
-      function setStatus(message, isError) {
-        statusNode.textContent = message;
-        statusNode.className = isError ? "status error" : "status";
+    // ── Views ─────────────────────────────────────────────────────────────────
+    const views = ["signin", "setup", "forgot", "forgot-sent"];
+    function showView(name) {
+      views.forEach(v => document.getElementById("view-" + v).classList.toggle("hidden", v !== name));
+    }
+
+    // ── Status helpers ────────────────────────────────────────────────────────
+    function setStatus(nodeId, msg, isError) {
+      const el = document.getElementById(nodeId);
+      el.textContent = msg;
+      el.className = "status" + (isError ? " error" : "");
+    }
+
+    // ── Sign in form ──────────────────────────────────────────────────────────
+    document.getElementById("signin-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const email    = document.getElementById("signin-email").value.trim();
+      const password = document.getElementById("signin-password").value;
+      setStatus("signin-status", "Signing in…", false);
+
+      try {
+        const res  = await fetch("/.netlify/functions/verify-email", {
+          method: "POST", credentials: "same-origin",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json().catch(() => null);
+
+        if (data && data.ok && data.needs_setup) {
+          currentEmail = email;
+          document.getElementById("setup-email").value = email;
+          showView("setup");
+          return;
+        }
+        if (data && data.ok && data.redirectTo) {
+          window.location.href = data.redirectTo;
+          return;
+        }
+        const reason = data && data.reason ? data.reason : `http_${res.status}`;
+        const messages = {
+          wrong_password:  "Incorrect password.",
+          missing_password:"Please enter your password.",
+          not_found:       "Email not found. Check your subscription email.",
+          not_active:      "Subscription not active.",
+        };
+        setStatus("signin-status", messages[reason] || `Sign in failed (${reason}).`, true);
+      } catch {
+        setStatus("signin-status", "Sign in failed. Try again.", true);
+      }
+    });
+
+    // ── Forgot link ───────────────────────────────────────────────────────────
+    document.getElementById("forgot-link").addEventListener("click", function () {
+      const email = document.getElementById("signin-email").value.trim();
+      if (email) document.getElementById("forgot-email").value = email;
+      showView("forgot");
+    });
+
+    // ── Setup form ────────────────────────────────────────────────────────────
+    document.getElementById("setup-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const email           = document.getElementById("setup-email").value;
+      const password        = document.getElementById("setup-password").value;
+      const confirmPassword = document.getElementById("setup-confirm").value;
+      setStatus("setup-status", "Setting password…", false);
+
+      if (password !== confirmPassword) {
+        setStatus("setup-status", "Passwords don't match.", true);
+        return;
+      }
+      if (password.length < 8) {
+        setStatus("setup-status", "Password must be at least 8 characters.", true);
+        return;
       }
 
-      form.addEventListener("submit", async function (event) {
-        event.preventDefault();
-        setStatus("Verifying access…", false);
+      try {
+        const res  = await fetch("/.netlify/functions/set-password", {
+          method: "POST", credentials: "same-origin",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ email, password, confirmPassword }),
+        });
+        const data = await res.json().catch(() => null);
 
-        try {
-          const response = await fetch("/.netlify/functions/verify-email", {
-            method: "POST",
-            credentials: "same-origin",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ email: emailInput.value }),
-          });
-
-          let data = null;
-          const responseText = await response.text();
-          try { data = responseText ? JSON.parse(responseText) : null; } catch { data = null; }
-
-          if (data && data.ok && data.redirectTo) {
-            window.location.href = data.redirectTo;
-            return;
-          }
-
-          const reason = data && typeof data.reason === "string"
-            ? data.reason : `http_${response.status}`;
-          setStatus(`Access denied (${reason}). Check your subscription email and status.`, true);
-        } catch {
-          setStatus("Access check failed. Try again.", true);
+        if (data && data.ok && data.redirectTo) {
+          window.location.href = data.redirectTo;
+          return;
         }
-      });
-    })();
+        const reason = data && data.reason ? data.reason : `http_${res.status}`;
+        const messages = {
+          password_mismatch: "Passwords don't match.",
+          password_too_short:"Password must be at least 8 characters.",
+          password_already_set: "A password is already set. Use 'Forgot password?' to reset it.",
+        };
+        setStatus("setup-status", messages[reason] || `Setup failed (${reason}).`, true);
+      } catch {
+        setStatus("setup-status", "Setup failed. Try again.", true);
+      }
+    });
+
+    // ── Forgot form ───────────────────────────────────────────────────────────
+    async function submitForgot(email) {
+      setStatus("forgot-status", "Sending reset link…", false);
+      try {
+        await fetch("/.netlify/functions/forgot-password", {
+          method: "POST", credentials: "same-origin",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        showView("forgot-sent");
+      } catch {
+        setStatus("forgot-status", "Failed to send. Try again.", true);
+      }
+    }
+
+    document.getElementById("forgot-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      await submitForgot(document.getElementById("forgot-email").value.trim());
+    });
+
+    document.getElementById("resend-link").addEventListener("click", function () {
+      showView("forgot");
+    });
+  })();
   </script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 const { createEntitlementStore } = require("./_lib/supabase");
 const sessionLib = require("./_lib/session");
 const { normalizeTier } = require("./_lib/tier-policy");
-const { verifyPassword: defaultVerifyPassword } = require("./_lib/password");
+const { hashPassword } = require("./_lib/password");
 
 function json(statusCode, body, headers = {}) {
   return {
@@ -11,17 +11,8 @@ function json(statusCode, body, headers = {}) {
   };
 }
 
-function normalizeEmail(value) { return String(value || "").trim().toLowerCase(); }
-function normalizeStatus(value) { return String(value || "").trim().toLowerCase(); }
-function getRedirectForTier(tier) {
-  if (tier === "Core")  return "/app-core.html";
-  if (tier === "Pro")   return "/app-pro.html";
-  if (tier === "Black") return "/app-black.html";
-  return "/access.html";
-}
-
 function createHandler(deps) {
-  const { findEntitlementByEmail, createSessionCookie, verifyPassword = defaultVerifyPassword } = deps;
+  const { findEntitlementByEmail, updatePasswordHash, createSessionCookie } = deps;
 
   return async function handler(event) {
     try {
@@ -34,10 +25,14 @@ function createHandler(deps) {
         return json(400, { ok: false, denied: true, reason: "invalid_json" });
       }
 
-      const email    = normalizeEmail(body.email);
-      const password = body.password || null;
+      const email           = String(body.email           || "").trim().toLowerCase();
+      const password        = String(body.password        || "");
+      const confirmPassword = String(body.confirmPassword || "");
 
-      if (!email) return json(400, { ok: false, denied: true, reason: "missing_email" });
+      if (!email)    return json(400, { ok: false, denied: true, reason: "missing_email" });
+      if (!password) return json(400, { ok: false, denied: true, reason: "missing_password" });
+      if (password !== confirmPassword) return json(400, { ok: false, denied: true, reason: "password_mismatch" });
+      if (password.length < 8) return json(400, { ok: false, denied: true, reason: "password_too_short" });
 
       const entitlement = await findEntitlementByEmail(email);
       if (!entitlement) return json(403, { ok: false, denied: true, reason: "not_found" });
@@ -45,26 +40,19 @@ function createHandler(deps) {
       const tier = normalizeTier(entitlement.entitled_tier);
       if (!tier) return json(403, { ok: false, denied: true, reason: "invalid_tier" });
 
-      const status = normalizeStatus(entitlement.subscription_status);
+      const status = String(entitlement.subscription_status || "").trim().toLowerCase();
       if (status !== "active" && status !== "trialing") {
         return json(403, { ok: false, denied: true, reason: "not_active" });
       }
 
-      // Password gate
-      if (!entitlement.password_hash) {
-        return json(200, { ok: true, needs_setup: true });
+      if (entitlement.password_hash) {
+        return json(403, { ok: false, denied: true, reason: "password_already_set" });
       }
 
-      if (!password) {
-        return json(400, { ok: false, denied: true, reason: "missing_password" });
-      }
-
-      if (!verifyPassword(password, entitlement.password_hash)) {
-        return json(403, { ok: false, denied: true, reason: "wrong_password" });
-      }
+      await updatePasswordHash(email, hashPassword(password));
 
       const setCookie = createSessionCookie({ email, tier });
-      return json(200, { ok: true, tier, redirectTo: getRedirectForTier(tier) }, { "set-cookie": setCookie });
+      return json(200, { ok: true, tier, redirectTo: `/app-${tier.toLowerCase()}.html` }, { "set-cookie": setCookie });
 
     } catch {
       return json(500, { ok: false, denied: true, reason: "server_error" });
@@ -73,14 +61,13 @@ function createHandler(deps) {
 }
 
 function createRuntimeHandler(overrides = {}) {
-  const store             = overrides.store        || createEntitlementStore();
-  const runtimeSessionLib = overrides.sessionLib   || sessionLib;
-  const runtimeVerify     = overrides.verifyPassword;
+  const store             = overrides.store      || createEntitlementStore();
+  const runtimeSessionLib = overrides.sessionLib || sessionLib;
 
   return createHandler({
     findEntitlementByEmail: (email) => store.findEntitlementByEmail(email),
+    updatePasswordHash:     (email, hash) => store.updatePasswordHash(email, hash),
     createSessionCookie:    (session) => runtimeSessionLib.createSessionCookie(session),
-    ...(runtimeVerify ? { verifyPassword: runtimeVerify } : {}),
   });
 }
 
