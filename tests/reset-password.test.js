@@ -42,7 +42,7 @@ async function testValidTokenResetsPasswordAndSignsIn() {
 
   assert.equal(markedUsed, true, "should mark token used");
   assert.equal(response.statusCode, 200);
-  assert.deepEqual(JSON.parse(response.body), { ok: true, tier: "Black", redirectTo: "/app-black.html" });
+  assert.deepEqual(JSON.parse(response.body), { ok: true, tier: "Black", redirectTo: "/app.html" });
   assert.equal(response.headers["set-cookie"], "textboss_session=new-cookie");
   assert.ok(typeof savedHash === "string" && savedHash.includes(":"), "should save hashed password");
 }

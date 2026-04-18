@@ -6,8 +6,6 @@
  *   navigator.serviceWorker.register('/sw.js')
  */
 
-const CACHE_NAME = "textboss-v1";
-
 const APP_SHELL_CACHE = "tb-shell-v1";
 const APP_SHELL_FILES = [
   "/app.html",
