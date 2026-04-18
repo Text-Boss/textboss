@@ -31,7 +31,7 @@ async function testSetsPasswordAndIssuesCookieOnFirstVisit() {
   });
 
   assert.equal(response.statusCode, 200);
-  assert.deepEqual(JSON.parse(response.body), { ok: true, tier: "Pro", redirectTo: "/app-pro.html" });
+  assert.deepEqual(JSON.parse(response.body), { ok: true, tier: "Pro", redirectTo: "/app.html" });
   assert.equal(response.headers["set-cookie"], "textboss_session=new-cookie");
   assert.equal(savedEmail, "new@example.com");
   assert.ok(typeof savedHash === "string" && savedHash.includes(":"), "hash should be salt:hash format");

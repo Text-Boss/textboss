@@ -13,7 +13,7 @@ function json(statusCode, body, headers = {}) {
 
 function normalizeEmail(value) { return String(value || "").trim().toLowerCase(); }
 function normalizeStatus(value) { return String(value || "").trim().toLowerCase(); }
-function getRedirectForTier(tier) { return `/app-${tier.toLowerCase()}.html`; }
+function getRedirectForTier(_tier) { return '/app.html'; }
 
 function createHandler(deps) {
   const { findEntitlementByEmail, createSessionCookie, verifyPassword = defaultVerifyPassword } = deps;

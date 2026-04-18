@@ -52,7 +52,7 @@ function createHandler(deps) {
       await updatePasswordHash(email, hashPassword(password));
 
       const setCookie = createSessionCookie({ email, tier });
-      return json(200, { ok: true, tier, redirectTo: `/app-${tier.toLowerCase()}.html` }, { "set-cookie": setCookie });
+      return json(200, { ok: true, tier, redirectTo: '/app.html' }, { "set-cookie": setCookie });
 
     } catch {
       return json(500, { ok: false, denied: true, reason: "server_error" });
