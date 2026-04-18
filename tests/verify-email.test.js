@@ -35,7 +35,7 @@ async function testActiveCoreEntitlement() {
   });
 
   assert.equal(response.statusCode, 200);
-  assert.deepEqual(JSON.parse(response.body), { ok: true, tier: "Core", redirectTo: "/app.html" });
+  assert.deepEqual(JSON.parse(response.body), { ok: true, tier: "Core", redirectTo: "/app-core.html" });
   assert.equal(response.headers["set-cookie"], "textboss_session=signed-cookie; Path=/; HttpOnly; SameSite=Lax");
 }
 
@@ -73,7 +73,7 @@ async function testActiveEntitlementNormalizesTierAndStatus() {
   });
 
   assert.equal(response.statusCode, 200);
-  assert.deepEqual(JSON.parse(response.body), { ok: true, tier: "Pro", redirectTo: "/app.html" });
+  assert.deepEqual(JSON.parse(response.body), { ok: true, tier: "Pro", redirectTo: "/app-pro.html" });
 }
 
 async function testDependencyFailureReturnsJsonError() {

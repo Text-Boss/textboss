@@ -13,7 +13,12 @@ function json(statusCode, body, headers = {}) {
 
 function normalizeEmail(value) { return String(value || "").trim().toLowerCase(); }
 function normalizeStatus(value) { return String(value || "").trim().toLowerCase(); }
-function getRedirectForTier() { return '/app.html'; }
+function getRedirectForTier(tier) {
+  if (tier === "Core")  return "/app-core.html";
+  if (tier === "Pro")   return "/app-pro.html";
+  if (tier === "Black") return "/app-black.html";
+  return "/access.html";
+}
 
 function createHandler(deps) {
   const { findEntitlementByEmail, createSessionCookie, verifyPassword = defaultVerifyPassword } = deps;
@@ -59,7 +64,7 @@ function createHandler(deps) {
       }
 
       const setCookie = createSessionCookie({ email, tier });
-      return json(200, { ok: true, tier, redirectTo: getRedirectForTier() }, { "set-cookie": setCookie });
+      return json(200, { ok: true, tier, redirectTo: getRedirectForTier(tier) }, { "set-cookie": setCookie });
 
     } catch {
       return json(500, { ok: false, denied: true, reason: "server_error" });
