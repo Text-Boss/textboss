@@ -52,7 +52,8 @@ function createHandler(deps) {
       await updatePasswordHash(email, hashPassword(password));
 
       const setCookie = createSessionCookie({ email, tier });
-      return json(200, { ok: true, tier, redirectTo: '/app.html' }, { "set-cookie": setCookie });
+      const redirectTo = tier === 'Black' ? '/app-black.html' : tier === 'Pro' ? '/app-pro.html' : '/app-core.html';
+      return json(200, { ok: true, tier, redirectTo }, { "set-cookie": setCookie });
 
     } catch {
       return json(500, { ok: false, denied: true, reason: "server_error" });

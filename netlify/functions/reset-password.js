@@ -49,7 +49,8 @@ function createHandler(deps) {
       await updatePasswordHash(tokenRecord.email, hashPassword(password));
 
       const setCookie = createSessionCookie({ email: tokenRecord.email, tier });
-      return json(200, { ok: true, tier, redirectTo: '/app.html' }, { "set-cookie": setCookie });
+      const redirectTo = tier === 'Black' ? '/app-black.html' : tier === 'Pro' ? '/app-pro.html' : '/app-core.html';
+      return json(200, { ok: true, tier, redirectTo }, { "set-cookie": setCookie });
 
     } catch (err) {
       console.error("[reset-password] error:", err?.message || err);
