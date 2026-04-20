@@ -40,7 +40,16 @@
       "Bash(curl -sI https://textboss.com.au/access)",
       "Bash(ls:*)",
       "mcp__plugin_Notion_notion__notion-search",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npm audit:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(npx netlify *)",
+      "Bash(git commit *)",
+      "Bash(cd C:\\\\\\\\Users\\\\\\\\ADMIN\\\\\\\\Desktop\\\\\\\\tb\\\\\\\\textboss)",
+      "Bash(python *)",
+      "Bash(claude mcp *)",
+      "mcp__supabase__apply_migration"
     ]
   }
 }

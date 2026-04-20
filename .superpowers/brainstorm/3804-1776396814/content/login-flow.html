@@ -1,0 +1,60 @@
+<h2>How should the login flow feel?</h2>
+<p class="subtitle">The current page asks for email only. With a password added, we need to decide how the two steps connect.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Single page — reveal password field</h3>
+      <p>User enters email, clicks Continue. If a password exists, a password field slides in below. One page, two steps.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">access.html — Step 2</div>
+        <div class="mockup-body" style="display:flex;flex-direction:column;gap:10px;padding:16px">
+          <div style="font-size:11px;color:#8896a4;letter-spacing:.1em;text-transform:uppercase">Subscription email</div>
+          <input class="mock-input" value="you@example.com" readonly style="opacity:.6">
+          <div style="font-size:11px;color:#8896a4;letter-spacing:.1em;text-transform:uppercase;margin-top:4px">Password</div>
+          <input class="mock-input" type="password" placeholder="••••••••">
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="mock-button" style="background:#22c55e;color:#040e07;border:none;font-weight:700">Sign in</button>
+            <button class="mock-button">← Back</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Single page — email + password together</h3>
+      <p>Both fields shown upfront. New subscribers still get a "set your password" prompt on first visit.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">access.html — all in one</div>
+        <div class="mockup-body" style="display:flex;flex-direction:column;gap:10px;padding:16px">
+          <div style="font-size:11px;color:#8896a4;letter-spacing:.1em;text-transform:uppercase">Subscription email</div>
+          <input class="mock-input" placeholder="you@example.com">
+          <div style="font-size:11px;color:#8896a4;letter-spacing:.1em;text-transform:uppercase;margin-top:4px">Password</div>
+          <input class="mock-input" type="password" placeholder="••••••••">
+          <button class="mock-button" style="background:#22c55e;color:#040e07;border:none;font-weight:700;margin-top:4px">Sign in</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Separate page for password</h3>
+      <p>Email on access.html as today. After verifying email, user is redirected to a dedicated password.html page to enter or set their password.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">password.html — new page</div>
+        <div class="mockup-body" style="display:flex;flex-direction:column;gap:10px;padding:16px">
+          <div style="font-size:13px;color:#e4ecf2;margin-bottom:4px">Welcome back, <span style="color:#22c55e">you@example.com</span></div>
+          <div style="font-size:11px;color:#8896a4;letter-spacing:.1em;text-transform:uppercase">Password</div>
+          <input class="mock-input" type="password" placeholder="••••••••">
+          <button class="mock-button" style="background:#22c55e;color:#040e07;border:none;font-weight:700;margin-top:4px">Continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

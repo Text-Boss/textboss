@@ -1,0 +1,60 @@
+<h2>How does a new subscriber set their password?</h2>
+<p class="subtitle">When someone pays and visits access.html for the first time, no password is on file yet. What happens when they try to sign in?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Form transforms on submit</h3>
+      <p>They fill in email + password and hit Sign in. The backend detects no password is set and the form switches to "Create your password" mode with a confirm field.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">After first sign-in attempt</div>
+        <div class="mockup-body" style="display:flex;flex-direction:column;gap:10px;padding:16px">
+          <div style="font-size:12px;color:#fbbf24;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:8px;padding:10px 12px">No password set yet — create one below to secure your account.</div>
+          <div style="font-size:11px;color:#8896a4;letter-spacing:.1em;text-transform:uppercase">Subscription email</div>
+          <input class="mock-input" value="you@example.com" readonly style="opacity:.6">
+          <div style="font-size:11px;color:#8896a4;letter-spacing:.1em;text-transform:uppercase;margin-top:4px">Create password</div>
+          <input class="mock-input" type="password" placeholder="••••••••">
+          <div style="font-size:11px;color:#8896a4;letter-spacing:.1em;text-transform:uppercase;margin-top:4px">Confirm password</div>
+          <input class="mock-input" type="password" placeholder="••••••••">
+          <button class="mock-button" style="background:#22c55e;color:#040e07;border:none;font-weight:700;margin-top:4px">Set password &amp; sign in</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Email link to set password</h3>
+      <p>When we detect no password on first sign-in, we send them a one-time setup link to their email. They click it, set their password, and are signed in. More secure, but adds email friction.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">After first sign-in attempt</div>
+        <div class="mockup-body" style="display:flex;flex-direction:column;gap:10px;padding:16px">
+          <div style="font-size:13px;color:#e4ecf2;line-height:1.6">We've sent a password setup link to <span style="color:#22c55e">you@example.com</span>.<br>Check your inbox to create your password.</div>
+          <div style="font-size:12px;color:#52606d;margin-top:4px">Didn't get it? Check your spam folder or <span style="color:#8896a4;text-decoration:underline;cursor:pointer">resend the link</span>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Separate onboarding page after payment</h3>
+      <p>Stripe redirects new subscribers to a dedicated setup page (e.g. <code style="font-size:11px;color:#22c55e">setup.html?email=...</code>) immediately after checkout. They set their password before ever reaching access.html.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">setup.html — post-checkout</div>
+        <div class="mockup-body" style="display:flex;flex-direction:column;gap:10px;padding:16px">
+          <div style="font-size:13px;color:#22c55e;font-weight:700;margin-bottom:2px">Welcome to Text Boss!</div>
+          <div style="font-size:12px;color:#8896a4;margin-bottom:8px">Create a password to secure your account.</div>
+          <div style="font-size:11px;color:#8896a4;letter-spacing:.1em;text-transform:uppercase">Create password</div>
+          <input class="mock-input" type="password" placeholder="••••••••">
+          <div style="font-size:11px;color:#8896a4;letter-spacing:.1em;text-transform:uppercase;margin-top:4px">Confirm password</div>
+          <input class="mock-input" type="password" placeholder="••••••••">
+          <button class="mock-button" style="background:#22c55e;color:#040e07;border:none;font-weight:700;margin-top:4px">Create password &amp; go to app</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

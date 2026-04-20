@@ -13,7 +13,10 @@
       "dependencies": [
         "npm:@supabase/supabase-js@^2.95.3",
         "npm:netlify-cli@^24.9.0",
-        "npm:stripe@^20.3.1"
+        "npm:resend@^6.12.0",
+        "npm:sharp@~0.34.5",
+        "npm:stripe@^20.3.1",
+        "npm:web-push@^3.6.7"
       ]
     }
   }

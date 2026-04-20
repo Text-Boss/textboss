@@ -1,0 +1,1 @@
+- [Booking tier enforcement system](project_booking_tier_system.md) — shared booking-auth middleware, Pro/Black gate, Black gold UI, Core upsell card

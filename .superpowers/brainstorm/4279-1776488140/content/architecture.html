@@ -1,0 +1,107 @@
+<h2>Architecture: Approach B</h2>
+<p class="subtitle">How the new mobile shell fits alongside the existing system</p>
+
+<div class="section">
+  <div class="mockup">
+    <div class="mockup-header">System Overview</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:12px;line-height:1.8;">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+
+        <!-- Left: Entry Points -->
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;margin-bottom:12px;">Entry Points</div>
+
+          <div style="background:#1a1d22;border:1px solid #2a3040;border-radius:8px;padding:12px;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="background:#3b82f6;color:white;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:700;">NEW</span>
+              <code style="color:#60a5fa;">app.html</code>
+            </div>
+            <div style="font-size:11px;color:#9ca3af;">PWA entry point — mobile-first shell with drawer nav. Detects tier, renders correct experience.</div>
+          </div>
+
+          <div style="background:#111418;border:1px solid #1e2530;border-radius:8px;padding:12px;margin-bottom:8px;opacity:0.6;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="background:#374151;color:#9ca3af;font-size:9px;padding:2px 6px;border-radius:4px;">EXISTING</span>
+              <code style="color:#6b7280;">app-core.html</code>
+            </div>
+            <div style="font-size:11px;color:#6b7280;">Desktop. Untouched.</div>
+          </div>
+
+          <div style="background:#111418;border:1px solid #1e2530;border-radius:8px;padding:12px;margin-bottom:8px;opacity:0.6;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="background:#374151;color:#9ca3af;font-size:9px;padding:2px 6px;border-radius:4px;">EXISTING</span>
+              <code style="color:#6b7280;">app-pro.html</code>
+            </div>
+            <div style="font-size:11px;color:#6b7280;">Desktop. Untouched.</div>
+          </div>
+
+          <div style="background:#111418;border:1px solid #1e2530;border-radius:8px;padding:12px;opacity:0.6;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="background:#374151;color:#9ca3af;font-size:9px;padding:2px 6px;border-radius:4px;">EXISTING</span>
+              <code style="color:#6b7280;">app-black.html</code>
+            </div>
+            <div style="font-size:11px;color:#6b7280;">Desktop. Untouched.</div>
+          </div>
+        </div>
+
+        <!-- Right: New Files + Shared -->
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;margin-bottom:12px;">New Files</div>
+
+          <div style="background:#1a1d22;border:1px solid #2a3040;border-radius:8px;padding:12px;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="background:#3b82f6;color:white;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:700;">NEW</span>
+              <code style="color:#60a5fa;">app-mobile.css</code>
+            </div>
+            <div style="font-size:11px;color:#9ca3af;">All mobile-specific styles. Drawer, header, touch targets, safe areas.</div>
+          </div>
+
+          <div style="background:#1a1d22;border:1px solid #2a3040;border-radius:8px;padding:12px;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="background:#3b82f6;color:white;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:700;">NEW</span>
+              <code style="color:#60a5fa;">manifest.json</code>
+            </div>
+            <div style="font-size:11px;color:#9ca3af;">PWA manifest — name, icons, theme colour, display: standalone.</div>
+          </div>
+
+          <div style="background:#1a1d22;border:1px solid #2a3040;border-radius:8px;padding:12px;margin-bottom:24px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="background:#059669;color:white;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:700;">ENHANCED</span>
+              <code style="color:#34d399;">sw.js</code>
+            </div>
+            <div style="font-size:11px;color:#9ca3af;">Existing service worker extended to cache app shell for offline.</div>
+          </div>
+
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;margin-bottom:12px;">Reused (unchanged)</div>
+
+          <div style="background:#111418;border:1px solid #1e2530;border-radius:8px;padding:10px;margin-bottom:6px;">
+            <code style="color:#9ca3af;font-size:11px;">app-client.js</code>
+            <span style="font-size:11px;color:#6b7280;"> — chat logic</span>
+          </div>
+          <div style="background:#111418;border:1px solid #1e2530;border-radius:8px;padding:10px;margin-bottom:6px;">
+            <code style="color:#9ca3af;font-size:11px;">scheduler-client.js</code>
+            <span style="font-size:11px;color:#6b7280;"> — scheduler logic</span>
+          </div>
+          <div style="background:#111418;border:1px solid #1e2530;border-radius:8px;padding:10px;">
+            <code style="color:#9ca3af;font-size:11px;">netlify/functions/*</code>
+            <span style="font-size:11px;color:#6b7280;"> — all backend unchanged</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Flow arrow -->
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid #1e2530;font-size:11px;color:#6b7280;text-align:center;">
+        <code style="color:#60a5fa;">access.html</code>
+        <span style="margin:0 8px;">→ sets session cookie →</span>
+        <code style="color:#60a5fa;">app.html</code>
+        <span style="margin:0 8px;">→ verifies tier →</span>
+        <span style="color:#9ca3af;">renders Chat / Scheduler / Threads</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="text-align:center;">Desktop users keep their existing experience. Mobile users land on <code>app.html</code>. Same backend, same auth, same JS logic.</p>

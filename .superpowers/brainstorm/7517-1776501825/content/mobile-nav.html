@@ -1,0 +1,145 @@
+<h2>Mobile Navigation Pattern</h2>
+<p class="subtitle">How should users move between Chat, Scheduler, and Threads on their phone?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f1216;padding:16px;border-radius:6px;margin-bottom:12px;">
+      <!-- Phone mockup: Bottom Tab Bar -->
+      <div style="width:160px;margin:0 auto;background:#16191f;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.5);">
+        <div style="background:#0a0d10;padding:10px 12px 6px;font-size:9px;color:#4a5568;text-align:center;letter-spacing:.05em;">TEXT BOSS</div>
+        <div style="padding:8px 10px;min-height:100px;background:#0f1216;">
+          <div style="background:#1a1d22;border-radius:8px;padding:8px;margin-bottom:6px;">
+            <div style="font-size:8px;color:#6b7280;margin-bottom:4px;">CLIENT</div>
+            <div style="font-size:9px;color:#e2e8f0;line-height:1.4;">How should I handle the late payment?</div>
+          </div>
+          <div style="background:#1e3a5f;border-radius:8px;padding:8px;margin-left:16px;margin-bottom:6px;">
+            <div style="font-size:9px;color:#93c5fd;line-height:1.4;">Send a firm but professional reminder...</div>
+          </div>
+          <div style="background:#111;border:1px solid #2a2f38;border-radius:8px;padding:6px 8px;display:flex;align-items:center;gap:4px;margin-top:8px;">
+            <div style="font-size:8px;color:#4a5568;flex:1;">Type a message...</div>
+            <div style="width:16px;height:16px;background:#3b82f6;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+              <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:6px solid white;margin-left:1px;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="background:#0a0d10;padding:6px 0 8px;display:flex;justify-content:space-around;border-top:1px solid #1e2530;">
+          <div style="text-align:center;">
+            <div style="font-size:14px;">💬</div>
+            <div style="font-size:7px;color:#3b82f6;margin-top:1px;">Chat</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:14px;">📅</div>
+            <div style="font-size:7px;color:#4a5568;margin-top:1px;">Schedule</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:14px;">🗂️</div>
+            <div style="font-size:7px;color:#4a5568;margin-top:1px;">Threads</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:14px;">⚙️</div>
+            <div style="font-size:7px;color:#4a5568;margin-top:1px;">Settings</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Bottom Tab Bar</h3>
+      <p>Persistent tabs at the bottom of the screen — the standard iOS/Android pattern. Always visible, thumb-friendly, instantly familiar. Each tab switches the full-screen view.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Most familiar to users</li><li>One-thumb navigation</li><li>Always visible</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Takes permanent screen space</li><li>Max ~4-5 tabs</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f1216;padding:16px;border-radius:6px;margin-bottom:12px;">
+      <!-- Phone mockup: Swipe Cards -->
+      <div style="width:160px;margin:0 auto;background:#16191f;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.5);">
+        <div style="background:#0a0d10;padding:10px 12px 6px;font-size:9px;color:#4a5568;text-align:center;letter-spacing:.05em;display:flex;align-items:center;justify-content:space-between;">
+          <span style="color:#6b7280;">←</span>
+          <span>CHAT</span>
+          <span style="color:#6b7280;">→</span>
+        </div>
+        <!-- Dots indicator -->
+        <div style="display:flex;justify-content:center;gap:4px;padding:4px 0;background:#0a0d10;">
+          <div style="width:16px;height:3px;background:#3b82f6;border-radius:2px;"></div>
+          <div style="width:6px;height:3px;background:#2a2f38;border-radius:2px;"></div>
+          <div style="width:6px;height:3px;background:#2a2f38;border-radius:2px;"></div>
+        </div>
+        <div style="padding:8px 10px;min-height:108px;background:#0f1216;">
+          <div style="background:#1a1d22;border-radius:8px;padding:8px;margin-bottom:6px;">
+            <div style="font-size:8px;color:#6b7280;margin-bottom:4px;">CLIENT</div>
+            <div style="font-size:9px;color:#e2e8f0;line-height:1.4;">How should I handle the late payment?</div>
+          </div>
+          <div style="background:#1e3a5f;border-radius:8px;padding:8px;margin-left:16px;">
+            <div style="font-size:9px;color:#93c5fd;line-height:1.4;">Send a firm but professional reminder...</div>
+          </div>
+        </div>
+        <div style="background:#0a0d10;padding:6px 8px;border-top:1px solid #1e2530;">
+          <div style="background:#111;border:1px solid #2a2f38;border-radius:8px;padding:5px 8px;display:flex;align-items:center;gap:4px;">
+            <div style="font-size:8px;color:#4a5568;flex:1;">Type a message...</div>
+            <div style="width:16px;height:16px;background:#3b82f6;border-radius:50%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Swipe Between Sections</h3>
+      <p>Full-screen sections you swipe left/right to navigate — like Stories or a card deck. A dot indicator shows your position. No permanent nav bar eats screen space.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Maximum screen space</li><li>Immersive, modern feel</li><li>Natural gesture pattern</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Less discoverable</li><li>Hard to jump sections quickly</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f1216;padding:16px;border-radius:6px;margin-bottom:12px;">
+      <!-- Phone mockup: Top Header + Drawer -->
+      <div style="width:160px;margin:0 auto;background:#16191f;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.5);">
+        <div style="background:#0a0d10;padding:8px 12px;font-size:9px;color:#e2e8f0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e2530;">
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <div style="width:12px;height:1.5px;background:#6b7280;border-radius:1px;"></div>
+            <div style="width:12px;height:1.5px;background:#6b7280;border-radius:1px;"></div>
+            <div style="width:12px;height:1.5px;background:#6b7280;border-radius:1px;"></div>
+          </div>
+          <span style="letter-spacing:.05em;font-size:9px;">CHAT</span>
+          <div style="width:20px;height:20px;background:#1a1d22;border-radius:50%;"></div>
+        </div>
+        <!-- Thread tabs below header -->
+        <div style="background:#0d1014;padding:4px 8px;display:flex;gap:8px;border-bottom:1px solid #1e2530;">
+          <div style="font-size:7px;color:#3b82f6;border-bottom:1px solid #3b82f6;padding-bottom:2px;">Thread 1</div>
+          <div style="font-size:7px;color:#4a5568;padding-bottom:2px;">Thread 2</div>
+          <div style="font-size:7px;color:#4a5568;padding-bottom:2px;">+ New</div>
+        </div>
+        <div style="padding:8px 10px;min-height:90px;background:#0f1216;">
+          <div style="background:#1a1d22;border-radius:8px;padding:8px;margin-bottom:6px;">
+            <div style="font-size:9px;color:#e2e8f0;line-height:1.4;">How should I handle the late payment?</div>
+          </div>
+          <div style="background:#1e3a5f;border-radius:8px;padding:8px;margin-left:16px;">
+            <div style="font-size:9px;color:#93c5fd;line-height:1.4;">Send a firm reminder...</div>
+          </div>
+        </div>
+        <div style="background:#0a0d10;padding:6px 8px;border-top:1px solid #1e2530;">
+          <div style="background:#111;border:1px solid #2a2f38;border-radius:8px;padding:5px 8px;display:flex;align-items:center;gap:4px;">
+            <div style="font-size:8px;color:#4a5568;flex:1;">Type a message...</div>
+            <div style="width:16px;height:16px;background:#3b82f6;border-radius:50%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Top Header + Drawer</h3>
+      <p>Hamburger menu top-left opens a slide-in drawer for section navigation. Thread tabs sit just below the header. Closer to the desktop experience — familiar if users already know the web app.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Familiar from desktop</li><li>Room for many sections</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Menu hidden by default</li><li>Less thumb-friendly</li><li>Drawer pattern falling out of favor</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;text-align:center;">My recommendation: <strong>A — Bottom Tab Bar</strong> — it's the native iOS pattern users expect and maps cleanly to Chat, Schedule, Threads, and Settings.</p>

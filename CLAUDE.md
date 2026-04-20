@@ -36,6 +36,8 @@ npx netlify dev
 | `VAPID_PUBLIC_KEY` | Web Push VAPID public key (generate: `npx web-push generate-vapid-keys`) |
 | `VAPID_PRIVATE_KEY` | Web Push VAPID private key |
 | `VAPID_SUBJECT` | Web Push VAPID subject (`mailto:you@domain.com`) |
+| `BEEHIIV_PUBLICATION_ID` | Beehiiv publication ID for newsletter signups via `subscribe.js` |
+| `BEEHIIV_API_KEY` | Beehiiv API key for newsletter signups |
 
 ## Architecture
 
@@ -81,12 +83,24 @@ Three additional functions handle appointment scheduling:
 - `send-reminders.js` — scheduled function (runs hourly per `netlify.toml`) that finds confirmed appointments within the next 24 h with no `reminder_sent_at`, delivers Web Push notifications via `web-push` (VAPID), marks them reminded. Authorized by Netlify's `x-nf-event: schedule` header or `REMINDERS_SECRET` bearer token.
 - `business-profile.js` — GET/POST for a user's business profile (`business_profiles` table: occupation, services with durations, buffer times, working hours, onboarding flag). Pro/Black only.
 - `push-subscribe.js` — POST to save a Web Push subscription, DELETE to remove one (`push_subscriptions` table). Pro/Black only.
+- `busy-blocks.js` — CRUD for calendar busy blocks (`busy_blocks` table). Pro: max 200 blocks, Black: unlimited. Pro/Black only.
+- `ical-import.js` — Accepts raw `.ics` content, parses VEVENT entries, stores upcoming events as busy blocks. No external deps — inline RFC 5545 parser. Pro: 60-day window/200 blocks, Black: 90-day window/500 blocks. Max 800 KB input.
+- `public-booking.js` — Unauthenticated client-facing booking endpoint (accessed via public booking link). Uses `public_booking_links` table. Clients interact via a conversational AI flow using `findAvailableSlots` + `confirm_booking` tools. Sends Web Push confirmation to owner. Returns iCal attachment on booking.
+- `follow-up.js` — AI-powered follow-up message drafting per appointment. Gated by `isFollowUpTier` from `tier-policy.js`.
+- `send-follow-ups.js` — Scheduled daily at 9am UTC. Finds due follow-up jobs and notifies owners via Web Push.
+- `vapid-key.js` — Simple GET returning `VAPID_PUBLIC_KEY` to the client for Web Push subscription setup.
+- `subscribe.js` — POST to add an email to the Beehiiv newsletter (uses `BEEHIIV_PUBLICATION_ID` + `BEEHIIV_API_KEY`).
+- `forgot-password.js` / `set-password.js` / `reset-password.js` — Password auth flow (migration 008). `forgot-password` sends a reset link via Resend; `reset-password` verifies the token and calls `set-password` to hash+store the new credential.
 
 `sw.js` at the project root is the service worker — handles `push` events and shows notifications. Must be registered from the scheduler app pages via `navigator.serviceWorker.register('/sw.js')`.
 
 ### Supabase additional tables
 - `business_profiles` — per-user scheduler config (see `migrations/004`)
 - `push_subscriptions` — Web Push endpoint/key storage (see `migrations/004`)
+- `public_booking_links` — owner-created links for client self-booking (see `migrations/005`)
+- `follow_up_jobs` — queued follow-up messages per appointment (see `migrations/006`)
+- `busy_blocks` — calendar blocks that mark owner unavailability (see `migrations/007`); has `batch_id` for undo of bulk iCal imports
+- `users` — password credentials (PBKDF2 hash + salt); added by `migrations/008`
 
 ### Scheduler AI model (`_lib/scheduler.js`)
 `findAvailableSlots({appointments, workingHours, durationMinutes, preBuffer, postBuffer, startDate, endDate, maxSlotsPerDay})` — pure function, no DB calls. `workingHoursToArray(jsonObj)` converts `business_profiles.working_hours` format (`{"1":{start,end}}`) to the array format `findAvailableSlots` expects. Used by `schedule-chat.js` for the `find_available_slots` AI tool.
@@ -95,8 +109,16 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 
 Thread limits per tier (defined in `tier-policy.js`): Core = 10, Pro = 50, Black = unlimited.
 
+`tier-policy.js` also exports `isFollowUpTier(tier)`, `getFollowUpLimit(tier)`, and `getFollowUpSystemPrompt(tier)` for the follow-up feature.
+
 ### Supabase stores (`_lib/supabase.js`)
-Exports `createEntitlementStore`, `createAvailabilityStore`, `createAppointmentStore`, `createBusinessProfileStore`, `createPushSubscriptionStore`. Each factory accepts an optional `{ client }` override for testing without real Supabase credentials.
+Exports `createEntitlementStore`, `createAvailabilityStore`, `createAppointmentStore`, `createBusinessProfileStore`, `createPushSubscriptionStore`, `createBusyBlockStore`, `createPublicBookingStore`, `createFollowUpStore`. Each factory accepts an optional `{ client }` override for testing without real Supabase credentials.
+
+### Password auth (`_lib/password.js`)
+PBKDF2-based hashing. `hashPassword(plain)` → `{ hash, salt }`. `verifyPassword(plain, hash, salt)` → boolean. 100,000 iterations, 32-byte key, 16-byte salt — all hex-encoded. Used by `set-password.js` and `reset-password.js`.
+
+### iCal generation (`_lib/ical.js`)
+Pure ICS generation with no external dependencies. Used by `public-booking.js` to return `.ics` calendar invites on booking confirmation.
 
 ### Scheduler client (`scheduler-client.js`)
 Shared IIFE loaded by `app-pro.html` and `app-black.html`. Call `window.initScheduler({ tier, inputLimit, enableIcalExport })` when the Scheduler tab is first activated. Manages scheduling conversation state, calendar UI, appointment cache, and the onboarding wizard. Not a module — loads as a plain `<script>` tag.
