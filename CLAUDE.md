@@ -55,7 +55,7 @@ System prompts instruct the AI to write in a natural human voice — no AI-givea
 Password auth is also supported — `forgot-password.js` / `reset-password.js` / `set-password.js` handle the full PBKDF2 reset flow via Resend email.
 
 ### Session cookie
-Implemented in `netlify/functions/_lib/session.js`. Format: `base64url(payload).hmac_signature`. Payload contains `email`, `tier`, `iat`, `exp` (30-day TTL). Uses `crypto.timingSafeEqual` for signature comparison.
+Implemented in `netlify/functions/_lib/session.js`. Format: `base64url(payload).hmac_signature`. Payload contains `email`, `tier`, `iat`, `exp` (30-day TTL). Uses `crypto.timingSafeEqual` for signature comparison. The `Secure` flag is always set unconditionally — do not gate it on `NODE_ENV`.
 
 ### Netlify Functions
 All backend logic lives in `netlify/functions/`. Each function exports three things:
@@ -65,13 +65,20 @@ All backend logic lives in `netlify/functions/`. Each function exports three thi
 
 `_lib/http.js` exports two helpers: `json(statusCode, body, headers?)` and `denied(statusCode, reason, headers?)`. The `denied` helper always sets `{ ok: false, denied: true }` — clients use the `denied` flag to redirect to `denied.html`.
 
+**Security invariant — every authenticated function must perform a three-way check:**
+1. Verify the session cookie signature (`verifySessionCookie`)
+2. Re-fetch the entitlement from Supabase (`findEntitlementByEmail`) and confirm `subscription_status` is `active`/`trialing`
+3. Assert `normalizeTier(entitlement.entitled_tier) === normalizeTier(session.tier)` — prevents a stale session cookie from accessing a higher tier after a downgrade
+
+Skipping step 3 is a security gap. All current functions enforce it.
+
 ### Supabase stores (`_lib/supabase.js`)
 Exports store factories: `createEntitlementStore`, `createAvailabilityStore`, `createAppointmentStore`, `createBusinessProfileStore`, `createPushSubscriptionStore`, `createBusyBlockStore`, `createPublicBookingStore`, `createFollowUpStore`, `createSchedulerMemoryStore`, `createTodoStore`, `createServiceStore`. Each accepts an optional `{ client }` override for testing.
 
 All tables are accessed via the service role key (bypasses RLS). RLS is intentionally not used — access control is enforced at the function level by verifying the session cookie before every DB operation.
 
 ### OpenAI integration
-`netlify/functions/_lib/openai.js` uses the **Responses API** (`POST /v1/responses`), not the Chat Completions API. User turns use `{ type: "input_text", text }`, assistant turns use `{ type: "output_text", text }`. System instructions are injected per-request from `tier-policy.js`.
+`netlify/functions/_lib/openai.js` uses the **Responses API** (`POST /v1/responses`), not the Chat Completions API. User turns use `{ type: "input_text", text }`, assistant turns use `{ type: "output_text", text }`. System instructions go in the top-level `instructions` field of the request body — **not** as a `role: "system"` item inside `input` (that is the Chat Completions format and is wrong for the Responses API). System content is injected per-request from `tier-policy.js`.
 
 ### Stripe webhook
 `stripe-webhook.js` handles `checkout.session.completed`, `customer.subscription.updated`, and `customer.subscription.deleted`. Upserts `entitlements` using `email` as the conflict key.
@@ -88,8 +95,8 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 - `busy-blocks.js` — Calendar busy blocks (Pro: max 200, Black: unlimited)
 - `ical-import.js` — Parses `.ics` uploads into busy blocks; inline RFC 5545 parser, no external deps
 - `follow-up.js` / `send-follow-ups.js` — AI-drafted follow-up messages; scheduled daily at 9am UTC
-- `send-reminders.js` — Scheduled hourly; Web Push appointment reminders 24h before
-- `send-todo-reminders.js` — Scheduled every 15 min; Web Push + Resend email fallback for due to-do reminders
+- `send-reminders.js` — Scheduled hourly; Web Push appointment reminders 24h before. Looks up owner tier to embed a tier-specific `url` in the push payload.
+- `send-todo-reminders.js` — Scheduled every 15 min; Web Push + Resend email fallback for due to-do reminders. Same tier-lookup pattern for `url`.
 - `push-subscribe.js` / `vapid-key.js` — Web Push subscription management
 - `threads.js` — Conversation thread persistence
 
@@ -130,6 +137,8 @@ App pages (`app-pro.html`, `app-black.html`, `app-core.html`) are single-page sh
 
 `app-pro.html` and `app-black.html` call `window.checkOnboardingOnLoad({ tier })` on DOMContentLoaded — shows the 4-step onboarding wizard immediately if `onboarding_complete` is false on the profile.
 
+**Client fetch requirement:** Every `fetch()` call in client scripts that hits a Netlify Function must include `credentials: 'same-origin'` so the session cookie is sent. Omitting it causes silent 401s — the function sees no cookie and denies the request.
+
 ### Onboarding wizard (4 steps)
 Defined in `scheduler-client.js`. Steps: (1) personal & business details, (2) occupation, (3) services + pricing, (4) buffer times. On finish, saves all fields to `business_profiles` and services to the relational `services` table.
 
@@ -137,7 +146,7 @@ Defined in `scheduler-client.js`. Steps: (1) personal & business details, (2) oc
 Accessed via `book.html?owner=<slug>`. Unauthenticated. On load, calls `public-booking.js` with `message: "__init__"` to fetch `businessName`, `occupation`, `ownerName`, `city`, `avatarData`, and `services`. Renders a chat UI — clients select a service chip or type freely. AI handles availability checking and booking confirmation, returns `.ics`.
 
 ### `sw.js` (service worker)
-Handles Web Push `push` events and shows notifications. Routes notification clicks: `type: "appointment"` → `/#scheduler`, `type: "follow_up"` → `/#follow-ups`, `type: "todo"` → `/#todos`. Must be registered from app pages.
+Handles Web Push `push` events, app-shell caching (cache name `tb-shell-v3`), and offline fallback. On notification click, navigates to `data.url` from the push payload if present; falls back to `/access.html`. The send functions (`send-reminders.js`, `send-follow-ups.js`, `send-todo-reminders.js`) look up the owner's tier and include a tier-specific deep-link URL in every push payload. `APP_SHELL_FILES` caches all three app pages plus all client scripts — bump the cache name (`tb-shell-vN`) whenever cached static files change.
 
 ### Testing pattern
 Tests use Node's built-in `assert/strict` — no test framework. Each test file is a self-executing async function. `npm test` discovers and runs all `tests/*.test.js`. Runtime-integration tests (`*-runtime.test.js`) require real env vars and are for manual runs only.
