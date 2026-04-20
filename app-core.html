@@ -486,7 +486,11 @@
       border-bottom: 1px solid var(--line);
       background: rgba(2,2,3,.92);
       padding: 0 24px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .tab-bar::-webkit-scrollbar { display: none; }
     .tab-btn {
       display: inline-flex;
       align-items: center;
@@ -511,9 +515,143 @@
     .tab-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
     .tab-panel.active { display: flex; }
 
+    /* ── Scheduler upsell tab label: dim with lock icon ── */
+    .tab-btn[data-tab="scheduler"] { opacity: .55; }
+    .tab-btn[data-tab="scheduler"]:hover { opacity: 1; }
+    .tab-lock-icon { font-style: normal; font-size: 11px; }
+
+    /* ── Upsell panel: centres the card ── */
+    .upsell-panel {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px;
+      overflow-y: auto;
+    }
+
+    /* ── Upsell card ── */
+    .upsell-card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border: 1px solid var(--line-hi);
+      border-radius: 16px;
+      padding: 32px 28px 28px;
+    }
+
+    .upsell-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #22c55e;
+      margin-bottom: 10px;
+    }
+
+    .upsell-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+
+    .upsell-sub {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 22px;
+    }
+
+    /* ── Feature list ── */
+    .upsell-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 26px;
+    }
+
+    .upsell-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .upsell-check {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(34,197,94,.12);
+      border: 1px solid rgba(34,197,94,.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #22c55e;
+      margin-top: 1px;
+    }
+
+    .upsell-feature-label { font-weight: 600; }
+    .upsell-feature-sub   { color: var(--muted); font-size: 12px; display: block; margin-top: 1px; }
+
+    /* ── Divider ── */
+    .upsell-divider {
+      height: 1px;
+      background: var(--line);
+      margin-bottom: 22px;
+    }
+
+    /* ── CTA button ── */
+    .upsell-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 46px;
+      border-radius: 10px;
+      border: none;
+      background: #22c55e;
+      color: #020d06;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: filter .15s;
+      letter-spacing: .02em;
+    }
+
+    .upsell-cta:hover { filter: brightness(1.08); }
+
+    .upsell-footnote {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 12px;
+      line-height: 1.55;
+    }
+
     @media (max-width: 640px) {
       .tab-bar { padding: 0 16px; }
       .tab-btn { padding: 8px 12px; font-size: 11px; }
+      .upsell-card { padding: 24px 18px 22px; }
+      .upsell-title { font-size: 17px; }
+    }
+
+    /* ── Footer sticky fix ── */
+    .app-footer { position: sticky; bottom: 0; z-index: 10; }
+
+    /* Ensure textareas never trigger iOS zoom */
+    textarea, input[type="text"], input[type="number"], input[type="email"],
+    input[type="search"], input[type="datetime-local"], select {
+      font-size: 16px !important;
+      touch-action: manipulation;
     }
   </style>
 </head>
@@ -531,7 +669,12 @@
 
     <nav class="tab-bar">
       <button class="tab-btn active" data-tab="chat" type="button">Messages</button>
+      <button class="tab-btn" data-tab="scheduler" type="button">
+        <i class="tab-lock-icon" aria-hidden="true">&#128274;</i>Scheduler
+      </button>
       <button class="tab-btn" data-tab="prompts" type="button">Prompts</button>
+      <button class="tab-btn" data-tab="todos" type="button">To-Do</button>
+      <button class="tab-btn" data-tab="settings" type="button">Settings</button>
     </nav>
 
     <div class="app-body">
@@ -570,22 +713,115 @@
         </div>
       </div>
 
-      <div class="tab-panel" id="panel-prompts">
-        <iframe
-          src="/core_subscriber_prompts.html"
-          id="prompts-frame"
-          style="flex:1;width:100%;height:100%;border:none;display:block;"
-          title="Core Prompt Templates"
-        ></iframe>
+      <!-- ── Scheduler upsell panel (Core tier: feature locked) ── -->
+      <div class="tab-panel" id="panel-scheduler">
+        <div class="upsell-panel">
+          <div class="upsell-card" role="region" aria-label="Scheduler upgrade">
+
+            <div class="upsell-eyebrow">Pro &amp; Black feature</div>
+
+            <h2 class="upsell-title">AI Scheduling — fully hands-free calendar management</h2>
+
+            <p class="upsell-sub">
+              Tell the AI what to book in plain language. It checks your live availability,
+              blocks buffers, confirms details, and sends reminders — no back-and-forth
+              required.
+            </p>
+
+            <ul class="upsell-features">
+              <li>
+                <span class="upsell-check" aria-hidden="true">&#10003;</span>
+                <span>
+                  <span class="upsell-feature-label">Conversational AI scheduler</span>
+                  <span class="upsell-feature-sub">
+                    "Book a 60-min massage for Sarah on Friday afternoon" — done.
+                  </span>
+                </span>
+              </li>
+              <li>
+                <span class="upsell-check" aria-hidden="true">&#10003;</span>
+                <span>
+                  <span class="upsell-feature-label">Public booking link</span>
+                  <span class="upsell-feature-sub">
+                    Share a link so clients book themselves into your real availability.
+                  </span>
+                </span>
+              </li>
+              <li>
+                <span class="upsell-check" aria-hidden="true">&#10003;</span>
+                <span>
+                  <span class="upsell-feature-label">Push reminders</span>
+                  <span class="upsell-feature-sub">
+                    Automatic notifications before every appointment — no calendar app needed.
+                  </span>
+                </span>
+              </li>
+              <li>
+                <span class="upsell-check" aria-hidden="true">&#10003;</span>
+                <span>
+                  <span class="upsell-feature-label">iCal import &amp; busy blocks</span>
+                  <span class="upsell-feature-sub">
+                    Drop in an .ics file — the AI sees your personal blocks and works around them.
+                  </span>
+                </span>
+              </li>
+              <li>
+                <span class="upsell-check" aria-hidden="true">&#10003;</span>
+                <span>
+                  <span class="upsell-feature-label">Follow-up sequences</span>
+                  <span class="upsell-feature-sub">
+                    Auto-draft check-ins and rebooking nudges after every completed service.
+                  </span>
+                </span>
+              </li>
+            </ul>
+
+            <div class="upsell-divider"></div>
+
+            <a
+              href="/pro.html#pricing"
+              class="upsell-cta"
+              aria-label="Upgrade to Pro to unlock the Scheduler"
+            >
+              Upgrade to Pro &rarr;
+            </a>
+
+            <p class="upsell-footnote">
+              Pro includes everything above. Black adds deeper history, gold accents,
+              and priority slots. Cancel any time.
+            </p>
+
+          </div>
+        </div>
       </div>
+
+      <div class="tab-panel" id="panel-prompts"></div>
+
+      <div class="tab-panel" id="panel-todos"></div>
+
+      <div class="tab-panel" id="panel-settings"></div>
     </div>
 
   </div>
   <script src="/app-client.js"></script>
+  <script src="/prompts-client.js"></script>
+  <script src="/todos-client.js"></script>
+  <script src="/settings-client.js"></script>
   <script>
   (function () {
+    var TIER   = "Core";
+    var ACCENT = "#06b6d4";
+
     var tabBtns = document.querySelectorAll(".tab-btn");
     var tabPanels = document.querySelectorAll(".tab-panel");
+    var promptsInited  = false;
+    var todosInited    = false;
+    var settingsInited = false;
+    var profile        = null;
+
+    function getEmail() {
+      return (window.__tbSession && window.__tbSession.email) || "";
+    }
 
     tabBtns.forEach(function (btn) {
       btn.addEventListener("click", function () {
@@ -595,8 +831,24 @@
         tabPanels.forEach(function (p) { p.classList.remove("active"); });
         var panel = document.getElementById("panel-" + target);
         if (panel) panel.classList.add("active");
+        if (target === "prompts" && !promptsInited) {
+          promptsInited = true;
+          window.initPrompts({ tier: TIER, panel: panel, profile: profile || {}, accent: ACCENT });
+        }
+        if (target === "todos" && !todosInited) {
+          todosInited = true;
+          window.initTodos({ panel: panel, tier: TIER, accent: ACCENT });
+        }
+        if (target === "settings" && !settingsInited) {
+          settingsInited = true;
+          window.initSettings({ panel: panel, accent: ACCENT, profile: profile || {}, userEmail: getEmail() });
+        }
       });
     });
+
+    var hash = window.location.hash;
+    if (hash === "#todos")    { var b = document.querySelector('[data-tab="todos"]');    if (b) b.click(); }
+    if (hash === "#settings") { var b = document.querySelector('[data-tab="settings"]'); if (b) b.click(); }
 
   })();
   </script>

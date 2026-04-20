@@ -81,6 +81,7 @@ function parseDateToLocal(dateStr) {
  *   Each: { day_of_week: 0-6, start_time: "HH:MM", end_time: "HH:MM" }
  *   If empty/missing, defaults to Mon-Fri 09:00-17:00.
  * @param {number} [params.maxSlotsPerDay=5] - cap returned slots per day
+ * @param {number} [params.stepMinutes=30]   - interval between slot start times in minutes
  *
  * @returns {Array} available slots:
  *   [{ date, dayName, startTime, endTime, durationMinutes }]
@@ -96,6 +97,7 @@ function findAvailableSlots(params) {
     busyBlocks = [],
     workingHours = [],
     maxSlotsPerDay = 5,
+    stepMinutes = 30,
   } = params;
 
   if (!startDate || !endDate || !durationMinutes) {
@@ -188,7 +190,7 @@ function findAvailableSlots(params) {
               durationMinutes,
             });
             daySlots++;
-            slotStart += 30;
+            slotStart += stepMinutes;
           }
         }
 

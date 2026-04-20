@@ -1,4 +1,4 @@
-const { createPublicBookingStore, createAppointmentStore, createPushSubscriptionStore, createBusyBlockStore, createServiceRoleClient } = require("./_lib/supabase");
+const { createPublicBookingStore, createAppointmentStore, createPushSubscriptionStore, createBusyBlockStore, createServiceStore, createServiceRoleClient } = require("./_lib/supabase");
 const { json, denied } = require("./_lib/http");
 const { normalizeTier } = require("./_lib/tier-policy");
 const { findAvailableSlots, workingHoursToArray } = require("./_lib/scheduler");
@@ -22,24 +22,27 @@ function addDays(dateStr, n) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-function buildClientSystemPrompt(profile) {
-  const businessName = profile.occupation || "this business";
+function buildClientSystemPrompt(profile, services) {
+  const businessName = profile.business_name || profile.occupation || "this business";
   const parts = [
     `You are a scheduling assistant for ${businessName}. Help clients book an appointment.`,
+    "- The client MUST select a service before you check availability. If no service is selected, ask: 'Which service would you like to book?' and list the options.",
     "- Use find_available_slots to check availability before suggesting times. Never guess.",
     "- Present 2-3 options with day, date, and time.",
-    "- Before calling confirm_booking, you MUST have: client name, client email, selected service, confirmed date/time.",
-    '- After booking: "Confirmed — [day], [date] at [time], [duration] minutes. Download your calendar invite below. You\'ll get a reminder 24 hours before."',
+    "- Before calling confirm_booking, you MUST have: client name, client email, selected service_id, confirmed date/time.",
+    "- When a service is selected, include its [id:...] as service_id in confirm_booking.",
+    '- After booking: "Confirmed — [day], [date] at [time], [duration] minutes. Download your calendar invite below."',
     "- Only discuss scheduling. Never discuss pricing, business advice, or internal details.",
     "- Never reveal the owner's email address.",
     "Keep responses concise and professional.",
   ];
 
-  if (Array.isArray(profile.services) && profile.services.length > 0) {
+  if (Array.isArray(services) && services.length > 0) {
     parts.push("\nAvailable services:");
-    for (const svc of profile.services) {
-      const dur = svc.duration_minutes ? ` (${svc.duration_minutes} min)` : "";
-      parts.push(`- ${svc.name}${dur}`);
+    for (const svc of services) {
+      const dur   = svc.duration_min ? ` (${svc.duration_min} min)` : "";
+      const price = svc.price != null ? ` — $${Number(svc.price).toFixed(2)}` : "";
+      parts.push(`- [id:${svc.id}] ${svc.title}${dur}${price}`);
     }
   }
 
@@ -83,13 +86,14 @@ const BOOKING_TOOLS = [
       properties: {
         client_name:      { type: "string", description: "Client's full name." },
         client_email:     { type: "string", description: "Client's email address." },
-        service_name:     { type: "string", description: "Name of the selected service." },
+        service_id:       { type: "string", description: "UUID of the selected service from the available services list." },
+        service_name:     { type: "string", description: "Name of the selected service (fallback if no service_id)." },
         scheduled_date:   { type: "string", description: "Date in YYYY-MM-DD format." },
         scheduled_time:   { type: "string", description: "Time in HH:MM 24-hour format." },
-        duration_minutes: { type: "number", description: "Duration in minutes." },
+        duration_minutes: { type: "number", description: "Duration in minutes (server will verify against service record)." },
         notes:            { type: "string", description: "Optional notes." },
       },
-      required: ["client_name", "client_email", "service_name", "scheduled_date", "scheduled_time", "duration_minutes"],
+      required: ["client_name", "client_email", "service_id", "scheduled_date", "scheduled_time"],
       additionalProperties: false,
     },
     strict: false,
@@ -106,49 +110,70 @@ function createHandler(deps) {
     generateICSData,
     sendOwnerNotification,
     callOpenAI,
+    getServicesByMerchant,
+    getServiceByIdPublic,
   } = deps;
 
   async function executeTool(toolName, args, context) {
     switch (toolName) {
       case "find_available_slots": {
         const profile = context.profile || {};
-        const bufferBefore = profile.buffer_before_minutes || 0;
-        const bufferAfter = profile.buffer_after_minutes || 0;
+        const stepMinutes = profile.slot_duration_min || 30;
+        let bufferBefore = profile.buffer_before_minutes || 0;
+        let bufferAfter  = profile.buffer_after_minutes  || 0;
+        // Per-service buffer overrides global if service is in context
+        if (context.selectedService && context.selectedService.buffer_time_min > 0) {
+          bufferBefore = context.selectedService.buffer_time_min;
+          bufferAfter  = context.selectedService.buffer_time_min;
+        }
         const today = new Date().toISOString().split("T")[0];
         const slots = findAvailableSlots({
-          appointments: context.appointments,
-          busyBlocks:   context.busyBlocks || [],
-          workingHours: workingHoursToArray(profile.working_hours),
+          appointments:    context.appointments,
+          busyBlocks:      context.busyBlocks || [],
+          workingHours:    workingHoursToArray(profile.working_hours),
           durationMinutes: args.duration_minutes,
-          preBuffer: bufferBefore,
-          postBuffer: bufferAfter,
-          startDate: args.start_date || today,
-          endDate: args.end_date || addDays(today, 14),
-          maxSlotsPerDay: 3,
+          preBuffer:       bufferBefore,
+          postBuffer:      bufferAfter,
+          startDate:       args.start_date || today,
+          endDate:         args.end_date   || addDays(today, 14),
+          maxSlotsPerDay:  3,
+          stepMinutes,
         });
         return { slots, count: slots.length };
       }
       case "confirm_booking": {
         const ownerEmail = context.ownerEmail;
-        const profile = context.profile || {};
+        const profile    = context.profile || {};
+
+        // Server-side service resolution — never trust client-provided duration
+        let resolvedDuration = args.duration_minutes || 60;
+        let serviceName      = args.service_name || args.service_id || "Appointment";
+        if (args.service_id) {
+          const svc = await getServiceByIdPublic(args.service_id);
+          if (svc) {
+            resolvedDuration = svc.duration_min;
+            serviceName      = svc.title;
+            context.selectedService = svc;
+          }
+        }
 
         const appt = await createAppointment(ownerEmail, {
-          client_name: args.client_name,
-          client_contact: args.client_email,
-          client_email: args.client_email,
-          title: args.service_name,
-          scheduled_date: args.scheduled_date,
-          scheduled_time: args.scheduled_time,
-          duration_minutes: args.duration_minutes || 60,
-          notes: args.notes || null,
+          client_name:      args.client_name,
+          client_contact:   args.client_email,
+          client_email:     args.client_email,
+          title:            serviceName,
+          scheduled_date:   args.scheduled_date,
+          scheduled_time:   args.scheduled_time,
+          duration_minutes: resolvedDuration,
+          notes:            args.notes || null,
         });
 
         const icsData = generateICSData({
-          title: args.service_name,
+          title: serviceName,
           description: `Appointment with ${args.client_name}`,
           startDate: args.scheduled_date,
           startTime: args.scheduled_time,
-          durationMinutes: args.duration_minutes || 60,
+          durationMinutes: resolvedDuration,
           organizerName: profile.occupation || null,
           organizerEmail: null, // never expose owner email to client
           attendeeName: args.client_name,
@@ -228,12 +253,17 @@ function createHandler(deps) {
       return json(400, { ok: false, reason: "missing_message" });
     }
 
-    // ── Init request: return profile data, no AI call ──────────────────────
+    // ── Init request: return profile + services from relational table ─────
     if (message === "__init__") {
+      const services = await getServicesByMerchant(profile.email).catch(() => []);
       return json(200, {
         ok: true,
-        businessName: profile.occupation || null,
-        services: Array.isArray(profile.services) ? profile.services : [],
+        businessName:  profile.business_name  || profile.occupation || null,
+        occupation:    profile.occupation     || null,
+        ownerName:     profile.owner_full_name || profile.owner_first_name || null,
+        city:          profile.city           || null,
+        avatarData:    profile.avatar_data    || null,
+        services,
       });
     }
 
@@ -247,14 +277,16 @@ function createHandler(deps) {
       return json(400, { ok: false, reason: "conversation_too_long" });
     }
 
-    // ── Load owner's appointments and busy blocks for availability checking ──
+    // ── Load owner's data for availability checking ────────────────────────
     let appointments = [];
     let busyBlocks   = [];
+    let services     = [];
     try {
       const today = new Date().toISOString().split("T")[0];
-      [appointments, busyBlocks] = await Promise.all([
+      [appointments, busyBlocks, services] = await Promise.all([
         listAppointments(profile.email, true),
         listBusyBlocks  ? listBusyBlocks(profile.email, today) : Promise.resolve([]),
+        getServicesByMerchant(profile.email),
       ]);
     } catch (_) {
       // continue with empty
@@ -265,9 +297,10 @@ function createHandler(deps) {
       appointments,
       busyBlocks,
       ownerEmail: profile.email,
+      selectedService: null,
     };
 
-    const systemPrompt = buildClientSystemPrompt(profile);
+    const systemPrompt = buildClientSystemPrompt(profile, services);
 
     // ── Tool-calling loop ──────────────────────────────────────────────────
     let currentConversation = conversation.slice();
@@ -360,6 +393,7 @@ function createRuntimeHandler(overrides = {}) {
   const appointmentStore = overrides.appointmentStore || createAppointmentStore();
   const busyBlockStore   = overrides.busyBlockStore   || createBusyBlockStore();
   const pushStore        = overrides.pushStore        || createPushSubscriptionStore();
+  const serviceStore     = overrides.serviceStore     || createServiceStore();
 
   // Configure VAPID once
   let vapidReady = false;
@@ -373,10 +407,12 @@ function createRuntimeHandler(overrides = {}) {
   }
 
   return createHandler({
-    getProfileBySlug: (slug) => bookingStore.getProfileBySlug(slug),
-    getEntitlementByEmail: (email) => bookingStore.getEntitlementByEmail(email),
-    listAppointments: (email, upcoming) => appointmentStore.listAppointments(email, upcoming),
-    listBusyBlocks:   (email, start)   => busyBlockStore.listBusyBlocks(email, start, null),
+    getProfileBySlug:      (slug)          => bookingStore.getProfileBySlug(slug),
+    getEntitlementByEmail: (email)         => bookingStore.getEntitlementByEmail(email),
+    listAppointments:      (email, upcoming) => appointmentStore.listAppointments(email, upcoming),
+    listBusyBlocks:        (email, start)  => busyBlockStore.listBusyBlocks(email, start, null),
+    getServicesByMerchant: (email)         => serviceStore.listServices(email),
+    getServiceByIdPublic:  (id)            => serviceStore.getServiceByIdPublic(id),
 
     createAppointment: (email, appt) => appointmentStore.createAppointment(email, appt),
 

@@ -23,6 +23,9 @@
   var cachedBusyBlocks = [];
   var lastImportBatchId = null;
 
+  // Services state (relational table)
+  var cachedServices = [];
+
   // Wizard state
   var wizStep = 1;
   var wizData = {};
@@ -127,6 +130,17 @@
       }
     } catch (_) {}
     renderBusyBlocks();
+  }
+
+  async function loadServices() {
+    try {
+      var result = await getJson('/.netlify/functions/services', {
+        method: 'GET', credentials: 'same-origin'
+      });
+      if (result.data.ok && Array.isArray(result.data.services)) {
+        cachedServices = result.data.services;
+      }
+    } catch (_) {}
   }
 
   async function deleteBusyBlock(id) {
@@ -552,6 +566,138 @@
     });
   }
 
+  function renderSlotDurationSetting() {
+    var container = document.getElementById('slot-dur-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    var label = document.createElement('div');
+    label.className = 'wh-section-label';
+    label.style.marginTop = '1rem';
+    label.style.fontWeight = '600';
+    label.textContent = 'Slot Duration';
+
+    var row = document.createElement('div');
+    row.className = 'slot-dur-row';
+    row.style.display = 'flex'; row.style.gap = '0.5rem'; row.style.marginTop = '0.4rem'; row.style.alignItems = 'center';
+
+    var sel = document.createElement('select');
+    sel.id = 'slot-dur-select';
+    sel.className = 'wh-select';
+    [15, 30, 45, 60, 90].forEach(function (v) {
+      var opt = document.createElement('option');
+      opt.value = v; opt.textContent = v + ' min';
+      if ((cachedProfile && cachedProfile.slot_duration_min || 30) === v) opt.selected = true;
+      sel.appendChild(opt);
+    });
+
+    var saveBtn = document.createElement('button');
+    saveBtn.type = 'button'; saveBtn.className = 'svc-btn'; saveBtn.textContent = 'Save';
+    saveBtn.addEventListener('click', async function () {
+      saveBtn.disabled = true; saveBtn.textContent = 'Saving\u2026';
+      await saveBusinessProfile({ slot_duration_min: Number(sel.value) });
+      saveBtn.disabled = false; saveBtn.textContent = 'Saved';
+      setTimeout(function () { saveBtn.textContent = 'Save'; }, 1500);
+    });
+
+    row.appendChild(sel);
+    row.appendChild(saveBtn);
+    container.appendChild(label);
+    container.appendChild(row);
+  }
+
+  function populateProfilePanel() {
+    var p = cachedProfile || {};
+    var set = function (id, val) { var el = document.getElementById(id); if (el) el.value = val || ''; };
+    set('prof-first-name', p.owner_first_name);
+    set('prof-full-name',  p.owner_full_name);
+    set('prof-biz-name',   p.business_name);
+    set('prof-phone',      p.business_phone);
+    set('prof-city',       p.city);
+    set('prof-website',    p.website);
+    set('prof-abn',        p.abn);
+
+    var av = document.getElementById('settings-avatar');
+    var headerAv = document.getElementById('app-avatar');
+    if (av) {
+      if (p.avatar_data) {
+        av.innerHTML = '<img src="' + p.avatar_data + '" alt="avatar" style="width:100%;height:100%;object-fit:cover">';
+      } else if (p.owner_first_name) {
+        av.textContent = p.owner_first_name.charAt(0).toUpperCase();
+      } else {
+        av.textContent = 'TB';
+      }
+    }
+    if (headerAv) {
+      if (p.avatar_data) {
+        headerAv.innerHTML = '<img src="' + p.avatar_data + '" alt="avatar">';
+      } else if (p.owner_first_name) {
+        headerAv.textContent = p.owner_first_name.charAt(0).toUpperCase();
+      } else {
+        headerAv.textContent = 'TB';
+      }
+    }
+  }
+
+  function bindProfilePanel() {
+    var uploadBtn  = document.getElementById('avatar-upload-btn');
+    var fileInput  = document.getElementById('avatar-file-input');
+    var saveBtn    = document.getElementById('prof-save-btn');
+    var statusEl   = document.getElementById('prof-status');
+
+    if (uploadBtn && fileInput) {
+      uploadBtn.addEventListener('click', function () { fileInput.click(); });
+      fileInput.addEventListener('change', function () {
+        var file = fileInput.files[0];
+        if (!file) return;
+        if (file.size > 200000) {
+          if (statusEl) statusEl.textContent = 'Image too large (max 200 KB).';
+          return;
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = canvas.height = 256;
+        var ctx = canvas.getContext('2d');
+        var img = new window.Image();
+        img.onload = async function () {
+          var size = Math.min(img.width, img.height);
+          var ox = (img.width  - size) / 2;
+          var oy = (img.height - size) / 2;
+          ctx.drawImage(img, ox, oy, size, size, 0, 0, 256, 256);
+          var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          var av = document.getElementById('settings-avatar');
+          if (av) av.innerHTML = '<img src="' + dataUrl + '" alt="avatar" style="width:100%;height:100%;object-fit:cover">';
+          var headerAv = document.getElementById('app-avatar');
+          if (headerAv) headerAv.innerHTML = '<img src="' + dataUrl + '" alt="avatar">';
+          await saveBusinessProfile({ avatar_data: dataUrl });
+          if (statusEl) { statusEl.textContent = 'Photo saved.'; setTimeout(function () { statusEl.textContent = ''; }, 2000); }
+        };
+        img.src = URL.createObjectURL(file);
+        fileInput.value = '';
+      });
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', async function () {
+        saveBtn.disabled = true; saveBtn.textContent = 'Saving\u2026';
+        var get = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+        await saveBusinessProfile({
+          owner_first_name: get('prof-first-name') || null,
+          owner_full_name:  get('prof-full-name')  || null,
+          business_name:    get('prof-biz-name')   || null,
+          business_phone:   get('prof-phone')       || null,
+          city:             get('prof-city')        || null,
+          website:          get('prof-website')     || null,
+          abn:              get('prof-abn')         || null,
+        });
+        saveBtn.disabled = false; saveBtn.textContent = 'Saved';
+        setTimeout(function () { saveBtn.textContent = 'Save'; }, 1500);
+        if (statusEl) { statusEl.textContent = 'Profile saved.'; setTimeout(function () { statusEl.textContent = ''; }, 2000); }
+      });
+    }
+
+    populateProfilePanel();
+  }
+
   function bindWorkingHoursForm() {
     var form = document.getElementById('wh-add-form');
     if (!form) return;
@@ -574,30 +720,138 @@
   }
 
   // ── Services ──────────────────────────────────────────────────────────────────
+  function buildServiceForm(svc) {
+    var row = document.createElement('div');
+    row.className = 'svc-row';
+
+    var nameInput = document.createElement('input');
+    nameInput.type = 'text'; nameInput.className = 'svc-new-name'; nameInput.placeholder = 'Service name'; nameInput.maxLength = 100;
+    if (svc) nameInput.value = svc.title;
+
+    var durInput = document.createElement('input');
+    durInput.type = 'number'; durInput.className = 'svc-new-dur'; durInput.placeholder = 'Duration (min)'; durInput.min = 15; durInput.step = 15;
+    if (svc) durInput.value = svc.duration_min;
+
+    var priceInput = document.createElement('input');
+    priceInput.type = 'number'; priceInput.className = 'svc-new-price'; priceInput.placeholder = 'Price (optional)'; priceInput.min = 0; priceInput.step = '0.01';
+    if (svc && svc.price != null) priceInput.value = svc.price;
+
+    var bufferInput = document.createElement('input');
+    bufferInput.type = 'number'; bufferInput.className = 'svc-new-buffer'; bufferInput.placeholder = 'Buffer (min)'; bufferInput.min = 0; bufferInput.max = 240; bufferInput.value = (svc ? svc.buffer_time_min : 0) || 0;
+
+    var descInput = document.createElement('input');
+    descInput.type = 'text'; descInput.className = 'svc-new-desc'; descInput.placeholder = 'Description (optional)'; descInput.maxLength = 500;
+    if (svc && svc.description) descInput.value = svc.description;
+
+    var errEl = document.createElement('div');
+    errEl.className = 'svc-error'; errEl.style.color = 'var(--warn, #f87171)'; errEl.style.fontSize = '0.75rem';
+
+    var saveBtn = document.createElement('button');
+    saveBtn.type = 'button'; saveBtn.className = 'svc-row-save'; saveBtn.textContent = 'Save';
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button'; cancelBtn.className = 'svc-row-remove svc-row-cancel'; cancelBtn.textContent = '\u00d7';
+
+    row.appendChild(nameInput);
+    row.appendChild(durInput);
+    row.appendChild(priceInput);
+    row.appendChild(bufferInput);
+    row.appendChild(descInput);
+    row.appendChild(errEl);
+    row.appendChild(saveBtn);
+    row.appendChild(cancelBtn);
+
+    return { row, nameInput, durInput, priceInput, bufferInput, descInput, errEl, saveBtn, cancelBtn };
+  }
+
   function renderServices() {
     var container = document.getElementById('svc-list');
     if (!container) return;
-    var services = (cachedProfile && cachedProfile.services) ? cachedProfile.services : [];
     container.innerHTML = '';
 
-    services.forEach(function (svc, idx) {
+    cachedServices.forEach(function (svc) {
       var item = document.createElement('div');
       item.className = 'svc-item';
-      item.innerHTML =
-        '<div><div class="svc-name">' + escapeHtml(svc.name) + '</div>' +
-        '<div class="svc-dur">' + escapeHtml(String(svc.duration_minutes || 60)) + ' minutes</div></div>';
+
+      var header = document.createElement('div');
+      header.className = 'svc-header';
+
+      var titleEl = document.createElement('div');
+      titleEl.className = 'svc-name';
+      titleEl.textContent = svc.title;
+
+      var metaParts = [svc.duration_min + ' min'];
+      if (svc.price != null) metaParts.push('$' + Number(svc.price).toFixed(2));
+      if (svc.buffer_time_min > 0) metaParts.push('buffer: ' + svc.buffer_time_min + 'min');
+      var metaEl = document.createElement('div');
+      metaEl.className = 'svc-dur';
+      metaEl.textContent = metaParts.join('  ·  ');
+
+      header.appendChild(titleEl);
+      header.appendChild(metaEl);
+      item.appendChild(header);
+
+      if (svc.description) {
+        var descEl = document.createElement('div');
+        descEl.className = 'svc-desc';
+        descEl.textContent = svc.description;
+        item.appendChild(descEl);
+      }
+
       var actions = document.createElement('div');
       actions.className = 'svc-actions';
+
+      var editBtn = document.createElement('button');
+      editBtn.className = 'svc-btn';
+      editBtn.textContent = 'Edit';
+      (function (s, itemEl) {
+        editBtn.addEventListener('click', function () {
+          var f = buildServiceForm(s);
+          itemEl.replaceWith(f.row);
+          f.cancelBtn.addEventListener('click', function () {
+            f.row.replaceWith(itemEl);
+          });
+          f.saveBtn.addEventListener('click', async function () {
+            var dur = parseInt(f.durInput.value, 10);
+            if (!f.nameInput.value.trim()) { f.errEl.textContent = 'Name required.'; return; }
+            if (!dur || dur % 15 !== 0) { f.errEl.textContent = 'Duration must be a multiple of 15 (e.g. 15, 30, 45, 60).'; return; }
+            f.saveBtn.disabled = true; f.saveBtn.textContent = 'Saving\u2026';
+            try {
+              var res = await fetch('/.netlify/functions/services?id=' + encodeURIComponent(s.id), {
+                method: 'PATCH', credentials: 'same-origin',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                  title:          f.nameInput.value.trim(),
+                  duration_min:   dur,
+                  price:          f.priceInput.value !== '' ? Number(f.priceInput.value) : null,
+                  buffer_time_min: Number(f.bufferInput.value) || 0,
+                  description:    f.descInput.value.trim() || null,
+                }),
+              });
+              var data = await res.json();
+              if (data.ok) { await loadServices(); renderServices(); }
+              else { f.errEl.textContent = data.reason || 'Save failed.'; f.saveBtn.disabled = false; f.saveBtn.textContent = 'Save'; }
+            } catch (_) { f.errEl.textContent = 'Request failed.'; f.saveBtn.disabled = false; f.saveBtn.textContent = 'Save'; }
+          });
+        });
+      })(svc, item);
+
       var removeBtn = document.createElement('button');
       removeBtn.className = 'svc-btn';
       removeBtn.textContent = 'Remove';
-      (function (i) {
+      (function (id) {
         removeBtn.addEventListener('click', async function () {
-          var updated = (cachedProfile.services || []).filter(function (_, j) { return j !== i; });
-          await saveBusinessProfile({ services: updated });
-          renderServices();
+          removeBtn.disabled = true; removeBtn.textContent = 'Removing\u2026';
+          try {
+            await fetch('/.netlify/functions/services?id=' + encodeURIComponent(id), {
+              method: 'DELETE', credentials: 'same-origin'
+            });
+            await loadServices(); renderServices();
+          } catch (_) { removeBtn.disabled = false; removeBtn.textContent = 'Remove'; }
         });
-      })(idx);
+      })(svc.id);
+
+      actions.appendChild(editBtn);
       actions.appendChild(removeBtn);
       item.appendChild(actions);
       container.appendChild(item);
@@ -608,25 +862,33 @@
     addBtn.textContent = '+ Add service';
     addBtn.addEventListener('click', function () {
       addBtn.style.display = 'none';
-      var row = document.createElement('div');
-      row.className = 'svc-row';
-      row.innerHTML =
-        '<input type="text" placeholder="Service name" class="svc-new-name">' +
-        '<input type="number" placeholder="Min" min="5" step="5" class="svc-new-dur">' +
-        '<button class="svc-row-save" type="button">Save</button>' +
-        '<button class="svc-row-remove svc-row-cancel" type="button">&times;</button>';
-      container.insertBefore(row, addBtn);
-      row.querySelector('.svc-row-cancel').addEventListener('click', function () {
-        row.remove();
+      var f = buildServiceForm(null);
+      container.insertBefore(f.row, addBtn);
+      f.cancelBtn.addEventListener('click', function () {
+        f.row.remove();
         addBtn.style.display = '';
       });
-      row.querySelector('.svc-row-save').addEventListener('click', async function () {
-        var name = row.querySelector('.svc-new-name').value.trim();
-        var dur = parseInt(row.querySelector('.svc-new-dur').value, 10);
-        if (!name || !dur) return;
-        var updated = (cachedProfile && cachedProfile.services ? cachedProfile.services : []).concat([{ name: name, duration_minutes: dur }]);
-        var ok = await saveBusinessProfile({ services: updated });
-        if (ok) renderServices();
+      f.saveBtn.addEventListener('click', async function () {
+        var dur = parseInt(f.durInput.value, 10);
+        if (!f.nameInput.value.trim()) { f.errEl.textContent = 'Name required.'; return; }
+        if (!dur || dur % 15 !== 0) { f.errEl.textContent = 'Duration must be a multiple of 15 (e.g. 15, 30, 45, 60).'; return; }
+        f.saveBtn.disabled = true; f.saveBtn.textContent = 'Adding\u2026';
+        try {
+          var res = await fetch('/.netlify/functions/services', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              title:          f.nameInput.value.trim(),
+              duration_min:   dur,
+              price:          f.priceInput.value !== '' ? Number(f.priceInput.value) : null,
+              buffer_time_min: Number(f.bufferInput.value) || 0,
+              description:    f.descInput.value.trim() || null,
+            }),
+          });
+          var data = await res.json();
+          if (data.ok) { await loadServices(); renderServices(); }
+          else { f.errEl.textContent = data.reason || 'Save failed.'; f.saveBtn.disabled = false; f.saveBtn.textContent = 'Save'; addBtn.style.display = ''; }
+        } catch (_) { f.errEl.textContent = 'Request failed.'; f.saveBtn.disabled = false; f.saveBtn.textContent = 'Save'; }
       });
     });
     container.appendChild(addBtn);
@@ -691,7 +953,13 @@
     var overlay = document.getElementById('wizard-overlay');
     if (overlay) overlay.classList.remove('hidden');
     wizStep = 1;
-    wizData = { occupation: '', services: [{ name: '', duration_minutes: 60 }], bufferBefore: 15, bufferAfter: 15 };
+    wizData = {
+      firstName: '', fullName: '', businessName: '', businessPhone: '',
+      businessEmail: '', website: '', abn: '', city: '',
+      occupation: '',
+      services: [{ name: '', duration_min: 60, price: null }],
+      bufferBefore: 15, bufferAfter: 15
+    };
     renderWizardStep();
   }
 
@@ -710,7 +978,7 @@
 
     if (stepIndicator) {
       stepIndicator.innerHTML = '';
-      for (var i = 1; i <= 3; i++) {
+      for (var i = 1; i <= 4; i++) {
         var dot = document.createElement('div');
         dot.className = 'wizard-step-dot' + (i < wizStep ? ' done' : i === wizStep ? ' active' : '');
         stepIndicator.appendChild(dot);
@@ -718,6 +986,28 @@
     }
 
     if (wizStep === 1) {
+      if (titleEl) titleEl.textContent = 'Tell us about yourself';
+      if (subEl) subEl.textContent = 'This fills in your prompt templates automatically so you rarely have to type your details again.';
+      if (nextBtn) nextBtn.textContent = 'Next \u2192';
+      bodyEl.innerHTML =
+        '<div class="wizard-field"><label>First name</label>' +
+        '<input type="text" id="wiz-first-name" placeholder="Jane" maxlength="100" value="' + escapeHtml(wizData.firstName) + '"></div>' +
+        '<div class="wizard-field"><label>Full name</label>' +
+        '<input type="text" id="wiz-full-name" placeholder="Jane Smith" maxlength="200" value="' + escapeHtml(wizData.fullName) + '"></div>' +
+        '<div class="wizard-field"><label>Business name</label>' +
+        '<input type="text" id="wiz-biz-name" placeholder="Jane\'s Salon" maxlength="200" value="' + escapeHtml(wizData.businessName) + '"></div>' +
+        '<div class="wizard-field"><label>Business phone</label>' +
+        '<input type="text" id="wiz-biz-phone" placeholder="+61 4xx xxx xxx" maxlength="40" value="' + escapeHtml(wizData.businessPhone) + '"></div>' +
+        '<div class="wizard-field"><label>Business email <span style="color:#52606d;font-weight:400">(optional)</span></label>' +
+        '<input type="email" id="wiz-biz-email" placeholder="hello@yourbusiness.com" maxlength="200" value="' + escapeHtml(wizData.businessEmail) + '"></div>' +
+        '<div class="wizard-field"><label>City</label>' +
+        '<input type="text" id="wiz-city" placeholder="Melbourne" maxlength="100" value="' + escapeHtml(wizData.city) + '"></div>' +
+        '<div class="wizard-field"><label>Website <span style="color:#52606d;font-weight:400">(optional)</span></label>' +
+        '<input type="text" id="wiz-website" placeholder="https://yourbusiness.com" maxlength="200" value="' + escapeHtml(wizData.website) + '"></div>' +
+        '<div class="wizard-field"><label>ABN <span style="color:#52606d;font-weight:400">(optional)</span></label>' +
+        '<input type="text" id="wiz-abn" placeholder="12 345 678 901" maxlength="20" value="' + escapeHtml(wizData.abn) + '"></div>';
+
+    } else if (wizStep === 2) {
       if (titleEl) titleEl.textContent = 'What do you do?';
       if (subEl) subEl.textContent = 'Your occupation helps the AI give relevant scheduling advice.';
       if (nextBtn) nextBtn.textContent = 'Next \u2192';
@@ -725,24 +1015,26 @@
         '<div class="wizard-field"><label>Your occupation</label>' +
         '<input type="text" id="wiz-occupation" placeholder="e.g. Mobile Hairdresser, Plumber, Personal Trainer" value="' + escapeHtml(wizData.occupation) + '"></div>';
 
-    } else if (wizStep === 2) {
+    } else if (wizStep === 3) {
       if (titleEl) titleEl.textContent = 'What services do you offer?';
-      if (subEl) subEl.textContent = 'Add the services you book. The AI uses these durations to find the right slots.';
+      if (subEl) subEl.textContent = 'Add the services you book. Durations must be multiples of 15 min. Price is optional.';
       if (nextBtn) nextBtn.textContent = 'Next \u2192';
       var html = '<div id="wiz-svc-list">';
       wizData.services.forEach(function (svc, i) {
         html +=
           '<div class="svc-row">' +
           '<input type="text" class="wiz-svc-name" placeholder="Service name" value="' + escapeHtml(svc.name) + '">' +
-          '<input type="number" class="wiz-svc-dur" placeholder="Min" min="5" step="5" value="' + escapeHtml(String(svc.duration_minutes || '')) + '">' +
+          '<input type="number" class="wiz-svc-dur" placeholder="Min" min="15" step="15" value="' + escapeHtml(String(svc.duration_min || '')) + '">' +
+          '<input type="number" class="wiz-svc-price" placeholder="Price (opt)" min="0" step="0.01" value="' + escapeHtml(svc.price != null ? String(svc.price) : '') + '">' +
           '<button class="svc-row-remove" type="button" data-idx="' + i + '">&times;</button></div>';
       });
-      html += '</div><button class="add-svc-btn" id="wiz-add-svc" type="button">+ Add service</button>';
+      html += '</div><div id="wiz-svc-error" style="color:#ef4444;font-size:12px;margin-top:6px;display:none"></div>';
+      html += '<button class="add-svc-btn" id="wiz-add-svc" type="button">+ Add service</button>';
       bodyEl.innerHTML = html;
       bodyEl.querySelectorAll('.svc-row-remove').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var idx = parseInt(btn.getAttribute('data-idx'), 10);
-          saveWizardStep2();
+          saveWizardStep3();
           wizData.services.splice(idx, 1);
           renderWizardStep();
         });
@@ -750,13 +1042,13 @@
       var addSvcBtn = document.getElementById('wiz-add-svc');
       if (addSvcBtn) {
         addSvcBtn.addEventListener('click', function () {
-          saveWizardStep2();
-          wizData.services.push({ name: '', duration_minutes: 60 });
+          saveWizardStep3();
+          wizData.services.push({ name: '', duration_min: 30, price: null });
           renderWizardStep();
         });
       }
 
-    } else if (wizStep === 3) {
+    } else if (wizStep === 4) {
       if (titleEl) titleEl.textContent = 'Buffer times';
       if (subEl) subEl.textContent = 'How much travel or prep time do you need around appointments?';
       if (nextBtn) nextBtn.textContent = 'Finish';
@@ -771,23 +1063,63 @@
   }
 
   function saveWizardStep1() {
+    var g = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    wizData.firstName     = g('wiz-first-name');
+    wizData.fullName      = g('wiz-full-name');
+    wizData.businessName  = g('wiz-biz-name');
+    wizData.businessPhone = g('wiz-biz-phone');
+    wizData.businessEmail = g('wiz-biz-email');
+    wizData.city          = g('wiz-city');
+    wizData.website       = g('wiz-website');
+    wizData.abn           = g('wiz-abn');
+  }
+
+  function saveWizardStep2() {
     var el = document.getElementById('wiz-occupation');
     if (el) wizData.occupation = el.value.trim();
   }
 
-  function saveWizardStep2() {
+  function saveWizardStep3() {
     var rows = document.querySelectorAll('#wiz-svc-list .svc-row');
     wizData.services = Array.from(rows).map(function (row) {
-      var nameEl = row.querySelector('.wiz-svc-name');
-      var durEl  = row.querySelector('.wiz-svc-dur');
+      var nameEl  = row.querySelector('.wiz-svc-name');
+      var durEl   = row.querySelector('.wiz-svc-dur');
+      var priceEl = row.querySelector('.wiz-svc-price');
+      var dur = parseInt(durEl ? durEl.value : '', 10) || 30;
+      dur = Math.max(15, Math.round(dur / 15) * 15);
+      var price = priceEl && priceEl.value !== '' ? parseFloat(priceEl.value) : null;
       return {
-        name: nameEl ? nameEl.value.trim() : '',
-        duration_minutes: durEl ? (parseInt(durEl.value, 10) || 60) : 60
+        name:         nameEl ? nameEl.value.trim() : '',
+        duration_min: dur,
+        price:        (price !== null && !isNaN(price) && price >= 0) ? price : null,
       };
     });
   }
 
-  function saveWizardStep3() {
+  async function saveWizardServicesToRelational(services) {
+    var valid = services.filter(function (s) { return s.name && s.duration_min >= 15; });
+    var results = [];
+    for (var i = 0; i < valid.length; i++) {
+      var s = valid[i];
+      try {
+        var res = await fetch('/.netlify/functions/services', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            title:        s.name,
+            duration_min: s.duration_min,
+            price:        s.price,
+            sort_order:   i,
+          }),
+        });
+        var data = await res.json();
+        if (data.ok) results.push(data.service);
+      } catch (_) {}
+    }
+    return results;
+  }
+
+  function saveWizardStep4() {
     var bb = document.getElementById('wiz-buf-before');
     var ba = document.getElementById('wiz-buf-after');
     if (bb) wizData.bufferBefore = parseInt(bb.value, 10) || 0;
@@ -809,14 +1141,29 @@
           renderWizardStep();
         } else if (wizStep === 3) {
           saveWizardStep3();
+          wizStep++;
+          renderWizardStep();
+        } else if (wizStep === 4) {
+          saveWizardStep4();
           nextBtn.disabled = true;
           nextBtn.textContent = 'Saving\u2026';
+          // Save services to relational table
+          var svcsToSave = wizData.services.filter(function (s) { return s.name; });
+          if (svcsToSave.length > 0) {
+            await saveWizardServicesToRelational(svcsToSave);
+          }
           var ok = await saveBusinessProfile({
-            occupation: wizData.occupation,
-            services: wizData.services.filter(function (s) { return s.name; }),
+            owner_first_name:      wizData.firstName     || null,
+            owner_full_name:       wizData.fullName      || null,
+            business_name:         wizData.businessName  || null,
+            business_phone:        wizData.businessPhone || null,
+            website:               wizData.website       || null,
+            abn:                   wizData.abn           || null,
+            city:                  wizData.city          || null,
+            occupation:            wizData.occupation,
             buffer_before_minutes: wizData.bufferBefore,
-            buffer_after_minutes: wizData.bufferAfter,
-            onboarding_complete: true
+            buffer_after_minutes:  wizData.bufferAfter,
+            onboarding_complete:   true
           });
           nextBtn.disabled = false;
           nextBtn.textContent = 'Finish';
@@ -1171,15 +1518,16 @@
     if (prevBtn) prevBtn.addEventListener('click', function () { navigateMonth(-1); });
     if (nextBtn) nextBtn.addEventListener('click', function () { navigateMonth(1); });
 
-    // Load data
+    // Load data — profile first (needed for slot_duration_min), then rest in parallel
     await loadBusinessProfile();
-    await Promise.all([loadAppointments(), loadBusyBlocks()]);
+    await Promise.all([loadAppointments(), loadBusyBlocks(), loadServices()]);
 
     // Onboarding check
     if (!cachedProfile || !cachedProfile.onboarding_complete) showWizard();
 
     // Render sidebar panels
     renderWorkingHours();
+    renderSlotDurationSetting();
     renderServices();
     renderBookingLink();
 
@@ -1192,6 +1540,7 @@
     bindWizardButtons();
     bindIcalExport();
     bindIcalImport();
+    bindProfilePanel();
 
     // Unlock form now that all handlers are registered
     if (submitBtn) submitBtn.disabled = false;
@@ -1199,5 +1548,25 @@
   }
 
   global.initScheduler = initScheduler;
+
+  // Called on page load (before any tab is clicked) to immediately show wizard
+  // if the user hasn't completed onboarding yet.
+  global.checkOnboardingOnLoad = async function checkOnboardingOnLoad(opts) {
+    try {
+      var res = await fetch('/.netlify/functions/business-profile', { credentials: 'same-origin' });
+      if (!res.ok) return;
+      var data = await res.json();
+      var profile = data.profile || null;
+      if (!profile || !profile.onboarding_complete) {
+        // Ensure wizard HTML is in the DOM (app-core doesn't have it)
+        var overlay = document.getElementById('wizard-overlay');
+        if (!overlay) return;
+        // Pre-seed wizData with any existing values
+        cachedProfile = profile;
+        showWizard();
+        bindWizardButtons();
+      }
+    } catch (_) {}
+  };
 
 })(window);

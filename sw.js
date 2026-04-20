@@ -50,6 +50,8 @@ self.addEventListener("notificationclick", (event) => {
   var targetUrl = "/";
   if (notifData.type === "follow_up") {
     targetUrl = "/#follow-ups";
+  } else if (notifData.type === "todo") {
+    targetUrl = "/#todos";
   }
 
   event.waitUntil(

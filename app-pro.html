@@ -107,7 +107,11 @@
       border-bottom: 1px solid var(--line);
       background: rgba(2,2,3,.92);
       padding: 0 24px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .tab-bar::-webkit-scrollbar { display: none; }
 
     .tab-btn {
       display: inline-flex;
@@ -959,6 +963,30 @@
     }
     .fu-cancel-btn:hover { color: #ef4444; border-color: #ef4444; }
 
+    /* ── Avatar ── */
+    .app-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--line-hi); overflow: hidden; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer;
+      border: 1px solid var(--line-hi); transition: border-color .15s;
+    }
+    .app-avatar:hover { border-color: var(--accent); }
+    .app-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ── Footer sticky fix ── */
+    .app-footer { position: sticky; bottom: 0; background: var(--bg); z-index: 10; }
+
+    /* Ensure textareas never trigger iOS zoom */
+    textarea, input[type="text"], input[type="number"], input[type="email"],
+    input[type="search"], input[type="datetime-local"], select {
+      font-size: 16px !important;
+      touch-action: manipulation;
+    }
+
+    /* Wizard price input */
+    .svc-row input.wiz-svc-price { width: 90px; flex-shrink: 0; }
+
     /* ── Responsive ── */
     @media (max-width: 820px) {
       .threads-sidebar {
@@ -1009,6 +1037,7 @@
       <div class="app-logo">TB</div>
       <div class="app-wordmark">Text Boss <span>Pro</span></div>
       <div class="app-tier-badge">Pro</div>
+      <div class="app-avatar" id="app-avatar">TB</div>
       <button class="secondary-btn" id="logout-button" type="button">Logout</button>
     </header>
 
@@ -1017,6 +1046,8 @@
       <button class="tab-btn" data-tab="scheduler" type="button">Scheduler</button>
       <button class="tab-btn" data-tab="followups" type="button">Follow-Ups</button>
       <button class="tab-btn" data-tab="prompts" type="button">Prompts</button>
+      <button class="tab-btn" data-tab="todos" type="button">To-Do</button>
+      <button class="tab-btn" data-tab="settings" type="button">Settings</button>
     </nav>
 
     <div class="app-body">
@@ -1074,6 +1105,7 @@
               <button class="sidebar-tab active" data-sidebar-panel="calendar" type="button">Calendar</button>
               <button class="sidebar-tab" data-sidebar-panel="hours" type="button">Hours</button>
               <button class="sidebar-tab" data-sidebar-panel="services" type="button">Services</button>
+              <button class="sidebar-tab" data-sidebar-panel="profile" type="button">Settings</button>
             </div>
 
             <!-- Calendar panel -->
@@ -1110,6 +1142,8 @@
                 </form>
               </div>
 
+              <div id="slot-dur-container"></div>
+
               <!-- Busy blocks / calendar import -->
               <div class="import-section">
                 <h3>Busy blocks</h3>
@@ -1125,6 +1159,56 @@
             <div class="sidebar-panel" id="sidebar-services">
               <div id="svc-list"></div>
               <div class="booking-link-section" id="booking-link-section"></div>
+            </div>
+
+            <!-- Profile / Settings panel -->
+            <div class="sidebar-panel" id="sidebar-profile">
+              <div class="wh-section">
+                <h3>Profile &amp; Settings</h3>
+
+                <!-- Avatar -->
+                <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;margin-top:8px">
+                  <div class="app-avatar" id="settings-avatar" style="width:56px;height:56px;font-size:20px">TB</div>
+                  <div>
+                    <button type="button" class="svc-btn" id="avatar-upload-btn">Upload photo</button>
+                    <input type="file" id="avatar-file-input" accept="image/*" style="display:none">
+                    <div class="import-hint" style="margin-top:4px">Square image, max 200 KB</div>
+                  </div>
+                </div>
+
+                <!-- Business details -->
+                <div class="wizard-field">
+                  <label>First name</label>
+                  <input type="text" id="prof-first-name" placeholder="Jane" maxlength="100">
+                </div>
+                <div class="wizard-field">
+                  <label>Full name</label>
+                  <input type="text" id="prof-full-name" placeholder="Jane Smith" maxlength="200">
+                </div>
+                <div class="wizard-field">
+                  <label>Business name</label>
+                  <input type="text" id="prof-biz-name" placeholder="Jane's Salon" maxlength="200">
+                </div>
+                <div class="wizard-field">
+                  <label>Phone</label>
+                  <input type="text" id="prof-phone" placeholder="+61 4xx xxx xxx" maxlength="40">
+                </div>
+                <div class="wizard-field">
+                  <label>City</label>
+                  <input type="text" id="prof-city" placeholder="Melbourne" maxlength="100">
+                </div>
+                <div class="wizard-field">
+                  <label>Website</label>
+                  <input type="text" id="prof-website" placeholder="https://…" maxlength="200">
+                </div>
+                <div class="wizard-field">
+                  <label>ABN (optional)</label>
+                  <input type="text" id="prof-abn" placeholder="12 345 678 901" maxlength="20">
+                </div>
+
+                <button type="button" class="svc-btn" id="prof-save-btn" style="margin-top:8px">Save</button>
+                <div id="prof-status" style="font-size:12px;color:#52606d;margin-top:6px"></div>
+              </div>
             </div>
 
           </aside>
@@ -1175,14 +1259,11 @@
         </div>
       </div>
 
-      <div class="tab-panel" id="panel-prompts">
-        <iframe
-          src="/pro_subscriber_prompts.html"
-          id="prompts-frame"
-          style="flex:1;width:100%;height:100%;border:none;display:block;"
-          title="Pro Prompt Templates"
-        ></iframe>
-      </div>
+      <div class="tab-panel" id="panel-prompts"></div>
+
+      <div class="tab-panel" id="panel-todos"></div>
+
+      <div class="tab-panel" id="panel-settings"></div>
 
     </div>
 
@@ -1206,38 +1287,93 @@
   <script src="/app-client.js"></script>
   <script src="/scheduler-client.js"></script>
   <script src="/followup-client.js"></script>
+  <script src="/prompts-client.js"></script>
+  <script src="/todos-client.js"></script>
+  <script src="/settings-client.js"></script>
   <script>
   (function () {
+    var TIER   = "Pro";
+    var ACCENT = "#06b6d4";
+
     // ── Tab switching ──
     var tabBtns = document.querySelectorAll(".tab-btn");
     var tabPanels = document.querySelectorAll(".tab-panel");
     var schedulerInited = false;
     var followUpsInited = false;
+    var promptsInited   = false;
+    var todosInited     = false;
+    var settingsInited  = false;
+    var profile         = null;
+    var userEmail       = "";
+
+    // Load profile once — used by avatar, prompts, settings
+    fetch("/.netlify/functions/business-profile")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.ok) return;
+        profile = d.profile || {};
+        var av = document.getElementById("app-avatar");
+        if (av && profile.avatar_data) {
+          av.innerHTML = '<img src="' + profile.avatar_data + '" alt="avatar">';
+        } else if (av && profile.owner_first_name) {
+          av.textContent = profile.owner_first_name.charAt(0).toUpperCase();
+        }
+      })
+      .catch(function () {});
+
+    // Capture email from session-verify (set by app-client.js)
+    function getEmail() {
+      return (window.__tbSession && window.__tbSession.email) || "";
+    }
+
+    function activateTab(target) {
+      tabBtns.forEach(function (b) { b.classList.remove("active"); });
+      var btn = document.querySelector('[data-tab="' + target + '"]');
+      if (btn) btn.classList.add("active");
+      tabPanels.forEach(function (p) { p.classList.remove("active"); });
+      var panel = document.getElementById("panel-" + target);
+      if (panel) panel.classList.add("active");
+
+      if (target === "scheduler" && !schedulerInited) {
+        schedulerInited = true;
+        window.initScheduler({ tier: TIER, inputLimit: 6000 });
+      }
+      if (target === "followups" && !followUpsInited) {
+        followUpsInited = true;
+        window.initFollowUps({ tier: TIER, followUpLimit: 10 });
+      }
+      if (target === "prompts" && !promptsInited) {
+        promptsInited = true;
+        window.initPrompts({ tier: TIER, panel: panel, profile: profile || {}, accent: ACCENT });
+      }
+      if (target === "todos" && !todosInited) {
+        todosInited = true;
+        window.initTodos({ panel: panel, tier: TIER, accent: ACCENT });
+      }
+      if (target === "settings" && !settingsInited) {
+        settingsInited = true;
+        window.initSettings({ panel: panel, accent: ACCENT, profile: profile || {}, userEmail: getEmail(), tier: TIER });
+      }
+    }
 
     tabBtns.forEach(function (btn) {
       btn.addEventListener("click", function () {
-        var target = btn.getAttribute("data-tab");
-        tabBtns.forEach(function (b) { b.classList.remove("active"); });
-        btn.classList.add("active");
-        tabPanels.forEach(function (p) { p.classList.remove("active"); });
-        var panel = document.getElementById("panel-" + target);
-        if (panel) panel.classList.add("active");
-        if (target === "scheduler" && !schedulerInited) {
-          schedulerInited = true;
-          window.initScheduler({ tier: "Pro", inputLimit: 6000 });
-        }
-        if (target === "followups" && !followUpsInited) {
-          followUpsInited = true;
-          window.initFollowUps({ tier: "Pro", followUpLimit: 10 });
-        }
+        activateTab(btn.getAttribute("data-tab"));
       });
     });
 
-    // Handle #follow-ups hash on page load
-    if (window.location.hash === "#follow-ups") {
-      var fuBtn = document.querySelector('[data-tab="followups"]');
-      if (fuBtn) fuBtn.click();
-    }
+    // Avatar click → open Settings tab
+    var avatarEl = document.getElementById("app-avatar");
+    if (avatarEl) avatarEl.addEventListener("click", function () { activateTab("settings"); });
+
+    // Handle hash navigation
+    var hash = window.location.hash;
+    if (hash === "#follow-ups") activateTab("followups");
+    else if (hash === "#todos")  activateTab("todos");
+    else if (hash === "#settings") activateTab("settings");
+
+    // Onboarding wizard — show immediately if profile incomplete
+    window.checkOnboardingOnLoad({ tier: TIER });
 
   })();
   </script>

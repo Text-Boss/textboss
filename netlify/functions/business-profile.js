@@ -134,6 +134,29 @@ function createHandler(deps) {
         updates.booking_slug = crypto.randomBytes(6).toString("base64url").slice(0, 8);
       }
 
+      if (body.slot_duration_min !== undefined) {
+        const v = Number(body.slot_duration_min);
+        if (!Number.isInteger(v) || v <= 0 || v % 15 !== 0 || v > 480) {
+          return deny(400, "invalid_slot_duration");
+        }
+        updates.slot_duration_min = v;
+      }
+
+      // Business detail fields (for prompt auto-fill + avatar)
+      for (const field of ["business_name", "owner_first_name", "owner_full_name",
+                            "business_phone", "website", "abn", "city"]) {
+        if (body[field] !== undefined) {
+          updates[field] = String(body[field] || "").trim().slice(0, 200) || null;
+        }
+      }
+
+      if (body.avatar_data !== undefined) {
+        // Expect base64 data-URL; cap at 200KB to avoid DB bloat
+        const av = String(body.avatar_data || "").trim();
+        if (av && av.length > 200_000) return deny(400, "avatar_too_large");
+        updates.avatar_data = av || null;
+      }
+
       if (Object.keys(updates).length === 0) {
         return deny(400, "no_fields_to_update");
       }

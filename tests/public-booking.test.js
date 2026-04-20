@@ -39,6 +39,14 @@ function makeDeps(overrides = {}) {
     }),
     generateICSData: (params) => "BEGIN:VCALENDAR\r\nMOCK ICS\r\nEND:VCALENDAR",
     sendOwnerNotification: null,
+    getServicesByMerchant: async () => [
+      { id: "svc-1", title: "Cut & Style", duration_min: 60, buffer_time_min: 0, price: null },
+      { id: "svc-2", title: "Colour", duration_min: 120, buffer_time_min: 0, price: null },
+    ],
+    getServiceByIdPublic: async (id) => {
+      if (id === "svc-1") return { id: "svc-1", title: "Cut & Style", duration_min: 60, buffer_time_min: 0, price: null };
+      return null;
+    },
     callOpenAI: async () => ({
       output: "I can help you book an appointment.",
       toolCalls: [],
@@ -70,7 +78,7 @@ async function testInitReturnsProfileData() {
   assert.equal(body.ok, true);
   assert.equal(body.businessName, "Mobile Hairdresser");
   assert.equal(body.services.length, 2);
-  assert.equal(body.services[0].name, "Cut & Style");
+  assert.equal(body.services[0].title, "Cut & Style");
 }
 
 async function testInitReturns404ForUnknownSlug() {

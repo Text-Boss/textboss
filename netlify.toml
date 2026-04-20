@@ -16,3 +16,7 @@
 # Run send-follow-ups daily at 9am UTC to notify owners of due follow-up messages
 [functions."send-follow-ups"]
   schedule = "0 9 * * *"
+
+# Run send-todo-reminders every 15 minutes to deliver due to-do alerts
+[functions."send-todo-reminders"]
+  schedule = "*/15 * * * *"

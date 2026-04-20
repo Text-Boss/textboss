@@ -174,7 +174,7 @@ function createBusinessProfileStore(options = {}) {
       const normalized = String(email || "").trim().toLowerCase();
       const { data, error } = await client
         .from("business_profiles")
-        .select("email, occupation, services, buffer_before_minutes, buffer_after_minutes, working_hours, onboarding_complete, booking_slug, updated_at")
+        .select("email, occupation, services, buffer_before_minutes, buffer_after_minutes, working_hours, onboarding_complete, booking_slug, slot_duration_min, avatar_data, business_name, owner_first_name, owner_full_name, business_phone, website, abn, city, updated_at")
         .ilike("email", normalized)
         .maybeSingle();
       if (error) throw error;
@@ -186,15 +186,107 @@ function createBusinessProfileStore(options = {}) {
       const payload = { email: normalized, updated_at: new Date().toISOString() };
       const allowed = ["occupation", "services", "buffer_before_minutes",
                        "buffer_after_minutes", "working_hours", "onboarding_complete",
-                       "booking_slug"];
+                       "booking_slug", "slot_duration_min",
+                       "avatar_data", "business_name", "owner_first_name", "owner_full_name",
+                       "business_phone", "website", "abn", "city"];
       for (const f of allowed) {
         if (updates[f] !== undefined) payload[f] = updates[f];
       }
       const { data, error } = await client
         .from("business_profiles")
         .upsert(payload, { onConflict: "email" })
-        .select("email, occupation, services, buffer_before_minutes, buffer_after_minutes, working_hours, onboarding_complete, booking_slug, updated_at")
+        .select("email, occupation, services, buffer_before_minutes, buffer_after_minutes, working_hours, onboarding_complete, booking_slug, slot_duration_min, avatar_data, business_name, owner_first_name, owner_full_name, business_phone, website, abn, city, updated_at")
         .single();
+      if (error) throw error;
+      return data;
+    },
+  };
+}
+
+function createServiceStore(options = {}) {
+  const client = options.client || createServiceRoleClient();
+
+  return {
+    async listServices(email) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { data, error } = await client
+        .from("services")
+        .select("id, title, description, duration_min, price, buffer_time_min, is_active, sort_order, created_at")
+        .ilike("merchant_email", normalized)
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+
+    async getService(id, email) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { data, error } = await client
+        .from("services")
+        .select("id, title, description, duration_min, price, buffer_time_min, is_active, sort_order")
+        .eq("id", id)
+        .ilike("merchant_email", normalized)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+
+    async createService(email, svc) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { data, error } = await client
+        .from("services")
+        .insert({
+          merchant_email:  normalized,
+          title:           svc.title,
+          description:     svc.description     || null,
+          duration_min:    svc.duration_min,
+          price:           svc.price           ?? null,
+          buffer_time_min: svc.buffer_time_min ?? 0,
+          is_active:       true,
+          sort_order:      svc.sort_order      ?? 0,
+        })
+        .select("id, title, description, duration_min, price, buffer_time_min, is_active, sort_order, created_at")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+
+    async updateService(id, email, updates) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const allowed = { updated_at: new Date().toISOString() };
+      const fields = ["title", "description", "duration_min", "price", "buffer_time_min", "is_active", "sort_order"];
+      for (const f of fields) {
+        if (updates[f] !== undefined) allowed[f] = updates[f];
+      }
+      const { data, error } = await client
+        .from("services")
+        .update(allowed)
+        .eq("id", id)
+        .ilike("merchant_email", normalized)
+        .select("id, title, description, duration_min, price, buffer_time_min, is_active, sort_order")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+
+    async deleteService(id, email) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { error } = await client
+        .from("services")
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .ilike("merchant_email", normalized);
+      if (error) throw error;
+    },
+
+    async getServiceByIdPublic(id) {
+      const { data, error } = await client
+        .from("services")
+        .select("id, title, description, duration_min, price, buffer_time_min")
+        .eq("id", id)
+        .eq("is_active", true)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -524,13 +616,121 @@ function createPasswordResetTokenStore(options = {}) {
   };
 }
 
-exports.createServiceRoleClient      = createServiceRoleClient;
-exports.createEntitlementStore       = createEntitlementStore;
-exports.createAvailabilityStore      = createAvailabilityStore;
-exports.createAppointmentStore       = createAppointmentStore;
-exports.createBusinessProfileStore   = createBusinessProfileStore;
-exports.createPushSubscriptionStore  = createPushSubscriptionStore;
-exports.createPublicBookingStore     = createPublicBookingStore;
-exports.createFollowUpStore          = createFollowUpStore;
-exports.createBusyBlockStore         = createBusyBlockStore;
-exports.createPasswordResetTokenStore = createPasswordResetTokenStore;
+function createSchedulerMemoryStore(options = {}) {
+  const client = options.client || createServiceRoleClient();
+
+  return {
+    async getMemory(email) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { data, error } = await client
+        .from("scheduler_memory")
+        .select("memory_text")
+        .eq("owner_email", normalized)
+        .maybeSingle();
+      if (error) throw error;
+      return data ? data.memory_text : null;
+    },
+
+    async upsertMemory(email, memoryText) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { error } = await client
+        .from("scheduler_memory")
+        .upsert(
+          { owner_email: normalized, memory_text: String(memoryText || "").slice(0, 4000), updated_at: new Date().toISOString() },
+          { onConflict: "owner_email" }
+        );
+      if (error) throw error;
+    },
+  };
+}
+
+function createTodoStore(options = {}) {
+  const client = options.client || createServiceRoleClient();
+
+  return {
+    async listTodos(email) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { data, error } = await client
+        .from("todos")
+        .select("*")
+        .ilike("owner_email", normalized)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+
+    async createTodo(email, { text, is_urgent = false, reminder_at = null }) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { data, error } = await client
+        .from("todos")
+        .insert({ owner_email: normalized, text: String(text).slice(0, 2000), is_urgent, reminder_at })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+
+    async updateTodo(id, email, updates) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const allowed = {};
+      if (updates.text      !== undefined) allowed.text       = String(updates.text).slice(0, 2000);
+      if (updates.is_done   !== undefined) allowed.is_done    = Boolean(updates.is_done);
+      if (updates.is_urgent !== undefined) allowed.is_urgent  = Boolean(updates.is_urgent);
+      if (updates.reminder_at !== undefined) allowed.reminder_at = updates.reminder_at || null;
+      allowed.updated_at = new Date().toISOString();
+      const { data, error } = await client
+        .from("todos")
+        .update(allowed)
+        .eq("id", id)
+        .ilike("owner_email", normalized)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+
+    async deleteTodo(id, email) {
+      const normalized = String(email || "").trim().toLowerCase();
+      const { error } = await client
+        .from("todos")
+        .delete()
+        .eq("id", id)
+        .ilike("owner_email", normalized);
+      if (error) throw error;
+    },
+
+    async findDueUnreminded() {
+      const now = new Date().toISOString();
+      const { data, error } = await client
+        .from("todos")
+        .select("*")
+        .lte("reminder_at", now)
+        .eq("reminder_sent", false)
+        .eq("is_done", false);
+      if (error) throw error;
+      return data || [];
+    },
+
+    async markReminderSent(id) {
+      const { error } = await client
+        .from("todos")
+        .update({ reminder_sent: true, updated_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+  };
+}
+
+exports.createServiceRoleClient         = createServiceRoleClient;
+exports.createEntitlementStore          = createEntitlementStore;
+exports.createAvailabilityStore         = createAvailabilityStore;
+exports.createAppointmentStore          = createAppointmentStore;
+exports.createBusinessProfileStore      = createBusinessProfileStore;
+exports.createPushSubscriptionStore     = createPushSubscriptionStore;
+exports.createPublicBookingStore        = createPublicBookingStore;
+exports.createFollowUpStore             = createFollowUpStore;
+exports.createBusyBlockStore            = createBusyBlockStore;
+exports.createPasswordResetTokenStore   = createPasswordResetTokenStore;
+exports.createServiceStore              = createServiceStore;
+exports.createSchedulerMemoryStore      = createSchedulerMemoryStore;
+exports.createTodoStore                 = createTodoStore;

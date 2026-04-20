@@ -1,26 +1,10 @@
 const { createEntitlementStore, createAppointmentStore } = require("./_lib/supabase");
 const sessionLib    = require("./_lib/session");
-const { normalizeTier } = require("./_lib/tier-policy");
+const { denied: deny, json } = require("./_lib/http");
+const { verifyBookingAccess, getHistoryLimit, isBlackTier } = require("./_lib/booking-auth");
 
-function json(statusCode, body) {
-  return {
-    statusCode,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
-    body: JSON.stringify(body),
-  };
-}
-
-function deny(statusCode, reason) {
-  return json(statusCode, { ok: false, denied: true, reason });
-}
-
-function normalizeStatus(value) {
-  return String(value || "").trim().toLowerCase();
-}
-
-const SCHEDULING_TIERS  = new Set(["Pro", "Black"]);
-const DATE_RE  = /^\d{4}-\d{2}-\d{2}$/;
-const TIME_RE  = /^\d{2}:\d{2}$/;
+const DATE_RE      = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_RE      = /^\d{2}:\d{2}$/;
 const VALID_STATUSES = new Set(["confirmed", "cancelled", "no_show"]);
 
 function createHandler(deps) {
@@ -33,44 +17,35 @@ function createHandler(deps) {
     deleteAppointment,
   } = deps;
 
-  async function verifySession(event) {
-    const verification = verifySessionCookie(event.headers || {});
-    if (!verification.ok) return { error: deny(401, verification.reason) };
-
-    const session = verification.session;
-    const entitlement = await findEntitlementByEmail(session.email);
-    if (!entitlement) return { error: deny(403, "not_found") };
-
-    if (normalizeStatus(entitlement.subscription_status) !== "active" &&
-        normalizeStatus(entitlement.subscription_status) !== "trialing") {
-      return { error: deny(403, "not_active") };
-    }
-
-    const entitlementTier = normalizeTier(entitlement.entitled_tier);
-    const sessionTier     = normalizeTier(session.tier);
-    if (!entitlementTier || !sessionTier || entitlementTier !== sessionTier) {
-      return { error: deny(403, "invalid_tier") };
-    }
-
-    return { session, tier: sessionTier };
-  }
-
   return async function handler(event) {
     const method = event.httpMethod;
     const params = event.queryStringParameters || {};
 
-    const auth = await verifySession(event);
+    // ── Auth: cookie verify + Supabase entitlement re-check + tier gate ────────
+    // verifyBookingAccess performs all three steps on every request.
+    // Core users are rejected here with 403 tier_not_entitled before any DB write.
+    const auth = await verifyBookingAccess(event, { verifySessionCookie, findEntitlementByEmail });
     if (auth.error) return auth.error;
 
-    if (!SCHEDULING_TIERS.has(auth.tier)) {
-      return deny(403, "tier_not_entitled");
-    }
+    const { session, tier } = auth;
 
     // ── GET: list appointments ───────────────────────────────────────────────
     if (method === "GET") {
       const upcomingOnly = params.all !== "true";
-      const appointments = await listAppointments(auth.session.email, upcomingOnly);
-      return json(200, { ok: true, appointments });
+
+      // When fetching past appointments, cap the result set by tier.
+      // Black: last 10, Pro: last 5. This feeds both the calendar UI
+      // and the AI scheduling context — Black subscribers get deeper history
+      // for personalised scheduling conversations.
+      const historyLimit = getHistoryLimit(tier);
+
+      const appointments = await listAppointments(session.email, upcomingOnly);
+      return json(200, {
+        ok: true,
+        appointments,
+        history_limit: historyLimit,
+        is_black_tier: isBlackTier(tier),
+      });
     }
 
     // ── POST: create appointment ─────────────────────────────────────────────
@@ -90,7 +65,7 @@ function createHandler(deps) {
         return deny(400, "invalid_duration_minutes");
       }
 
-      const appt = await createAppointment(auth.session.email, body);
+      const appt = await createAppointment(session.email, body);
       return json(200, { ok: true, appointment: appt });
     }
 
@@ -112,14 +87,14 @@ function createHandler(deps) {
         return deny(400, "invalid_scheduled_time");
       }
 
-      const appt = await updateAppointment(params.id, auth.session.email, body);
+      const appt = await updateAppointment(params.id, session.email, body);
       return json(200, { ok: true, appointment: appt });
     }
 
     // ── DELETE: delete appointment ───────────────────────────────────────────
     if (method === "DELETE") {
       if (!params.id) return deny(400, "missing_id");
-      await deleteAppointment(params.id, auth.session.email);
+      await deleteAppointment(params.id, session.email);
       return json(200, { ok: true, deleted: true });
     }
 
@@ -128,17 +103,17 @@ function createHandler(deps) {
 }
 
 function createRuntimeHandler(overrides = {}) {
-  const entitlementStore = overrides.entitlementStore || createEntitlementStore();
-  const appointmentStore = overrides.appointmentStore || createAppointmentStore();
-  const runtimeSessionLib = overrides.sessionLib      || sessionLib;
+  const entitlementStore  = overrides.entitlementStore || createEntitlementStore();
+  const appointmentStore  = overrides.appointmentStore || createAppointmentStore();
+  const runtimeSessionLib = overrides.sessionLib       || sessionLib;
 
   return createHandler({
-    verifySessionCookie:    (h) => runtimeSessionLib.verifySessionCookie(h),
-    findEntitlementByEmail: (e) => entitlementStore.findEntitlementByEmail(e),
-    listAppointments:       (e, u) => appointmentStore.listAppointments(e, u),
-    createAppointment:      (e, a) => appointmentStore.createAppointment(e, a),
+    verifySessionCookie:    (h)        => runtimeSessionLib.verifySessionCookie(h),
+    findEntitlementByEmail: (e)        => entitlementStore.findEntitlementByEmail(e),
+    listAppointments:       (e, u)     => appointmentStore.listAppointments(e, u),
+    createAppointment:      (e, a)     => appointmentStore.createAppointment(e, a),
     updateAppointment:      (id, e, u) => appointmentStore.updateAppointment(id, e, u),
-    deleteAppointment:      (id, e) => appointmentStore.deleteAppointment(id, e),
+    deleteAppointment:      (id, e)    => appointmentStore.deleteAppointment(id, e),
   });
 }
 

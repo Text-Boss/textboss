@@ -107,7 +107,11 @@
       border-bottom: 1px solid var(--line);
       background: rgba(2,2,3,.92);
       padding: 0 24px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .tab-bar::-webkit-scrollbar { display: none; }
 
     .tab-btn {
       display: inline-flex;
@@ -953,6 +957,192 @@
     }
     .fu-cancel-btn:hover { color: #ef4444; border-color: #ef4444; }
 
+    /* ── Black tier premium scheduling accents ────────────────────────────────
+       Gold/brass colour scheme applied only to the Scheduler section so the
+       core messaging UI (violet accent) remains unchanged.
+    ── */
+    :root {
+      --gold:        #B5A642;
+      --gold-dim:    #8a7d30;
+      --gold-glow:   rgba(181,166,66,.12);
+      --gold-border: rgba(181,166,66,.28);
+    }
+
+    /* Scheduler tab — gold underline when active */
+    .tab-btn[data-tab="scheduler"].active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    /* Black tier greeting bar */
+    .black-greeting {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 20px;
+      background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--gold) 8%, var(--surface)),
+        var(--surface)
+      );
+      border-bottom: 1px solid var(--gold-border);
+    }
+
+    .black-greeting-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+      box-shadow: 0 0 6px var(--gold);
+    }
+
+    .black-greeting-text {
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: .06em;
+      font-weight: 600;
+    }
+
+    .black-greeting-email {
+      opacity: .7;
+      font-weight: 400;
+    }
+
+    /* Sidebar active-tab gold accent in scheduler */
+    #panel-scheduler .sidebar-tab.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    /* Calendar: today cell — gold instead of violet */
+    #panel-scheduler .cal-day.today {
+      color: var(--gold);
+    }
+
+    /* Calendar: selected cell — gold tint */
+    #panel-scheduler .cal-day.selected {
+      background: var(--gold-glow);
+      color: var(--gold);
+    }
+
+    /* Calendar dots — gold */
+    #panel-scheduler .cal-dot {
+      background: var(--gold);
+    }
+
+    /* Booking link accent — gold */
+    #panel-scheduler .booking-link-url { color: var(--gold); }
+    #panel-scheduler .booking-link-copy,
+    #panel-scheduler .booking-link-generate {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    #panel-scheduler .booking-link-copy:hover,
+    #panel-scheduler .booking-link-generate:hover {
+      background: var(--gold-glow);
+    }
+
+    /* Add working-hours button — gold */
+    #panel-scheduler .wh-add-form button {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    #panel-scheduler .wh-add-form button:hover {
+      background: var(--gold-glow);
+    }
+
+    /* Add service button — gold hover */
+    #panel-scheduler .add-svc-btn:hover {
+      color: var(--gold);
+      border-color: var(--gold);
+    }
+    #panel-scheduler .svc-row-save {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* Enable-notifications button — gold */
+    #panel-scheduler .notify-btn-enable {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    #panel-scheduler .notify-btn-enable:hover {
+      background: var(--gold-glow);
+    }
+
+    /* Notify prompt background — gold tint */
+    .notify-prompt {
+      background: color-mix(in srgb, var(--gold) 6%, var(--surface));
+      border-bottom-color: var(--gold-border);
+    }
+
+    /* Scheduler chat: caret + focus ring — gold */
+    #sched-message {
+      caret-color: var(--gold);
+    }
+    #sched-message:focus {
+      border-color: color-mix(in srgb, var(--gold) 40%, transparent);
+    }
+
+    /* Scheduler send button — gold */
+    #panel-scheduler button.primary-btn {
+      background: var(--gold);
+      color: #0a0a00;
+    }
+    #panel-scheduler button.primary-btn:hover {
+      filter: brightness(1.1);
+    }
+
+    /* AI message bubble — gold tint in scheduler */
+    #sched-output .msg-ai .msg-text {
+      background: color-mix(in srgb, var(--gold) 5%, var(--surface));
+      border-color: color-mix(in srgb, var(--gold) 14%, transparent);
+    }
+    #sched-output .msg-ai .msg-label { color: var(--gold); }
+
+    /* History depth badge — shown in sidebar when Black history limit is loaded */
+    .history-depth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid var(--gold-border);
+      border-radius: 4px;
+      padding: 2px 7px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    /* ── Avatar ── */
+    .app-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--line-hi); overflow: hidden; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer;
+      border: 1px solid var(--line-hi); transition: border-color .15s;
+    }
+    .app-avatar:hover { border-color: var(--accent); }
+    .app-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ── Footer sticky fix ── */
+    .app-footer { position: sticky; bottom: 0; background: var(--bg); z-index: 10; }
+
+    /* Ensure textareas never trigger iOS zoom */
+    textarea, input[type="text"], input[type="number"], input[type="email"],
+    input[type="search"], input[type="datetime-local"], select {
+      font-size: 16px !important;
+      touch-action: manipulation;
+    }
+
+    /* Wizard price input */
+    .svc-row input.wiz-svc-price { width: 90px; flex-shrink: 0; }
+
     /* ── Responsive ── */
     @media (max-width: 820px) {
       .threads-sidebar {
@@ -1003,6 +1193,7 @@
       <div class="app-logo">TB</div>
       <div class="app-wordmark">Text Boss <span>Black</span></div>
       <div class="app-tier-badge">Black</div>
+      <div class="app-avatar" id="app-avatar">TB</div>
       <button class="secondary-btn" id="logout-button" type="button">Logout</button>
     </header>
 
@@ -1011,6 +1202,8 @@
       <button class="tab-btn" data-tab="scheduler" type="button">Scheduler</button>
       <button class="tab-btn" data-tab="followups" type="button">Follow-Ups</button>
       <button class="tab-btn" data-tab="prompts" type="button">Prompts</button>
+      <button class="tab-btn" data-tab="todos" type="button">To-Do</button>
+      <button class="tab-btn" data-tab="settings" type="button">Settings</button>
     </nav>
 
     <div class="app-body">
@@ -1053,6 +1246,16 @@
       <!-- ── Scheduler tab ── -->
       <div class="tab-panel" id="panel-scheduler">
 
+        <!-- Black tier: personalised greeting bar (populated by inline script below) -->
+        <div class="black-greeting" id="black-greeting" aria-live="polite">
+          <span class="black-greeting-dot" aria-hidden="true"></span>
+          <span class="black-greeting-text">
+            Black &mdash; precision scheduling
+            &nbsp;<span class="black-greeting-email" id="black-greeting-email"></span>
+          </span>
+          <span class="history-depth-badge" title="Appointment history depth">10 appt history</span>
+        </div>
+
         <!-- Notification prompt (hidden by default, shown by scheduler-client.js) -->
         <div class="notify-prompt" id="notify-prompt" style="display:none;">
           <span class="notify-prompt-text">Get reminders before your appointments and a daily digest each morning.</span>
@@ -1068,6 +1271,7 @@
               <button class="sidebar-tab active" data-sidebar-panel="calendar" type="button">Calendar</button>
               <button class="sidebar-tab" data-sidebar-panel="hours" type="button">Hours</button>
               <button class="sidebar-tab" data-sidebar-panel="services" type="button">Services</button>
+              <button class="sidebar-tab" data-sidebar-panel="profile" type="button">Settings</button>
             </div>
 
             <!-- Calendar panel -->
@@ -1104,6 +1308,8 @@
                 </form>
               </div>
 
+              <div id="slot-dur-container"></div>
+
               <!-- Busy blocks / calendar import -->
               <div class="import-section">
                 <h3>Busy blocks</h3>
@@ -1120,6 +1326,56 @@
               <div id="svc-list"></div>
               <div class="booking-link-section" id="booking-link-section"></div>
               <button type="button" class="export-btn" id="ical-export">Export .ics</button>
+            </div>
+
+            <!-- Profile / Settings panel -->
+            <div class="sidebar-panel" id="sidebar-profile">
+              <div class="wh-section">
+                <h3>Profile &amp; Settings</h3>
+
+                <!-- Avatar -->
+                <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;margin-top:8px">
+                  <div class="app-avatar" id="settings-avatar" style="width:56px;height:56px;font-size:20px">TB</div>
+                  <div>
+                    <button type="button" class="svc-btn" id="avatar-upload-btn">Upload photo</button>
+                    <input type="file" id="avatar-file-input" accept="image/*" style="display:none">
+                    <div class="import-hint" style="margin-top:4px">Square image, max 200 KB</div>
+                  </div>
+                </div>
+
+                <!-- Business details -->
+                <div class="wizard-field">
+                  <label>First name</label>
+                  <input type="text" id="prof-first-name" placeholder="Jane" maxlength="100">
+                </div>
+                <div class="wizard-field">
+                  <label>Full name</label>
+                  <input type="text" id="prof-full-name" placeholder="Jane Smith" maxlength="200">
+                </div>
+                <div class="wizard-field">
+                  <label>Business name</label>
+                  <input type="text" id="prof-biz-name" placeholder="Jane's Salon" maxlength="200">
+                </div>
+                <div class="wizard-field">
+                  <label>Phone</label>
+                  <input type="text" id="prof-phone" placeholder="+61 4xx xxx xxx" maxlength="40">
+                </div>
+                <div class="wizard-field">
+                  <label>City</label>
+                  <input type="text" id="prof-city" placeholder="Melbourne" maxlength="100">
+                </div>
+                <div class="wizard-field">
+                  <label>Website</label>
+                  <input type="text" id="prof-website" placeholder="https://…" maxlength="200">
+                </div>
+                <div class="wizard-field">
+                  <label>ABN (optional)</label>
+                  <input type="text" id="prof-abn" placeholder="12 345 678 901" maxlength="20">
+                </div>
+
+                <button type="button" class="svc-btn" id="prof-save-btn" style="margin-top:8px">Save</button>
+                <div id="prof-status" style="font-size:12px;color:#52606d;margin-top:6px"></div>
+              </div>
             </div>
 
           </aside>
@@ -1171,14 +1427,11 @@
       </div>
 
       <!-- ── Prompts tab ── -->
-      <div class="tab-panel" id="panel-prompts">
-        <iframe
-          src="/black_subscriber_prompts.html"
-          id="prompts-frame"
-          style="flex:1;width:100%;height:100%;border:none;display:block;"
-          title="Black Prompt Templates"
-        ></iframe>
-      </div>
+      <div class="tab-panel" id="panel-prompts"></div>
+
+      <div class="tab-panel" id="panel-todos"></div>
+
+      <div class="tab-panel" id="panel-settings"></div>
 
     </div>
 
@@ -1202,38 +1455,109 @@
   <script src="/app-client.js"></script>
   <script src="/scheduler-client.js"></script>
   <script src="/followup-client.js"></script>
+  <script src="/prompts-client.js"></script>
+  <script src="/todos-client.js"></script>
+  <script src="/settings-client.js"></script>
   <script>
   (function () {
-    // ── Tab switching ──
+    var TIER   = "Black";
+    var ACCENT = "#a78bfa";
+
     var tabBtns = document.querySelectorAll(".tab-btn");
     var tabPanels = document.querySelectorAll(".tab-panel");
     var schedulerInited = false;
     var followUpsInited = false;
+    var promptsInited   = false;
+    var todosInited     = false;
+    var settingsInited  = false;
+    var profile         = null;
+
+    fetch("/.netlify/functions/business-profile")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.ok) return;
+        profile = d.profile || {};
+        var av = document.getElementById("app-avatar");
+        if (av && profile.avatar_data) {
+          av.innerHTML = '<img src="' + profile.avatar_data + '" alt="avatar">';
+        } else if (av && profile.owner_first_name) {
+          av.textContent = profile.owner_first_name.charAt(0).toUpperCase();
+        }
+      })
+      .catch(function () {});
+
+    function getEmail() {
+      return (window.__tbSession && window.__tbSession.email) || "";
+    }
+
+    function activateTab(target) {
+      tabBtns.forEach(function (b) { b.classList.remove("active"); });
+      var btn = document.querySelector('[data-tab="' + target + '"]');
+      if (btn) btn.classList.add("active");
+      tabPanels.forEach(function (p) { p.classList.remove("active"); });
+      var panel = document.getElementById("panel-" + target);
+      if (panel) panel.classList.add("active");
+
+      if (target === "scheduler" && !schedulerInited) {
+        schedulerInited = true;
+        window.initScheduler({ tier: TIER, inputLimit: 8000, enableIcalExport: true });
+      }
+      if (target === "followups" && !followUpsInited) {
+        followUpsInited = true;
+        window.initFollowUps({ tier: TIER, followUpLimit: Infinity });
+      }
+      if (target === "prompts" && !promptsInited) {
+        promptsInited = true;
+        window.initPrompts({ tier: TIER, panel: panel, profile: profile || {}, accent: ACCENT });
+      }
+      if (target === "todos" && !todosInited) {
+        todosInited = true;
+        window.initTodos({ panel: panel, tier: TIER, accent: ACCENT });
+      }
+      if (target === "settings" && !settingsInited) {
+        settingsInited = true;
+        window.initSettings({ panel: panel, accent: ACCENT, profile: profile || {}, userEmail: getEmail(), tier: TIER });
+      }
+    }
 
     tabBtns.forEach(function (btn) {
       btn.addEventListener("click", function () {
-        var target = btn.getAttribute("data-tab");
-        tabBtns.forEach(function (b) { b.classList.remove("active"); });
-        btn.classList.add("active");
-        tabPanels.forEach(function (p) { p.classList.remove("active"); });
-        var panel = document.getElementById("panel-" + target);
-        if (panel) panel.classList.add("active");
-        if (target === "scheduler" && !schedulerInited) {
-          schedulerInited = true;
-          window.initScheduler({ tier: "Black", inputLimit: 8000, enableIcalExport: true });
-        }
-        if (target === "followups" && !followUpsInited) {
-          followUpsInited = true;
-          window.initFollowUps({ tier: "Black", followUpLimit: Infinity });
-        }
+        activateTab(btn.getAttribute("data-tab"));
       });
     });
 
-    // Handle #follow-ups hash on page load
-    if (window.location.hash === "#follow-ups") {
-      var fuBtn = document.querySelector('[data-tab="followups"]');
-      if (fuBtn) fuBtn.click();
-    }
+    var avatarEl = document.getElementById("app-avatar");
+    if (avatarEl) avatarEl.addEventListener("click", function () { activateTab("settings"); });
+
+    var hash = window.location.hash;
+    if (hash === "#follow-ups") activateTab("followups");
+    else if (hash === "#todos")  activateTab("todos");
+    else if (hash === "#settings") activateTab("settings");
+
+    window.checkOnboardingOnLoad({ tier: TIER });
+
+    // ── Black tier: personalised greeting ──────────────────────────────────────
+    (function populateGreeting() {
+      var el = document.getElementById("black-greeting-email");
+      if (!el) return;
+
+      function trySet() {
+        var sess = window.__tbSession;
+        if (sess && sess.email) {
+          var local = sess.email.split("@")[0];
+          el.textContent = "\u2014 " + local;
+          return true;
+        }
+        return false;
+      }
+
+      if (!trySet()) {
+        var attempts = 0;
+        var timer = setInterval(function () {
+          if (trySet() || ++attempts > 15) clearInterval(timer);
+        }, 200);
+      }
+    })();
 
   })();
   </script>

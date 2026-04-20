@@ -1,8 +1,23 @@
-const { createEntitlementStore, createAppointmentStore, createBusinessProfileStore, createBusyBlockStore, createServiceRoleClient } = require("./_lib/supabase");
+"use strict";
+
+const {
+  createEntitlementStore,
+  createAppointmentStore,
+  createBusinessProfileStore,
+  createBusyBlockStore,
+  createServiceStore,
+  createSchedulerMemoryStore,
+  createServiceRoleClient,
+} = require("./_lib/supabase");
 const sessionLib    = require("./_lib/session");
 const tierPolicyLib = require("./_lib/tier-policy");
 const { normalizeTier } = require("./_lib/tier-policy");
-const { findAvailableSlots, formatBusinessProfile, formatAppointments, workingHoursToArray } = require("./_lib/scheduler");
+const {
+  findAvailableSlots,
+  formatBusinessProfile,
+  formatAppointments,
+  workingHoursToArray,
+} = require("./_lib/scheduler");
 
 function json(statusCode, body) {
   return {
@@ -28,11 +43,21 @@ function addDays(dateStr, n) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-function buildSchedulingContext(profile, appointments) {
+function buildSchedulingContext(profile, appointments, services) {
   const parts = [];
 
   const profileBlock = formatBusinessProfile(profile);
   if (profileBlock) parts.push(profileBlock);
+
+  if (services && services.length > 0) {
+    const svcLines = ["=== SERVICES ==="];
+    for (const s of services) {
+      const price = s.price != null ? ` — $${Number(s.price).toFixed(2)}` : "";
+      const buf   = s.buffer_time_min > 0 ? ` — buffer: ${s.buffer_time_min} min` : "";
+      svcLines.push(`[id:${s.id}] ${s.title} — ${s.duration_min} min${price}${buf}`);
+    }
+    parts.push(svcLines.join("\n"));
+  }
 
   parts.push(formatAppointments(appointments));
   parts.push("Today's date: " + new Date().toISOString().split("T")[0]);
@@ -43,6 +68,23 @@ function buildSchedulingContext(profile, appointments) {
 const SCHEDULING_TOOLS = [
   {
     type: "function",
+    name: "resolve_service",
+    description: "Look up a service by its ID to get the authoritative duration, buffer, and price. MUST be called before find_available_slots when the user has selected a service.",
+    parameters: {
+      type: "object",
+      properties: {
+        service_id: {
+          type: "string",
+          description: "The UUID of the selected service from the === SERVICES === list.",
+        },
+      },
+      required: ["service_id"],
+      additionalProperties: false,
+    },
+    strict: true,
+  },
+  {
+    type: "function",
     name: "find_available_slots",
     description: "Find open time slots for a new booking. Computes gaps between existing appointments using the business profile's buffer settings. Always call this to check availability — do not guess.",
     parameters: {
@@ -50,15 +92,15 @@ const SCHEDULING_TOOLS = [
       properties: {
         duration_minutes: {
           type: "number",
-          description: "Duration of the service in minutes. Use the service default from the business profile if the user named a service.",
+          description: "Duration of the service in minutes. Use the value from resolve_service if a service was resolved.",
         },
         buffer_before: {
           type: "number",
-          description: "Travel/prep time to reserve before the booking (minutes). Defaults to the profile's buffer_before_minutes if omitted.",
+          description: "Travel/prep time to reserve before the booking (minutes). Overridden by resolve_service buffer if present.",
         },
         buffer_after: {
           type: "number",
-          description: "Travel/cleanup time to reserve after the booking (minutes). Defaults to the profile's buffer_after_minutes if omitted.",
+          description: "Travel/cleanup time to reserve after the booking (minutes). Overridden by resolve_service buffer if present.",
         },
         start_date: {
           type: "string",
@@ -103,13 +145,14 @@ const SCHEDULING_TOOLS = [
     parameters: {
       type: "object",
       properties: {
-        client_name:    { type: "string", description: "Client's name." },
-        client_contact: { type: "string", description: "Client's email or phone." },
-        title:          { type: "string", description: "Short title for the appointment." },
-        scheduled_date: { type: "string", description: "Date in YYYY-MM-DD format." },
-        scheduled_time: { type: "string", description: "Time in HH:MM 24-hour format." },
-        duration_minutes: { type: "number", description: "Duration in minutes. Default 60." },
-        notes:          { type: "string", description: "Optional notes." },
+        client_name:      { type: "string", description: "Client's name." },
+        client_contact:   { type: "string", description: "Client's email or phone." },
+        title:            { type: "string", description: "Short title for the appointment (use service title if a service was resolved)." },
+        scheduled_date:   { type: "string", description: "Date in YYYY-MM-DD format." },
+        scheduled_time:   { type: "string", description: "Time in HH:MM 24-hour format." },
+        duration_minutes: { type: "number", description: "Duration in minutes. Must match value from resolve_service if a service was resolved." },
+        notes:            { type: "string", description: "Optional notes." },
+        service_id:       { type: "string", description: "UUID of the resolved service. Include if resolve_service was called." },
       },
       required: ["scheduled_date", "scheduled_time"],
       additionalProperties: false,
@@ -137,9 +180,9 @@ const SCHEDULING_TOOLS = [
     parameters: {
       type: "object",
       properties: {
-        appointment_id: { type: "string", description: "The UUID of the appointment to reschedule." },
-        scheduled_date: { type: "string", description: "New date in YYYY-MM-DD format." },
-        scheduled_time: { type: "string", description: "New time in HH:MM 24-hour format." },
+        appointment_id:   { type: "string", description: "The UUID of the appointment to reschedule." },
+        scheduled_date:   { type: "string", description: "New date in YYYY-MM-DD format." },
+        scheduled_time:   { type: "string", description: "New time in HH:MM 24-hour format." },
         duration_minutes: { type: "number", description: "New duration in minutes, if changed." },
       },
       required: ["appointment_id"],
@@ -150,7 +193,7 @@ const SCHEDULING_TOOLS = [
   {
     type: "function",
     name: "add_busy_block",
-    description: "Mark specific date/time ranges as unavailable — personal commitments, travel, illness, or any time that should not be bookable. These are not client appointments. Always confirm the proposed block(s) with the user before calling this tool. For recurring commitments, insert one block per date.",
+    description: "Mark specific date/time ranges as unavailable. Always confirm with user before calling. For recurring commitments, insert one block per date.",
     parameters: {
       type: "object",
       properties: {
@@ -163,7 +206,7 @@ const SCHEDULING_TOOLS = [
               block_date:  { type: "string", description: "Date in YYYY-MM-DD format." },
               start_time:  { type: "string", description: "Start time in HH:MM 24-hour format." },
               end_time:    { type: "string", description: "End time in HH:MM 24-hour format." },
-              label:       { type: "string", description: "Short reason e.g. 'Dentist', 'School pickup', 'Travel'." },
+              label:       { type: "string", description: "Short reason e.g. 'Dentist', 'Travel'." },
             },
             required: ["block_date", "start_time", "end_time"],
             additionalProperties: false,
@@ -177,6 +220,24 @@ const SCHEDULING_TOOLS = [
   },
 ];
 
+const REMEMBER_TOOL = {
+  type: "function",
+  name: "remember",
+  description: "Save a persistent memory note about how this business owner runs their schedule. Always pass the FULL updated memory text — this overwrites the previous memory. Use when the user states a standing preference, rule, or client-specific note.",
+  parameters: {
+    type: "object",
+    properties: {
+      memory_text: {
+        type: "string",
+        description: "The full updated memory text. Include all previously stored facts plus any new ones. Max 4000 characters.",
+      },
+    },
+    required: ["memory_text"],
+    additionalProperties: false,
+  },
+  strict: true,
+};
+
 const MAX_TOOL_ROUNDS = 5;
 
 function createHandler(deps) {
@@ -189,82 +250,122 @@ function createHandler(deps) {
     getBusinessProfile,
     listAppointments,
     listBusyBlocks,
+    listServices,
+    getService,
     createAppointment,
     updateAppointment,
     createBusyBlocks,
     loadThreadMessages,
     saveMessage,
+    getMemory,
+    upsertMemory,
   } = deps;
 
-  // context = { appointments, profile } — loaded once per request, reused by tool calls
-  async function executeTool(toolName, args, email, context) {
+  // toolContext is shared across all tool-call rounds in one request.
+  // resolvedService is populated by resolve_service and consumed by
+  // find_available_slots and book_appointment within the same request.
+  async function executeTool(toolName, args, email, toolContext) {
     switch (toolName) {
+
+      case "resolve_service": {
+        const svc = await toolContext.getService(args.service_id, email);
+        if (!svc) return { error: "service_not_found" };
+        toolContext.resolvedService = svc;
+        return {
+          id:              svc.id,
+          title:           svc.title,
+          duration_min:    svc.duration_min,
+          buffer_time_min: svc.buffer_time_min,
+          price:           svc.price,
+        };
+      }
+
       case "find_available_slots": {
-        const profile     = context.profile || {};
-        const bufferBefore = args.buffer_before ?? (profile.buffer_before_minutes ?? 0);
-        const bufferAfter  = args.buffer_after  ?? (profile.buffer_after_minutes  ?? 0);
-        const today        = new Date().toISOString().split("T")[0];
+        const profile  = toolContext.profile || {};
+        const resolved = toolContext.resolvedService;
+
+        const duration = resolved ? resolved.duration_min : args.duration_minutes;
+        const svcBuffer = resolved && resolved.buffer_time_min > 0 ? resolved.buffer_time_min : null;
+        const bufferBefore = svcBuffer ?? args.buffer_before ?? (profile.buffer_before_minutes ?? 0);
+        const bufferAfter  = svcBuffer ?? args.buffer_after  ?? (profile.buffer_after_minutes  ?? 0);
+        const stepMinutes  = profile.slot_duration_min || 30;
+
+        const today = new Date().toISOString().split("T")[0];
         const slots = findAvailableSlots({
-          appointments:  context.appointments,
-          busyBlocks:    context.busyBlocks || [],
-          workingHours:  workingHoursToArray(profile.working_hours),
-          durationMinutes: args.duration_minutes,
-          preBuffer:     bufferBefore,
-          postBuffer:    bufferAfter,
-          startDate:     args.start_date || today,
-          endDate:       args.end_date   || addDays(today, 14),
-          maxSlotsPerDay: 3,
+          appointments:    toolContext.appointments,
+          busyBlocks:      toolContext.busyBlocks || [],
+          workingHours:    workingHoursToArray(profile.working_hours),
+          durationMinutes: duration,
+          preBuffer:       bufferBefore,
+          postBuffer:      bufferAfter,
+          startDate:       args.start_date || today,
+          endDate:         args.end_date   || addDays(today, 14),
+          maxSlotsPerDay:  3,
+          stepMinutes,
         });
         return { slots, count: slots.length };
       }
+
       case "list_appointments": {
         const upcomingOnly = !args.include_all;
         const appts = await listAppointments(email, upcomingOnly);
         return { appointments: appts };
       }
+
       case "book_appointment": {
+        const resolved = toolContext.resolvedService;
+        const title    = args.title || (resolved ? resolved.title : null) || null;
+        const duration = resolved ? resolved.duration_min : (args.duration_minutes || 60);
+
+        // Stash service_id in notes until migration adds the column
+        let notes = args.notes || null;
+        if (args.service_id) {
+          const tag = `service_id:${args.service_id}`;
+          notes = notes ? `${tag}\n${notes}` : tag;
+        }
+
         const appt = await createAppointment(email, {
-          client_name:      args.client_name      || null,
-          client_contact:   args.client_contact   || null,
-          title:            args.title            || null,
+          client_name:      args.client_name    || null,
+          client_contact:   args.client_contact || null,
+          title,
           scheduled_date:   args.scheduled_date,
           scheduled_time:   args.scheduled_time,
-          duration_minutes: args.duration_minutes || 60,
-          notes:            args.notes            || null,
+          duration_minutes: duration,
+          notes,
         });
         return { booked: true, appointment: appt, _notify: true };
       }
+
       case "cancel_appointment": {
         const appt = await updateAppointment(args.appointment_id, email, { status: "cancelled" });
         return { cancelled: true, appointment: appt };
       }
+
       case "reschedule_appointment": {
-        const updates = {};
-        if (args.scheduled_date) updates.scheduled_date = args.scheduled_date;
-        if (args.scheduled_time) updates.scheduled_time = args.scheduled_time;
+        const updates = { status: "confirmed" };
+        if (args.scheduled_date)   updates.scheduled_date   = args.scheduled_date;
+        if (args.scheduled_time)   updates.scheduled_time   = args.scheduled_time;
         if (args.duration_minutes) updates.duration_minutes = args.duration_minutes;
-        updates.status = "confirmed";
         const appt = await updateAppointment(args.appointment_id, email, updates);
         return { rescheduled: true, appointment: appt };
       }
+
       case "add_busy_block": {
         const incoming = Array.isArray(args.blocks) ? args.blocks : [];
         if (incoming.length === 0) return { error: "no_blocks_provided" };
 
-        // For Black tier: detect conflicts with confirmed appointments
         const conflicts = [];
-        if (context.tier === "Black" && Array.isArray(context.appointments)) {
+        if (toolContext.tier === "Black" && Array.isArray(toolContext.appointments)) {
           for (const block of incoming) {
-            for (const appt of context.appointments) {
+            for (const appt of toolContext.appointments) {
               if (appt.status !== "confirmed") continue;
               if (appt.scheduled_date !== block.block_date) continue;
-              // Simple overlap check
               const apptStart = appt.scheduled_time;
-              const apptEnd   = (() => {
+              const apptEnd = (() => {
                 const [h, m] = appt.scheduled_time.split(":").map(Number);
                 const dur = appt.duration_minutes || 60;
                 const end = h * 60 + m + dur;
-                return `${String(Math.floor(end/60)).padStart(2,"0")}:${String(end%60).padStart(2,"0")}`;
+                return `${String(Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`;
               })();
               if (block.start_time < apptEnd && block.end_time > apptStart) {
                 conflicts.push({ block, appointment: appt });
@@ -292,6 +393,16 @@ function createHandler(deps) {
           conflicts: conflicts.length > 0 ? conflicts : undefined,
         };
       }
+
+      case "remember": {
+        const text = String(args.memory_text || "").slice(0, 4000);
+        if (!text) return { error: "empty_memory_text" };
+        if (!upsertMemory) return { error: "memory_not_available" };
+        await upsertMemory(email, text);
+        toolContext.memory = text;
+        return { saved: true };
+      }
+
       default:
         return { error: "unknown_tool" };
     }
@@ -318,8 +429,8 @@ function createHandler(deps) {
     if (!message) return deny(400, "missing_message");
 
     const threadId = body.threadId || null;
+    const session  = verification.session;
 
-    const session = verification.session;
     let entitlement;
     try {
       entitlement = await findEntitlementByEmail(session.email);
@@ -350,131 +461,125 @@ function createHandler(deps) {
       return deny(400, "message_too_long");
     }
 
-    // Load conversation history from thread if available
     let conversation = Array.isArray(body.conversation) ? body.conversation : [];
 
     if (threadId && loadThreadMessages) {
-      const storedMessages = await loadThreadMessages(threadId, session.email);
-      if (storedMessages && storedMessages.length > 0) {
-        conversation = storedMessages.map(function (m) {
+      const stored = await loadThreadMessages(threadId, session.email);
+      if (stored && stored.length > 0) {
+        conversation = stored.map((m) => {
           if (m.role === "user") {
-            return {
-              role: "user",
-              content: [{ type: "input_text", text: m.content }],
-            };
+            return { role: "user", content: [{ type: "input_text", text: m.content }] };
           }
-          return {
-            role: "assistant",
-            content: [{ type: "output_text", text: m.content }],
-          };
+          return { role: "assistant", content: [{ type: "output_text", text: m.content }] };
         });
       }
     }
 
+    const isBlack = sessionTier === "Black";
+
     let profile = null;
     let appointments = [];
     let busyBlocks = [];
+    let services = [];
+    let memory = null;
     try {
       const today = new Date().toISOString().split("T")[0];
-      [profile, appointments, busyBlocks] = await Promise.all([
+      const dataLoads = [
         getBusinessProfile(session.email),
         listAppointments(session.email, true),
         listBusyBlocks ? listBusyBlocks(session.email, today) : Promise.resolve([]),
-      ]);
+        listServices(session.email),
+        isBlack && getMemory ? getMemory(session.email) : Promise.resolve(null),
+      ];
+      [profile, appointments, busyBlocks, services, memory] = await Promise.all(dataLoads);
     } catch (_) {
       // Tables may not exist yet — continue with empty context
     }
 
     const schedulingInstructions = getSchedulingInstructions(sessionTier);
-    const contextBlock = buildSchedulingContext(profile, appointments);
-
+    let contextBlock = buildSchedulingContext(profile, appointments, services);
+    if (isBlack && memory) {
+      contextBlock += `\n\n=== MEMORY ===\n${memory}`;
+    }
     const extraSystemContext = schedulingInstructions
       ? `${schedulingInstructions}\n\n${contextBlock}`
       : contextBlock;
 
-    // Shared context passed to every tool call in this request
-    const toolContext = { profile, appointments, busyBlocks, tier: sessionTier };
+    const tools = isBlack ? [...SCHEDULING_TOOLS, REMEMBER_TOOL] : SCHEDULING_TOOLS;
 
-    // Tool-calling loop: send to OpenAI, execute any tool calls, feed results back
+    const toolContext = {
+      profile,
+      appointments,
+      busyBlocks,
+      tier: sessionTier,
+      resolvedService: null,
+      memory,
+      getService,
+    };
+
     let currentConversation = conversation.slice();
     let finalOutput = "";
-    let finalUsage = null;
+    let finalUsage  = null;
     let toolActions = [];
 
     try {
-    for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-      const response = await createSchedulingResponse({
-        tier: sessionTier,
-        message: round === 0 ? message : null,
-        conversation: currentConversation,
-        policy,
-        extraSystemContext,
-        tools: SCHEDULING_TOOLS,
-      });
-
-      finalUsage = response.usage;
-
-      // Check if the response contains tool calls
-      const toolCalls = response.toolCalls || [];
-
-      if (toolCalls.length === 0) {
-        // No tool calls — this is the final text response
-        finalOutput = response.output;
-        break;
-      }
-
-      // Execute each tool call and build the continuation.
-      // Persist the user message on the first round so it is available in all
-      // subsequent rounds — round 1+ call createSchedulingResponse with
-      // message=null, so without this the original request disappears from
-      // context and OpenAI sees tool results with no explanation of why.
-      if (round === 0) {
-        currentConversation.push({
-          role: "user",
-          content: [{ type: "input_text", text: message }],
+      for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+        const response = await createSchedulingResponse({
+          tier: sessionTier,
+          message: round === 0 ? message : null,
+          conversation: currentConversation,
+          policy,
+          extraSystemContext,
+          tools,
         });
-      }
 
-      // Add the assistant's response (including function_call items) to conversation
-      currentConversation.push({
-        type: "function_call_output",
-        _raw: response.rawOutput,
-      });
+        finalUsage = response.usage;
+        const toolCalls = response.toolCalls || [];
 
-      for (const call of toolCalls) {
-        let toolResult;
-        try {
-          const args = typeof call.arguments === "string"
-            ? JSON.parse(call.arguments)
-            : (call.arguments || {});
-          toolResult = await executeTool(call.name, args, session.email, toolContext);
-          toolActions.push({ tool: call.name, result: toolResult });
-        } catch (err) {
-          toolResult = { error: err.message || "tool_execution_failed" };
-          toolActions.push({ tool: call.name, error: toolResult.error });
+        if (toolCalls.length === 0) {
+          finalOutput = response.output;
+          break;
         }
 
-        currentConversation.push({
-          type: "function_call_output",
-          call_id: call.call_id,
-          output: JSON.stringify(toolResult),
-        });
+        if (round === 0) {
+          currentConversation.push({
+            role: "user",
+            content: [{ type: "input_text", text: message }],
+          });
+        }
+
+        currentConversation.push({ type: "function_call_output", _raw: response.rawOutput });
+
+        for (const call of toolCalls) {
+          let toolResult;
+          try {
+            const args = typeof call.arguments === "string"
+              ? JSON.parse(call.arguments)
+              : (call.arguments || {});
+            toolResult = await executeTool(call.name, args, session.email, toolContext);
+            toolActions.push({ tool: call.name, result: toolResult });
+          } catch (err) {
+            toolResult = { error: err.message || "tool_execution_failed" };
+            toolActions.push({ tool: call.name, error: toolResult.error });
+          }
+
+          currentConversation.push({
+            type: "function_call_output",
+            call_id: call.call_id,
+            output: JSON.stringify(toolResult),
+          });
+        }
       }
-    }
     } catch (err) {
       console.error("[schedule-chat] ai loop error:", err?.message || err);
       return deny(500, "ai_error");
     }
 
-    // Save messages to thread if threadId provided
     if (threadId && saveMessage) {
       await saveMessage(threadId, "user", message);
-      if (finalOutput) {
-        await saveMessage(threadId, "assistant", finalOutput);
-      }
+      if (finalOutput) await saveMessage(threadId, "assistant", finalOutput);
     }
 
-    // Extract notification signal before stripping internal flag
     const bookAction = toolActions.find(a => a.result && a.result._notify);
     for (const a of toolActions) {
       if (a.result && a.result._notify) delete a.result._notify;
@@ -496,97 +601,70 @@ function createHandler(deps) {
 }
 
 function createRuntimeHandler(overrides = {}) {
-  let entitlementStore, profileStore, appointmentStore, busyBlockStore;
+  let entitlementStore, profileStore, appointmentStore, busyBlockStore, serviceStore, memoryStore;
   try {
     entitlementStore = overrides.entitlementStore || createEntitlementStore();
     profileStore     = overrides.profileStore     || createBusinessProfileStore();
     appointmentStore = overrides.appointmentStore || createAppointmentStore();
     busyBlockStore   = overrides.busyBlockStore   || createBusyBlockStore();
+    serviceStore     = overrides.serviceStore     || createServiceStore();
+    memoryStore      = overrides.memoryStore      || createSchedulerMemoryStore();
   } catch (err) {
     console.error("[schedule-chat] store construction failed:", err);
     return async () => deny(500, "store_init_failed");
   }
-  const runtimeSessionLib = overrides.sessionLib  || sessionLib;
+  const runtimeSessionLib = overrides.sessionLib    || sessionLib;
   const runtimePolicyLib  = overrides.tierPolicyLib || tierPolicyLib;
 
   let _supabase;
   function getSupabase() {
-    if (!_supabase) {
-      _supabase = overrides.supabase || createServiceRoleClient();
-    }
+    if (!_supabase) _supabase = overrides.supabase || createServiceRoleClient();
     return _supabase;
   }
 
   return createHandler({
-    verifySessionCookie:      (h) => runtimeSessionLib.verifySessionCookie(h),
-    findEntitlementByEmail:   (e) => entitlementStore.findEntitlementByEmail(e),
-    getTierPolicy:            (t) => runtimePolicyLib.getTierPolicy(t),
-    getSchedulingInstructions:(t) => runtimePolicyLib.getSchedulingInstructions(t),
-    getBusinessProfile:       (e) => profileStore.getProfile(e),
-    listAppointments:         (e, u) => appointmentStore.listAppointments(e, u),
-    listBusyBlocks:           (e, s) => busyBlockStore.listBusyBlocks(e, s, null),
-    createAppointment:        (e, a) => appointmentStore.createAppointment(e, a),
-    updateAppointment:        (id, e, u) => appointmentStore.updateAppointment(id, e, u),
-    createBusyBlocks:         (e, b) => busyBlockStore.createBusyBlocks(e, b),
+    verifySessionCookie:       (h) => runtimeSessionLib.verifySessionCookie(h),
+    findEntitlementByEmail:    (e) => entitlementStore.findEntitlementByEmail(e),
+    getTierPolicy:             (t) => runtimePolicyLib.getTierPolicy(t),
+    getSchedulingInstructions: (t) => runtimePolicyLib.getSchedulingInstructions(t),
+    getBusinessProfile:        (e) => profileStore.getProfile(e),
+    listAppointments:          (e, u) => appointmentStore.listAppointments(e, u),
+    listBusyBlocks:            (e, s) => busyBlockStore.listBusyBlocks(e, s, null),
+    listServices:              (e) => serviceStore.listServices(e),
+    getService:                (id, e) => serviceStore.getService(id, e),
+    createAppointment:         (e, a) => appointmentStore.createAppointment(e, a),
+    updateAppointment:         (id, e, u) => appointmentStore.updateAppointment(id, e, u),
+    createBusyBlocks:          (e, b) => busyBlockStore.createBusyBlocks(e, b),
+    getMemory:                 (e)    => memoryStore.getMemory(e),
+    upsertMemory:              (e, t) => memoryStore.upsertMemory(e, t),
 
     createSchedulingResponse: async ({ tier, message, conversation, policy, extraSystemContext, tools }) => {
-      // IMPORTANT: Do NOT include policy.instructions here — those are the
-      // text-messaging system prompts (boundary enforcement, scope creep, etc.)
-      // which are wrong context for the scheduling assistant. The scheduling
-      // instructions are already in extraSystemContext via getSchedulingInstructions().
-      const systemParts = [`Tier: ${tier}`];
-      if (extraSystemContext) {
-        systemParts.push(extraSystemContext);
-      }
-      const instructions = systemParts.join("\n\n");
+      const instructions = [`Tier: ${tier}`, extraSystemContext].filter(Boolean).join("\n\n");
 
       const input = [];
-
-      // Add conversation history, filtering out raw function_call_output entries
       for (const item of conversation) {
         if (item.type === "function_call_output" && item.call_id) {
           input.push(item);
         } else if (item.type === "function_call_output" && item._raw) {
-          // Re-add raw assistant output items from tool calling rounds
-          if (Array.isArray(item._raw)) {
-            for (const rawItem of item._raw) {
-              input.push(rawItem);
-            }
-          }
+          if (Array.isArray(item._raw)) for (const r of item._raw) input.push(r);
         } else if (item.role) {
           input.push(item);
         }
       }
-
-      // Add current user message if this is the first round
       if (message) {
-        input.push({
-          role: "user",
-          content: [{ type: "input_text", text: message }],
-        });
+        input.push({ role: "user", content: [{ type: "input_text", text: message }] });
       }
 
-      const apiKey = process.env.OPENAI_API_KEY;
-      const model = process.env.OPENAI_MODEL;
+      const apiKey    = process.env.OPENAI_API_KEY;
+      const model     = process.env.OPENAI_MODEL;
       const fetchImpl = overrides.fetchImpl || fetch;
 
       console.log("[schedule-chat] OpenAI request model=%s inputItems=%d hasKey=%s", model, input.length, !!apiKey);
 
-      const requestBody = {
-        model,
-        instructions,
-        input,
-        max_output_tokens: policy.responseMaxTokens,
-        tools,
-      };
-
       const response = await fetchImpl("https://api.openai.com/v1/responses", {
         method: "POST",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify(requestBody),
+        headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({ model, instructions, input, max_output_tokens: policy.responseMaxTokens, tools }),
       });
 
       if (!response.ok) {
@@ -597,8 +675,6 @@ function createRuntimeHandler(overrides = {}) {
       }
 
       const data = await response.json();
-
-      // Extract tool calls from the response
       const toolCalls = [];
       const rawOutput = [];
 
@@ -606,16 +682,11 @@ function createRuntimeHandler(overrides = {}) {
         for (const item of data.output) {
           rawOutput.push(item);
           if (item.type === "function_call") {
-            toolCalls.push({
-              call_id: item.call_id,
-              name: item.name,
-              arguments: item.arguments,
-            });
+            toolCalls.push({ call_id: item.call_id, name: item.name, arguments: item.arguments });
           }
         }
       }
 
-      // Extract text output
       let outputText = "";
       if (typeof data.output_text === "string" && data.output_text) {
         outputText = data.output_text;
@@ -627,12 +698,7 @@ function createRuntimeHandler(overrides = {}) {
           .join("");
       }
 
-      return {
-        output: outputText,
-        usage: data.usage,
-        toolCalls,
-        rawOutput,
-      };
+      return { output: outputText, usage: data.usage, toolCalls, rawOutput };
     },
 
     loadThreadMessages: async (threadId, email) => {
@@ -657,14 +723,8 @@ function createRuntimeHandler(overrides = {}) {
     },
 
     saveMessage: async (threadId, role, content) => {
-      await getSupabase()
-        .from("messages")
-        .insert({ thread_id: threadId, role, content });
-
-      await getSupabase()
-        .from("threads")
-        .update({ updated_at: new Date().toISOString() })
-        .eq("id", threadId);
+      await getSupabase().from("messages").insert({ thread_id: threadId, role, content });
+      await getSupabase().from("threads").update({ updated_at: new Date().toISOString() }).eq("id", threadId);
     },
   });
 }

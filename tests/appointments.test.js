@@ -45,7 +45,12 @@ async function testGetListsUpcomingByDefault() {
   });
 
   assert.equal(res.statusCode, 200);
-  assert.deepEqual(JSON.parse(res.body), { ok: true, appointments: appts });
+  assert.deepEqual(JSON.parse(res.body), {
+    ok: true,
+    appointments: appts,
+    history_limit: 50,
+    is_black_tier: false,
+  });
 }
 
 async function testGetAllParamPassedThrough() {
