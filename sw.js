@@ -6,12 +6,18 @@
  *   navigator.serviceWorker.register('/sw.js')
  */
 
-const APP_SHELL_CACHE = "tb-shell-v2";
+const APP_SHELL_CACHE = "tb-shell-v3";
 const APP_SHELL_FILES = [
-  "/app.html",
-  "/app-mobile.css",
+  "/app-core.html",
+  "/app-pro.html",
+  "/app-black.html",
+  "/access.html",
   "/app-client.js",
   "/scheduler-client.js",
+  "/followup-client.js",
+  "/prompts-client.js",
+  "/todos-client.js",
+  "/settings-client.js",
   "/prompts-data.json",
   "/manifest.json",
 ];
@@ -45,13 +51,12 @@ self.addEventListener("notificationclick", (event) => {
 
   if (event.action === "dismiss") return;
 
-  // Determine target URL based on notification type
+  // Determine target URL — prefer an explicit url in the payload, then fall back by type
   var notifData = (event.notification.data) || {};
-  var targetUrl = "/";
-  if (notifData.type === "follow_up") {
-    targetUrl = "/#follow-ups";
-  } else if (notifData.type === "todo") {
-    targetUrl = "/#todos";
+  var targetUrl = notifData.url || "/access.html";
+  if (!notifData.url) {
+    if (notifData.type === "follow_up") targetUrl = "/access.html#follow-ups";
+    else if (notifData.type === "todo")  targetUrl = "/access.html#todos";
   }
 
   event.waitUntil(
@@ -105,8 +110,7 @@ self.addEventListener("fetch", (event) => {
       .catch(() =>
         caches.match(event.request).then((cached) => {
           if (cached) return cached;
-          // Final fallback: serve the app shell root
-          return caches.match("/app.html");
+          return caches.match("/access.html");
         })
       )
   );

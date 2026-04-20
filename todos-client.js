@@ -21,7 +21,7 @@
 
   // ── API helpers ──────────────────────────────────────────────────────────────
   async function apiFetch(method, path, body) {
-    var opts = { method: method, headers: { 'content-type': 'application/json' } };
+    var opts = { method: method, headers: { 'content-type': 'application/json' }, credentials: 'same-origin' };
     if (body !== undefined) opts.body = JSON.stringify(body);
     var res = await fetch(API + (path || ''), opts);
     return res.json();

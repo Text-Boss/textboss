@@ -151,7 +151,7 @@
           updateHeaderAvatar(dataUrl, null);
           try {
             var res = await fetch(PROFILE_API, {
-              method: 'POST', headers: { 'content-type': 'application/json' },
+              method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin',
               body: JSON.stringify({ avatar_data: dataUrl }),
             });
             var data = await res.json();
@@ -173,7 +173,7 @@
         var firstName = get('sf-first-name');
         try {
           var res = await fetch(PROFILE_API, {
-            method: 'POST', headers: { 'content-type': 'application/json' },
+            method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin',
             body: JSON.stringify({
               owner_first_name: firstName || null,
               owner_full_name:  get('sf-full-name')  || null,
@@ -262,7 +262,7 @@
   async function generateSlug(panelEl, accent) {
     try {
       var res = await fetch(PROFILE_API, {
-        method: 'POST', headers: { 'content-type': 'application/json' },
+        method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin',
         body: JSON.stringify({ generateSlug: true }),
       });
       var data = await res.json();

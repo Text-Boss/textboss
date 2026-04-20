@@ -49,7 +49,9 @@
       "Bash(cd C:\\\\\\\\Users\\\\\\\\ADMIN\\\\\\\\Desktop\\\\\\\\tb\\\\\\\\textboss)",
       "Bash(python *)",
       "Bash(claude mcp *)",
-      "mcp__supabase__apply_migration"
+      "mcp__supabase__apply_migration",
+      "WebFetch(domain:api.github.com)",
+      "Bash(git push *)"
     ]
   }
 }

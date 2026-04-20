@@ -51,9 +51,7 @@ function extractCookieValue(headers) {
 function createSessionCookie(session) {
   const payload = base64UrlEncode(serializeCookieValue(session));
   const signature = sign(payload);
-  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
-
-  return `${COOKIE_NAME}=${payload}.${signature}; Path=/; HttpOnly; SameSite=Lax${secure}; Max-Age=${Math.floor(THIRTY_DAYS_MS / 1000)}`;
+  return `${COOKIE_NAME}=${payload}.${signature}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${Math.floor(THIRTY_DAYS_MS / 1000)}`;
 }
 
 function verifySessionCookie(headers) {
@@ -101,8 +99,7 @@ function verifySessionCookie(headers) {
 }
 
 function clearSessionCookie() {
-  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
-  return `${COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax${secure}; Max-Age=0`;
+  return `${COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=0`;
 }
 
 exports.COOKIE_NAME = COOKIE_NAME;

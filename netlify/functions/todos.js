@@ -1,10 +1,9 @@
 "use strict";
 
-const { createTodoStore }            = require("./_lib/supabase");
+const { createTodoStore, createEntitlementStore } = require("./_lib/supabase");
 const { json, denied }               = require("./_lib/http");
-const { verifyBookingAccess }        = require("./_lib/booking-auth");
 const sessionLib                     = require("./_lib/session");
-const { createEntitlementStore }     = require("./_lib/supabase");
+const { normalizeTier }              = require("./_lib/tier-policy");
 
 function createHandler(deps) {
   const { verifySessionCookie, findEntitlementByEmail, listTodos, createTodo, updateTodo, deleteTodo } = deps;
@@ -28,8 +27,12 @@ function createHandler(deps) {
     const status = String(entitlement.subscription_status || "").toLowerCase();
     if (status !== "active" && status !== "trialing") return denied(403, "not_active");
 
+    const entitlementTier = normalizeTier(entitlement.entitled_tier);
+    const sessionTier     = normalizeTier(session.tier);
+    if (!entitlementTier || !sessionTier || entitlementTier !== sessionTier) return denied(403, "invalid_tier");
+
     const email = session.email;
-    const tier  = String(session.tier || "").trim();
+    const tier  = entitlementTier;
     const canRemind = tier === "Pro" || tier === "Black";
 
     if (method === "GET") {

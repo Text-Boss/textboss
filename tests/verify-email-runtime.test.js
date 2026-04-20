@@ -28,7 +28,7 @@ async function testRuntimeHandlerUsesSharedDeps() {
   assert.deepEqual(JSON.parse(response.body), {
     ok: true,
     tier: "Pro",
-    redirectTo: "/app.html",
+    redirectTo: "/app-pro.html",
   });
   assert.equal(
     response.headers["set-cookie"],

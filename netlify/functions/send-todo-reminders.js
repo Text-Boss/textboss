@@ -1,6 +1,7 @@
 "use strict";
 
-const { createServiceRoleClient, createTodoStore, createPushSubscriptionStore } = require("./_lib/supabase");
+const { createServiceRoleClient, createTodoStore, createPushSubscriptionStore, createEntitlementStore } = require("./_lib/supabase");
+const { normalizeTier } = require("./_lib/tier-policy");
 
 let webpush;
 try { webpush = require("web-push"); } catch (_) {}
@@ -25,6 +26,11 @@ function verifyScheduledAccess(event) {
   return { ok: false, reason: "unauthorized" };
 }
 
+function tierAppUrl(tier, hash) {
+  const page = tier === "Black" ? "/app-black.html" : tier === "Pro" ? "/app-pro.html" : "/access.html";
+  return hash && page !== "/access.html" ? page + hash : page;
+}
+
 function createHandler(deps) {
   const {
     findDueUnreminded,
@@ -33,7 +39,10 @@ function createHandler(deps) {
     deleteSubscriptionById,
     sendPushNotification,
     sendEmail,
+    findEntitlementByEmail,
   } = deps;
+
+  const tierCache = new Map();
 
   return async function handler(event) {
     if (event.httpMethod !== "POST") return json(405, { ok: false, reason: "method_not_allowed" });
@@ -50,10 +59,19 @@ function createHandler(deps) {
       await markReminderSent(todo.id);
       reminded++;
 
+      let ownerTier = tierCache.get(todo.owner_email);
+      if (!ownerTier && findEntitlementByEmail) {
+        try {
+          const ent = await findEntitlementByEmail(todo.owner_email);
+          ownerTier = normalizeTier(ent && ent.entitled_tier) || "Pro";
+        } catch (_) { ownerTier = "Pro"; }
+        tierCache.set(todo.owner_email, ownerTier);
+      }
+
       const payload = {
         title: todo.is_urgent ? "⚠ Urgent To-Do Reminder" : "Text Boss · To-Do Reminder",
         body:  todo.text.length > 100 ? todo.text.slice(0, 97) + "…" : todo.text,
-        data:  { type: "todo", todoId: todo.id },
+        data:  { type: "todo", todoId: todo.id, url: tierAppUrl(ownerTier, "#todos") },
       };
 
       let pushDelivered = false;
@@ -103,10 +121,11 @@ function createRuntimeHandler(overrides = {}) {
   setupWebPush();
 
   return createHandler({
-    findDueUnreminded:    () => todoStore.findDueUnreminded(),
-    markReminderSent:     (id) => todoStore.markReminderSent(id),
+    findDueUnreminded:       () => todoStore.findDueUnreminded(),
+    markReminderSent:        (id) => todoStore.markReminderSent(id),
     getSubscriptionsByEmail: (e) => pushStore.getSubscriptionsByEmail(e),
     deleteSubscriptionById:  (id) => pushStore.deleteSubscriptionById(id),
+    findEntitlementByEmail:  (e) => (overrides.entitlementStore || createEntitlementStore()).findEntitlementByEmail(e),
 
     sendPushNotification: webpush
       ? async (sub, payload) => {

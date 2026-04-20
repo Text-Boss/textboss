@@ -1,4 +1,5 @@
-const { createFollowUpStore, createPushSubscriptionStore } = require("./_lib/supabase");
+const { createFollowUpStore, createPushSubscriptionStore, createEntitlementStore } = require("./_lib/supabase");
+const { normalizeTier } = require("./_lib/tier-policy");
 
 // web-push is optional — gracefully skip push delivery if not installed or VAPID not configured
 let webpush;
@@ -16,6 +17,11 @@ function deny(statusCode, reason) {
   return json(statusCode, { ok: false, denied: true, reason });
 }
 
+function tierAppUrl(tier, hash) {
+  const page = tier === "Black" ? "/app-black.html" : "/app-pro.html";
+  return hash ? page + hash : page;
+}
+
 function createHandler(deps) {
   const {
     verifyScheduledAccess,
@@ -25,7 +31,10 @@ function createHandler(deps) {
     deleteSubscriptionById,
     sendPushNotification,
     getJobById,
+    findEntitlementByEmail,
   } = deps;
+
+  const tierCache = new Map();
 
   return async function handler(event) {
     if (event.httpMethod !== "POST") {
@@ -59,6 +68,15 @@ function createHandler(deps) {
 
       // Deliver push notification to all of this owner's subscribed devices
       if (sendPushNotification) {
+        let ownerTier = tierCache.get(msg.owner_email);
+        if (!ownerTier && findEntitlementByEmail) {
+          try {
+            const ent = await findEntitlementByEmail(msg.owner_email);
+            ownerTier = normalizeTier(ent && ent.entitled_tier) || "Pro";
+          } catch (_) { ownerTier = "Pro"; }
+          tierCache.set(msg.owner_email, ownerTier);
+        }
+
         const subscriptions = await getSubscriptionsByEmail(msg.owner_email);
         for (const sub of subscriptions) {
           try {
@@ -83,7 +101,7 @@ function createHandler(deps) {
             await sendPushNotification(sub, {
               title: "Text Boss \u00b7 Follow-Up Ready",
               body: bodyParts.join(" "),
-              data: { type: "follow_up", messageId: msg.id },
+              data: { type: "follow_up", messageId: msg.id, url: tierAppUrl(ownerTier, "#follow-ups") },
             });
           } catch (err) {
             // 410 Gone = subscription expired; remove it so we don't retry
@@ -143,6 +161,7 @@ function createRuntimeHandler(overrides = {}) {
 
     getSubscriptionsByEmail: (email) => pushStore.getSubscriptionsByEmail(email),
     deleteSubscriptionById:  (id) => pushStore.deleteSubscriptionById(id),
+    findEntitlementByEmail:  (email) => (overrides.entitlementStore || createEntitlementStore()).findEntitlementByEmail(email),
 
     getJobById: null, // In runtime, we rely on the message's owner_email + job data embedded in notification
 

@@ -350,7 +350,7 @@ function createPublicBookingStore(options = {}) {
     async getProfileBySlug(slug) {
       const { data, error } = await client
         .from("business_profiles")
-        .select("email, occupation, services, buffer_before_minutes, buffer_after_minutes, working_hours, onboarding_complete, booking_slug, updated_at")
+        .select("email, occupation, services, buffer_before_minutes, buffer_after_minutes, working_hours, onboarding_complete, booking_slug, avatar_data, business_name, owner_first_name, owner_full_name, city, updated_at")
         .eq("booking_slug", slug)
         .maybeSingle();
       if (error) throw error;

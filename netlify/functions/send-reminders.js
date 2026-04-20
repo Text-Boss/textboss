@@ -1,4 +1,5 @@
-const { createServiceRoleClient, createPushSubscriptionStore } = require("./_lib/supabase");
+const { createServiceRoleClient, createPushSubscriptionStore, createEntitlementStore } = require("./_lib/supabase");
+const { normalizeTier } = require("./_lib/tier-policy");
 
 // web-push is optional — gracefully skip push delivery if not installed or VAPID not configured
 let webpush;
@@ -16,6 +17,11 @@ function deny(statusCode, reason) {
   return json(statusCode, { ok: false, denied: true, reason });
 }
 
+function tierAppUrl(tier, hash) {
+  const page = tier === "Black" ? "/app-black.html" : "/app-pro.html";
+  return hash ? page + hash : page;
+}
+
 function createHandler(deps) {
   const {
     verifyScheduledAccess,
@@ -24,7 +30,10 @@ function createHandler(deps) {
     getSubscriptionsByEmail,
     deleteSubscriptionById,
     sendPushNotification,
+    findEntitlementByEmail,
   } = deps;
+
+  const tierCache = new Map();
 
   return async function handler(event) {
     if (event.httpMethod !== "POST") {
@@ -59,6 +68,15 @@ function createHandler(deps) {
 
       // Deliver push notification to all of this owner's subscribed devices
       if (sendPushNotification) {
+        let ownerTier = tierCache.get(appt.owner_email);
+        if (!ownerTier && findEntitlementByEmail) {
+          try {
+            const ent = await findEntitlementByEmail(appt.owner_email);
+            ownerTier = normalizeTier(ent && ent.entitled_tier) || "Pro";
+          } catch (_) { ownerTier = "Pro"; }
+          tierCache.set(appt.owner_email, ownerTier);
+        }
+
         const subscriptions = await getSubscriptionsByEmail(appt.owner_email);
         for (const sub of subscriptions) {
           try {
@@ -69,7 +87,7 @@ function createHandler(deps) {
                 appt.client_name ? `with ${appt.client_name}` : null,
                 `at ${appt.scheduled_time}`,
               ].filter(Boolean).join(" "),
-              data: { appointmentId: appt.id },
+              data: { appointmentId: appt.id, url: tierAppUrl(ownerTier, "#scheduler") },
             });
           } catch (err) {
             // 410 Gone = subscription expired; remove it so we don't retry
@@ -165,8 +183,9 @@ function createRuntimeHandler(overrides = {}) {
       if (error) throw error;
     },
 
-    getSubscriptionsByEmail: (email) => pushStore.getSubscriptionsByEmail(email),
-    deleteSubscriptionById:  (id) => pushStore.deleteSubscriptionById(id),
+    getSubscriptionsByEmail:  (email) => pushStore.getSubscriptionsByEmail(email),
+    deleteSubscriptionById:   (id) => pushStore.deleteSubscriptionById(id),
+    findEntitlementByEmail:   (email) => (overrides.entitlementStore || createEntitlementStore()).findEntitlementByEmail(email),
 
     sendPushNotification: vapidReady
       ? async (sub, payload) => {

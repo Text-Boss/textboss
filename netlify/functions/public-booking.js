@@ -441,12 +441,7 @@ function createRuntimeHandler(overrides = {}) {
       const model = process.env.OPENAI_MODEL;
       const fetchImpl = overrides.fetchImpl || fetch;
 
-      const input = [
-        {
-          role: "system",
-          content: [{ type: "input_text", text: systemPrompt }],
-        },
-      ];
+      const input = [];
 
       for (const item of conversation) {
         if (item.type === "function_call_output" && item.call_id) {
@@ -477,6 +472,7 @@ function createRuntimeHandler(overrides = {}) {
         },
         body: JSON.stringify({
           model,
+          instructions: systemPrompt,
           input,
           max_output_tokens: 600,
           tools,

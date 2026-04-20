@@ -841,7 +841,7 @@
         }
         if (target === "settings" && !settingsInited) {
           settingsInited = true;
-          window.initSettings({ panel: panel, accent: ACCENT, profile: profile || {}, userEmail: getEmail() });
+          window.initSettings({ panel: panel, accent: ACCENT, profile: profile || {}, userEmail: getEmail(), tier: TIER });
         }
       });
     });
