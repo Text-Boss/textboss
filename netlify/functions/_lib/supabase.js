@@ -100,7 +100,7 @@ function createAppointmentStore(options = {}) {
       const normalized = String(email || "").trim().toLowerCase();
       let query = client
         .from("appointments")
-        .select("id, client_name, client_contact, title, scheduled_date, scheduled_time, duration_minutes, status, notes, created_at")
+        .select("id, client_name, client_contact, client_phone, title, scheduled_date, scheduled_time, duration_minutes, status, notes, created_at")
         .ilike("owner_email", normalized)
         .order("scheduled_date", { ascending: true })
         .order("scheduled_time", { ascending: true });
@@ -121,6 +121,7 @@ function createAppointmentStore(options = {}) {
           owner_email: normalized,
           client_name:      appt.client_name      || null,
           client_contact:   appt.client_contact   || null,
+          client_phone:     appt.client_phone     || null,
           title:            appt.title            || null,
           scheduled_date:   appt.scheduled_date,
           scheduled_time:   appt.scheduled_time,
@@ -128,7 +129,7 @@ function createAppointmentStore(options = {}) {
           status:           "confirmed",
           notes:            appt.notes            || null,
         })
-        .select("id, client_name, client_contact, title, scheduled_date, scheduled_time, duration_minutes, status, notes, created_at")
+        .select("id, client_name, client_contact, client_phone, title, scheduled_date, scheduled_time, duration_minutes, status, notes, created_at")
         .single();
       if (error) throw error;
       return data;

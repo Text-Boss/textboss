@@ -3,9 +3,13 @@ const { json, denied } = require("./_lib/http");
 const { normalizeTier } = require("./_lib/tier-policy");
 const { findAvailableSlots, workingHoursToArray } = require("./_lib/scheduler");
 const { generateICS } = require("./_lib/ical");
+const { sendSms } = require("./_lib/sms");
 
 let webpush;
 try { webpush = require("web-push"); } catch (_) { /* not installed */ }
+
+let resend;
+try { resend = new (require("resend").Resend)(process.env.RESEND_API_KEY); } catch (_) {}
 
 const SCHEDULING_TIERS = new Set(["Pro", "Black"]);
 const MAX_CONVERSATION_LENGTH = 20;
@@ -29,9 +33,9 @@ function buildClientSystemPrompt(profile, services) {
     "- The client MUST select a service before you check availability. If no service is selected, ask: 'Which service would you like to book?' and list the options.",
     "- Use find_available_slots to check availability before suggesting times. Never guess.",
     "- Present 2-3 options with day, date, and time.",
-    "- Before calling confirm_booking, you MUST have: client name, client email, selected service_id, confirmed date/time.",
+    "- Before calling confirm_booking, you MUST have: client name, client mobile phone number, selected service_id, and confirmed date/time. Ask for phone if not provided. Email is optional.",
     "- When a service is selected, include its [id:...] as service_id in confirm_booking.",
-    '- After booking: "Confirmed — [day], [date] at [time], [duration] minutes. Download your calendar invite below."',
+    '- After booking: "Confirmed — [day], [date] at [time], [duration] minutes. You\'ll receive a confirmation by SMS shortly."',
     "- Only discuss scheduling. Never discuss pricing, business advice, or internal details.",
     "- Never reveal the owner's email address.",
     "Keep responses concise and professional.",
@@ -80,12 +84,13 @@ const BOOKING_TOOLS = [
   {
     type: "function",
     name: "confirm_booking",
-    description: "Confirm and create an appointment booking. Only call this after you have collected: client name, client email, selected service, and confirmed date/time.",
+    description: "Confirm and create an appointment booking. Only call this after you have collected: client name, client mobile phone number, selected service, and confirmed date/time.",
     parameters: {
       type: "object",
       properties: {
         client_name:      { type: "string", description: "Client's full name." },
-        client_email:     { type: "string", description: "Client's email address." },
+        client_phone:     { type: "string", description: "Client's mobile phone number (required)." },
+        client_email:     { type: "string", description: "Client's email address (optional)." },
         service_id:       { type: "string", description: "UUID of the selected service from the available services list." },
         service_name:     { type: "string", description: "Name of the selected service (fallback if no service_id)." },
         scheduled_date:   { type: "string", description: "Date in YYYY-MM-DD format." },
@@ -93,7 +98,7 @@ const BOOKING_TOOLS = [
         duration_minutes: { type: "number", description: "Duration in minutes (server will verify against service record)." },
         notes:            { type: "string", description: "Optional notes." },
       },
-      required: ["client_name", "client_email", "service_id", "scheduled_date", "scheduled_time"],
+      required: ["client_name", "client_phone", "service_id", "scheduled_date", "scheduled_time"],
       additionalProperties: false,
     },
     strict: false,
@@ -109,6 +114,10 @@ function createHandler(deps) {
     createAppointment,
     generateICSData,
     sendOwnerNotification,
+    sendOwnerSms,
+    sendClientSms,
+    sendOwnerEmail,
+    sendClientEmail,
     callOpenAI,
     getServicesByMerchant,
     getServiceByIdPublic,
@@ -159,8 +168,9 @@ function createHandler(deps) {
 
         const appt = await createAppointment(ownerEmail, {
           client_name:      args.client_name,
-          client_contact:   args.client_email,
-          client_email:     args.client_email,
+          client_contact:   args.client_email || args.client_phone || null,
+          client_phone:     args.client_phone || null,
+          client_email:     args.client_email || null,
           title:            serviceName,
           scheduled_date:   args.scheduled_date,
           scheduled_time:   args.scheduled_time,
@@ -177,21 +187,52 @@ function createHandler(deps) {
           organizerName: profile.occupation || null,
           organizerEmail: null, // never expose owner email to client
           attendeeName: args.client_name,
-          attendeeEmail: args.client_email,
+          attendeeEmail: args.client_email || null,
         });
 
-        // Send push notification to owner (fire-and-forget)
-        if (sendOwnerNotification) {
-          sendOwnerNotification(ownerEmail, {
+        const bizName = profile.business_name || profile.occupation || "Text Boss";
+        const apptSummary = `${serviceName} on ${args.scheduled_date} at ${args.scheduled_time}`;
+
+        // Fire-and-forget all notifications
+        const notifyOwner = async () => {
+          const pushPayload = {
             title: "Text Boss · New Booking",
-            body: [
-              args.service_name || "Appointment",
-              `with ${args.client_name}`,
-              `on ${args.scheduled_date} at ${args.scheduled_time}`,
-            ].filter(Boolean).join(" "),
-            data: { appointmentId: appt.id },
-          }).catch(() => {});
-        }
+            body: `${serviceName} with ${args.client_name} on ${args.scheduled_date} at ${args.scheduled_time}`,
+            data: { type: "appointment", appointmentId: appt.id, url: "/#scheduler" },
+          };
+          if (sendOwnerNotification) await sendOwnerNotification(ownerEmail, pushPayload).catch(() => {});
+          if (sendOwnerSms && profile.business_phone) {
+            await sendOwnerSms({
+              to: profile.business_phone,
+              body: `New booking via Text Boss: ${args.client_name} — ${apptSummary}. Phone: ${args.client_phone || "not provided"}.`,
+            }).catch(() => {});
+          }
+          if (sendOwnerEmail) {
+            await sendOwnerEmail({
+              to: ownerEmail,
+              subject: `New Booking: ${args.client_name} — ${serviceName}`,
+              text: `You have a new booking via Text Boss.\n\nClient: ${args.client_name}\nPhone: ${args.client_phone || "not provided"}\nEmail: ${args.client_email || "not provided"}\nService: ${apptSummary}\nNotes: ${args.notes || "none"}\n\nLog in to manage your appointments.`,
+            }).catch(() => {});
+          }
+        };
+
+        const notifyClient = async () => {
+          if (sendClientSms && args.client_phone) {
+            await sendClientSms({
+              to: args.client_phone,
+              body: `Hi ${args.client_name}, your ${bizName} appointment is confirmed: ${apptSummary}. See you then!`,
+            }).catch(() => {});
+          }
+          if (sendClientEmail && args.client_email) {
+            await sendClientEmail({
+              to: args.client_email,
+              subject: `Appointment Confirmed — ${bizName}`,
+              text: `Hi ${args.client_name},\n\nYour appointment is confirmed.\n\nService: ${apptSummary}\n\nWe look forward to seeing you!\n\n— ${bizName}`,
+            }).catch(() => {});
+          }
+        };
+
+        Promise.all([notifyOwner(), notifyClient()]).catch(() => {});
 
         return {
           booked: true,
@@ -433,6 +474,21 @@ function createRuntimeHandler(overrides = {}) {
               }
             }
           }
+        }
+      : null,
+
+    sendOwnerSms:   ({ to, body }) => sendSms({ to, body }),
+    sendClientSms:  ({ to, body }) => sendSms({ to, body }),
+
+    sendOwnerEmail: resend
+      ? async ({ to, subject, text }) => {
+          await resend.emails.send({ from: "Text Boss <noreply@textboss.com.au>", to, subject, text });
+        }
+      : null,
+
+    sendClientEmail: resend
+      ? async ({ to, subject, text }) => {
+          await resend.emails.send({ from: "Text Boss <noreply@textboss.com.au>", to, subject, text });
         }
       : null,
 

@@ -46,8 +46,11 @@
   .booking-confirm{background:var(--surface);border:1px solid var(--accent);border-radius:var(--radius);padding:16px;margin:8px 0}
   .booking-confirm h3{font-size:14px;font-weight:600;margin-bottom:8px;color:var(--accent)}
   .booking-detail{font-size:13px;color:var(--text-dim);margin-bottom:4px}
-  .ics-btn{display:inline-block;margin-top:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:8px 16px;font-family:var(--mono);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+  .cal-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .ics-btn{display:inline-block;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:8px 16px;font-family:var(--mono);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
   .ics-btn:hover{background:var(--accent-hover)}
+  .ics-btn.secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+  .ics-btn.secondary:hover{border-color:var(--accent)}
 
   /* Loading */
   .loading{display:flex;align-items:center;justify-content:center;min-height:200px;color:var(--text-dim);font-size:13px}
@@ -93,26 +96,77 @@
     container.scrollTop = container.scrollHeight;
   }
 
+  function buildGoogleCalUrl(booking) {
+    // Format: YYYYMMDDTHHMMSS (local, no Z)
+    var datePart = booking.date.replace(/-/g, '');
+    var timePart = (booking.time || '00:00').replace(':', '') + '00';
+    var start = datePart + 'T' + timePart;
+    // Calculate end time
+    var startMs = new Date(booking.date + 'T' + (booking.time || '00:00') + ':00').getTime();
+    var endMs = startMs + (booking.duration || 60) * 60 * 1000;
+    var endDate = new Date(endMs);
+    var endPart = endDate.getFullYear() +
+      String(endDate.getMonth() + 1).padStart(2, '0') +
+      String(endDate.getDate()).padStart(2, '0') + 'T' +
+      String(endDate.getHours()).padStart(2, '0') +
+      String(endDate.getMinutes()).padStart(2, '0') + '00';
+    var params = new URLSearchParams({
+      action: 'TEMPLATE',
+      text: booking.title || 'Appointment',
+      dates: start + '/' + endPart,
+    });
+    return 'https://calendar.google.com/calendar/render?' + params.toString();
+  }
+
   function renderBookingCard(booking) {
     var container = document.getElementById('messages');
     if (!container) return;
     var card = document.createElement('div');
     card.className = 'booking-confirm';
-    card.innerHTML =
-      '<h3>Booking Confirmed</h3>' +
-      '<div class="booking-detail">' + escapeHtml(booking.title) + '</div>' +
-      '<div class="booking-detail">' + escapeHtml(booking.date) + ' at ' + escapeHtml(booking.time) + '</div>' +
-      '<div class="booking-detail">' + escapeHtml(booking.duration) + ' minutes</div>';
+
+    var heading = document.createElement('h3');
+    heading.textContent = 'Booking Confirmed';
+    card.appendChild(heading);
+
+    var d1 = document.createElement('div');
+    d1.className = 'booking-detail';
+    d1.textContent = booking.title || 'Appointment';
+    card.appendChild(d1);
+
+    var d2 = document.createElement('div');
+    d2.className = 'booking-detail';
+    d2.textContent = (booking.date || '') + ' at ' + (booking.time || '');
+    card.appendChild(d2);
+
+    var d3 = document.createElement('div');
+    d3.className = 'booking-detail';
+    d3.textContent = (booking.duration || 60) + ' minutes';
+    card.appendChild(d3);
 
     if (booking.icsData) {
+      var btns = document.createElement('div');
+      btns.className = 'cal-btns';
+
+      // Google Calendar
+      var gcal = document.createElement('a');
+      gcal.className = 'ics-btn';
+      gcal.href = buildGoogleCalUrl(booking);
+      gcal.target = '_blank';
+      gcal.rel = 'noopener';
+      gcal.textContent = 'Add to Google Calendar';
+      btns.appendChild(gcal);
+
+      // Apple / Outlook (.ics download)
       var blob = new Blob([booking.icsData], { type: 'text/calendar' });
       var url = URL.createObjectURL(blob);
-      var btn = document.createElement('a');
-      btn.className = 'ics-btn';
-      btn.href = url;
-      btn.download = 'appointment.ics';
-      btn.textContent = 'Download Calendar Invite (.ics)';
-      card.appendChild(btn);
+      var apple = document.createElement('a');
+      apple.className = 'ics-btn secondary';
+      apple.href = url;
+      apple.download = 'appointment.ics';
+      apple.textContent = 'Add to Apple / Outlook Calendar';
+      btns.appendChild(apple);
+
+      card.appendChild(btns);
     }
 
     container.appendChild(card);

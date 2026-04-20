@@ -134,6 +134,21 @@
     .tab-btn:hover { color: var(--text); }
     .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
+    .tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 9px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
     /* ── Sidebar ── */
     .sidebar-toggle {
       display: inline-flex;
@@ -1043,7 +1058,7 @@
 
     <nav class="tab-bar">
       <button class="tab-btn active" data-tab="chat" type="button">Messages</button>
-      <button class="tab-btn" data-tab="scheduler" type="button">Scheduler</button>
+      <button class="tab-btn" data-tab="scheduler" type="button">Scheduler<span class="tab-badge" id="scheduler-badge" style="display:none"></span></button>
       <button class="tab-btn" data-tab="followups" type="button">Follow-Ups</button>
       <button class="tab-btn" data-tab="prompts" type="button">Prompts</button>
       <button class="tab-btn" data-tab="todos" type="button">To-Do</button>

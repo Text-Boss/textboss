@@ -114,8 +114,24 @@
         cachedAppointments = result.data.appointments || [];
       }
     } catch (_) {}
+    updateSchedulerBadge();
     renderCalendar();
     renderDayDetail(selectedDate);
+  }
+
+  function updateSchedulerBadge() {
+    var badge = document.getElementById('scheduler-badge');
+    if (!badge) return;
+    var today = todayStr();
+    var count = cachedAppointments.filter(function (a) {
+      return a.status === 'confirmed' && a.scheduled_date >= today;
+    }).length;
+    if (count > 0) {
+      badge.textContent = String(count);
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
   }
 
   // ── Busy Blocks API ──────────────────────────────────────────────────────────
@@ -1548,6 +1564,17 @@
   }
 
   global.initScheduler = initScheduler;
+
+  global.refreshScheduler = async function refreshScheduler() {
+    await loadAppointments();
+  };
+
+  // Refresh badge when page regains visibility (e.g., returning from another app)
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') {
+      loadAppointments();
+    }
+  });
 
   // Called on page load (before any tab is clicked) to immediately show wizard
   // if the user hasn't completed onboarding yet.

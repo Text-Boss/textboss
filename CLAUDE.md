@@ -31,7 +31,10 @@ npx netlify dev
 | `STRIPE_PRICE_CORE` | Stripe price ID for Core tier |
 | `STRIPE_PRICE_PRO` | Stripe price ID for Pro tier |
 | `STRIPE_PRICE_BLACK` | Stripe price ID for Black tier |
-| `RESEND_API_KEY` | Resend API key for sending password reset emails |
+| `RESEND_API_KEY` | Resend API key for sending password reset emails and booking confirmations |
+| `MOBILEMESSAGE_USERNAME` | Mobile Message API username (SMS notifications) |
+| `MOBILEMESSAGE_PASSWORD` | Mobile Message API password |
+| `MOBILEMESSAGE_SENDER` | Mobile Message sender ID (default: `TEXT BOSS`) |
 | `REMINDERS_SECRET` | Bearer token to authorize non-scheduled invocations of `send-reminders.js` |
 | `VAPID_PUBLIC_KEY` | Web Push VAPID public key (generate: `npx web-push generate-vapid-keys`) |
 | `VAPID_PRIVATE_KEY` | Web Push VAPID private key |
