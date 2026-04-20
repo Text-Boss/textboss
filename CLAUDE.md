@@ -94,7 +94,7 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 - `schedule-chat.js` — AI conversational scheduling; tools: `find_available_slots`, `create_appointment`, `update_appointment`, `cancel_appointment`, `list_appointments`, `resolve_service`, plus `remember` (Black only)
 - `business-profile.js` — GET/POST for business profile (occupation, working hours, buffer times, avatar, business details, booking slug). Also validates and saves: `business_name`, `owner_first_name`, `owner_full_name`, `business_phone`, `website`, `abn`, `city`, `avatar_data` (base64, max 200KB)
 - `services.js` — CRUD for the relational `services` table (replaces old JSONB services field on `business_profiles`)
-- `public-booking.js` — Unauthenticated client-facing booking via `book.html?owner=<slug>`. AI tools: `find_available_slots` + `confirm_booking`. Returns `.ics` on booking, sends Web Push to owner
+- `public-booking.js` — Unauthenticated client-facing booking via `book.html?owner=<slug>`. AI tools: `find_available_slots` + `confirm_booking`. `confirm_booking` requires `client_phone` (mandatory) and accepts optional `client_email`. On confirmation: sends SMS to owner (`business_phone`) + client via Mobile Message; sends Resend email to owner + client (if email provided); sends Web Push to owner with deep-link URL. Uses `_lib/sms.js` for SMS delivery.
 - `busy-blocks.js` — Calendar busy blocks (Pro: max 200, Black: unlimited)
 - `ical-import.js` — Parses `.ics` uploads into busy blocks; inline RFC 5545 parser, no external deps
 - `follow-up.js` / `send-follow-ups.js` — AI-drafted follow-up messages; scheduled daily at 9am UTC
@@ -102,6 +102,9 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 - `send-todo-reminders.js` — Scheduled every 15 min; Web Push + Resend email fallback for due to-do reminders. Same tier-lookup pattern for `url`.
 - `push-subscribe.js` / `vapid-key.js` — Web Push subscription management
 - `threads.js` — Conversation thread persistence
+
+### SMS utility (`_lib/sms.js`)
+`sendSms({ to, body })` — sends via Mobile Message REST API (`POST https://api.mobilemessage.com.au/v1/messages`, Basic Auth). Normalises AU mobile numbers (`04xx` → `61xx`). Reads `MOBILEMESSAGE_USERNAME`, `MOBILEMESSAGE_PASSWORD`, `MOBILEMESSAGE_SENDER` from env — returns silently if credentials are missing (safe in local dev).
 
 ### Scheduler AI model (`_lib/scheduler.js`)
 `findAvailableSlots({appointments, busyBlocks, workingHours, durationMinutes, preBuffer, postBuffer, startDate, endDate, maxSlotsPerDay, stepMinutes})` — pure function, no DB calls. `workingHoursToArray(jsonObj)` converts `business_profiles.working_hours` format (`{"1":{start,end}}`) to array form.
@@ -115,7 +118,7 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 | `entitlements` | — | Stripe-managed subscription state |
 | `threads` / `messages` | 001 | Chat thread persistence |
 | `availability` | 003 | Weekly availability slots |
-| `appointments` | 003 | Booked appointments; `reminder_sent_at` added in 002 |
+| `appointments` | 003 | Booked appointments; `reminder_sent_at` added in 002; `client_phone` added in 012 |
 | `business_profiles` | 004 | Per-user scheduler config + avatar + business details |
 | `push_subscriptions` | 004 | Web Push endpoint storage |
 | `public_booking_links` | 005 | Public booking slug → owner mapping |
@@ -125,6 +128,7 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 | `services` | 009 | Relational services (title, duration_min, price, buffer_time_min) |
 | `scheduler_memory` | 010 | Black tier AI persistent memory (one row per owner) |
 | `todos` | 011 | To-do items with urgency, reminders, done state |
+| `appointments.client_phone` | 012 | Client mobile number (mandatory on public bookings) |
 
 ### Client-side architecture
 App pages (`app-pro.html`, `app-black.html`, `app-core.html`) are single-page shells with a scrollable tab bar. All tabs lazy-init on first click. Scripts loaded as plain `<script>` tags (no bundler):
@@ -132,7 +136,7 @@ App pages (`app-pro.html`, `app-black.html`, `app-core.html`) are single-page sh
 | Script | Exported global | Purpose |
 |---|---|---|
 | `app-client.js` | — | Session verify, logout, char count, thread UI |
-| `scheduler-client.js` | `window.initScheduler`, `window.checkOnboardingOnLoad` | Scheduler tab, calendar, wizard, services, working hours |
+| `scheduler-client.js` | `window.initScheduler`, `window.checkOnboardingOnLoad`, `window.refreshScheduler` | Scheduler tab, calendar, wizard, services, working hours; badge shows upcoming confirmed count; auto-refreshes on `visibilitychange` |
 | `followup-client.js` | `window.initFollowUps` | Follow-ups tab |
 | `prompts-client.js` | `window.initPrompts` | Prompts tab — fetches tier HTML file, parses with DOMParser, renders cards natively with `{{variable}}` auto-fill from profile |
 | `todos-client.js` | `window.initTodos` | To-Do tab + collapsible Notes (localStorage) |
@@ -146,7 +150,7 @@ App pages (`app-pro.html`, `app-black.html`, `app-core.html`) are single-page sh
 Defined in `scheduler-client.js`. Steps: (1) personal & business details, (2) occupation, (3) services + pricing, (4) buffer times. On finish, saves all fields to `business_profiles` and services to the relational `services` table.
 
 ### Public booking page (`book.html`)
-Accessed via `book.html?owner=<slug>`. Unauthenticated. On load, calls `public-booking.js` with `message: "__init__"` to fetch `businessName`, `occupation`, `ownerName`, `city`, `avatarData`, and `services`. Renders a chat UI — clients select a service chip or type freely. AI handles availability checking and booking confirmation, returns `.ics`.
+Accessed via `book.html?owner=<slug>`. Unauthenticated. On load, calls `public-booking.js` with `message: "__init__"` to fetch `businessName`, `occupation`, `ownerName`, `city`, `avatarData`, and `services`. Renders a chat UI — clients select a service chip or type freely. AI handles availability checking and booking confirmation. On confirmation, the client sees "Add to Google Calendar" (deep-link) and "Add to Apple / Outlook Calendar" (.ics download) buttons — do not label these as ".ics" to the user. Client phone is collected as mandatory; email is optional.
 
 ### `sw.js` (service worker)
 Handles Web Push `push` events, app-shell caching (cache name `tb-shell-v3`), and offline fallback. On notification click, navigates to `data.url` from the push payload if present; falls back to `/access.html`. The send functions (`send-reminders.js`, `send-follow-ups.js`, `send-todo-reminders.js`) look up the owner's tier and include a tier-specific deep-link URL in every push payload. `APP_SHELL_FILES` caches all three app pages plus all client scripts — bump the cache name (`tb-shell-vN`) whenever cached static files change.
