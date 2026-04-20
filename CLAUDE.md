@@ -44,11 +44,15 @@ npx netlify dev
 ### Tiers
 Three subscription tiers — **Core**, **Pro**, **Black** — each with its own HTML app page (`app-core.html`, `app-pro.html`, `app-black.html`), token limits, input limits, and system prompt in `netlify/functions/_lib/tier-policy.js`.
 
+System prompts instruct the AI to write in a natural human voice — no AI-giveaway phrases ("Certainly", "I hope this finds you well", etc.). Each tier has explicit escalation boundaries: Core handles basic comms, Pro handles authority/boundary enforcement, Black handles high-risk/legal-containment scenarios.
+
 ### Auth flow
 1. User submits email on `access.html` → `POST /.netlify/functions/verify-email`
 2. `verify-email` checks Supabase `entitlements` table, verifies `subscription_status` is `active`/`trialing`, then sets a signed `HttpOnly` cookie (`textboss_session`)
 3. Each app page loads `app-client.js`, which calls `GET /.netlify/functions/session-verify` on boot and redirects to `denied.html` if the session is invalid or the tier doesn't match `data-app-tier` on the root element
 4. `POST /.netlify/functions/chat` re-verifies the session cookie AND re-checks Supabase entitlements on every request before calling OpenAI
+
+Password auth is also supported — `forgot-password.js` / `reset-password.js` / `set-password.js` handle the full PBKDF2 reset flow via Resend email.
 
 ### Session cookie
 Implemented in `netlify/functions/_lib/session.js`. Format: `base64url(payload).hmac_signature`. Payload contains `email`, `tier`, `iat`, `exp` (30-day TTL). Uses `crypto.timingSafeEqual` for signature comparison.
@@ -59,75 +63,89 @@ All backend logic lives in `netlify/functions/`. Each function exports three thi
 - `createRuntimeHandler(overrides?)` — wires real dependencies; accepts partial overrides for testing
 - `handler(event, context)` — the actual Netlify entry point
 
-`_lib/http.js` exports two helpers used across functions: `json(statusCode, body, headers?)` and `denied(statusCode, reason, headers?)`. The `denied` helper always sets `{ ok: false, denied: true }` in the response body — clients use the `denied` flag to redirect to `denied.html`.
-
-`session-logout.js` clears the `textboss_session` cookie by setting it with `Max-Age=0`.
-
-### Supabase `entitlements` table columns
-`email`, `entitled_tier`, `subscription_status`, `current_period_end`, `stripe_customer_id`, `stripe_subscription_id`, `price_id`, `updated_at`
-
-### OpenAI integration
-`netlify/functions/_lib/openai.js` uses the **Responses API** (`POST /v1/responses`), not the Chat Completions API. The conversation history passed by the client maps directly to the `input` array. System instructions are injected per-request from `tier-policy.js` (not stored server-side between calls).
-
-Message format in the `input` array: user turns use `{ type: "input_text", text }`, assistant turns use `{ type: "output_text", text }`. This differs from Chat Completions format and is specific to the Responses API.
-
-### Stripe webhook
-`stripe-webhook.js` handles `checkout.session.completed`, `customer.subscription.updated`, and `customer.subscription.deleted`. It upserts the `entitlements` table using `email` as the conflict key.
-
-### Scheduling subsystem (Pro/Black only)
-Three additional functions handle appointment scheduling:
-- `availability.js` — CRUD for a user's weekly availability slots (`availability` table: `owner_email`, `day_of_week`, `start_time`, `end_time`, `is_active`)
-- `appointments.js` — CRUD for booked appointments (`appointments` table: `owner_email`, `client_name`, `client_contact`, `title`, `scheduled_date`, `scheduled_time`, `duration_minutes`, `status`, `notes`)
-- `schedule-chat.js` — AI-powered conversational scheduling; reads availability + appointments and uses OpenAI to create/update appointments via natural language
-- `threads.js` — manages conversation thread persistence (`threads`/`messages` tables; schema in `migrations/001_create_threads_and_messages.sql`; scheduling tables in `003`, reminder column in `002`)
-- `send-reminders.js` — scheduled function (runs hourly per `netlify.toml`) that finds confirmed appointments within the next 24 h with no `reminder_sent_at`, delivers Web Push notifications via `web-push` (VAPID), marks them reminded. Authorized by Netlify's `x-nf-event: schedule` header or `REMINDERS_SECRET` bearer token.
-- `business-profile.js` — GET/POST for a user's business profile (`business_profiles` table: occupation, services with durations, buffer times, working hours, onboarding flag). Pro/Black only.
-- `push-subscribe.js` — POST to save a Web Push subscription, DELETE to remove one (`push_subscriptions` table). Pro/Black only.
-- `busy-blocks.js` — CRUD for calendar busy blocks (`busy_blocks` table). Pro: max 200 blocks, Black: unlimited. Pro/Black only.
-- `ical-import.js` — Accepts raw `.ics` content, parses VEVENT entries, stores upcoming events as busy blocks. No external deps — inline RFC 5545 parser. Pro: 60-day window/200 blocks, Black: 90-day window/500 blocks. Max 800 KB input.
-- `public-booking.js` — Unauthenticated client-facing booking endpoint (accessed via public booking link). Uses `public_booking_links` table. Clients interact via a conversational AI flow using `findAvailableSlots` + `confirm_booking` tools. Sends Web Push confirmation to owner. Returns iCal attachment on booking.
-- `follow-up.js` — AI-powered follow-up message drafting per appointment. Gated by `isFollowUpTier` from `tier-policy.js`.
-- `send-follow-ups.js` — Scheduled daily at 9am UTC. Finds due follow-up jobs and notifies owners via Web Push.
-- `vapid-key.js` — Simple GET returning `VAPID_PUBLIC_KEY` to the client for Web Push subscription setup.
-- `subscribe.js` — POST to add an email to the Beehiiv newsletter (uses `BEEHIIV_PUBLICATION_ID` + `BEEHIIV_API_KEY`).
-- `forgot-password.js` / `set-password.js` / `reset-password.js` — Password auth flow (migration 008). `forgot-password` sends a reset link via Resend; `reset-password` verifies the token and calls `set-password` to hash+store the new credential.
-
-`sw.js` at the project root is the service worker — handles `push` events and shows notifications. Must be registered from the scheduler app pages via `navigator.serviceWorker.register('/sw.js')`.
-
-### Supabase additional tables
-- `business_profiles` — per-user scheduler config (see `migrations/004`)
-- `push_subscriptions` — Web Push endpoint/key storage (see `migrations/004`)
-- `public_booking_links` — owner-created links for client self-booking (see `migrations/005`)
-- `follow_up_jobs` — queued follow-up messages per appointment (see `migrations/006`)
-- `busy_blocks` — calendar blocks that mark owner unavailability (see `migrations/007`); has `batch_id` for undo of bulk iCal imports
-- `users` — password credentials (PBKDF2 hash + salt); added by `migrations/008`
-
-### Scheduler AI model (`_lib/scheduler.js`)
-`findAvailableSlots({appointments, workingHours, durationMinutes, preBuffer, postBuffer, startDate, endDate, maxSlotsPerDay})` — pure function, no DB calls. `workingHoursToArray(jsonObj)` converts `business_profiles.working_hours` format (`{"1":{start,end}}`) to the array format `findAvailableSlots` expects. Used by `schedule-chat.js` for the `find_available_slots` AI tool.
-
-All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core users are denied at the function level.
-
-Thread limits per tier (defined in `tier-policy.js`): Core = 10, Pro = 50, Black = unlimited.
-
-`tier-policy.js` also exports `isFollowUpTier(tier)`, `getFollowUpLimit(tier)`, and `getFollowUpSystemPrompt(tier)` for the follow-up feature.
+`_lib/http.js` exports two helpers: `json(statusCode, body, headers?)` and `denied(statusCode, reason, headers?)`. The `denied` helper always sets `{ ok: false, denied: true }` — clients use the `denied` flag to redirect to `denied.html`.
 
 ### Supabase stores (`_lib/supabase.js`)
-Exports `createEntitlementStore`, `createAvailabilityStore`, `createAppointmentStore`, `createBusinessProfileStore`, `createPushSubscriptionStore`, `createBusyBlockStore`, `createPublicBookingStore`, `createFollowUpStore`. Each factory accepts an optional `{ client }` override for testing without real Supabase credentials.
+Exports store factories: `createEntitlementStore`, `createAvailabilityStore`, `createAppointmentStore`, `createBusinessProfileStore`, `createPushSubscriptionStore`, `createBusyBlockStore`, `createPublicBookingStore`, `createFollowUpStore`, `createSchedulerMemoryStore`, `createTodoStore`, `createServiceStore`. Each accepts an optional `{ client }` override for testing.
 
-### Password auth (`_lib/password.js`)
-PBKDF2-based hashing. `hashPassword(plain)` → `{ hash, salt }`. `verifyPassword(plain, hash, salt)` → boolean. 100,000 iterations, 32-byte key, 16-byte salt — all hex-encoded. Used by `set-password.js` and `reset-password.js`.
+All tables are accessed via the service role key (bypasses RLS). RLS is intentionally not used — access control is enforced at the function level by verifying the session cookie before every DB operation.
 
-### iCal generation (`_lib/ical.js`)
-Pure ICS generation with no external dependencies. Used by `public-booking.js` to return `.ics` calendar invites on booking confirmation.
+### OpenAI integration
+`netlify/functions/_lib/openai.js` uses the **Responses API** (`POST /v1/responses`), not the Chat Completions API. User turns use `{ type: "input_text", text }`, assistant turns use `{ type: "output_text", text }`. System instructions are injected per-request from `tier-policy.js`.
 
-### Scheduler client (`scheduler-client.js`)
-Shared IIFE loaded by `app-pro.html` and `app-black.html`. Call `window.initScheduler({ tier, inputLimit, enableIcalExport })` when the Scheduler tab is first activated. Manages scheduling conversation state, calendar UI, appointment cache, and the onboarding wizard. Not a module — loads as a plain `<script>` tag.
+### Stripe webhook
+`stripe-webhook.js` handles `checkout.session.completed`, `customer.subscription.updated`, and `customer.subscription.deleted`. Upserts `entitlements` using `email` as the conflict key.
+
+### Scheduling subsystem (Pro/Black only)
+All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core users are denied at the function level.
+
+- `appointments.js` — CRUD for booked appointments
+- `availability.js` — CRUD for weekly availability slots
+- `schedule-chat.js` — AI conversational scheduling; tools: `find_available_slots`, `create_appointment`, `update_appointment`, `cancel_appointment`, `list_appointments`, `resolve_service`, plus `remember` (Black only)
+- `business-profile.js` — GET/POST for business profile (occupation, working hours, buffer times, avatar, business details, booking slug). Also validates and saves: `business_name`, `owner_first_name`, `owner_full_name`, `business_phone`, `website`, `abn`, `city`, `avatar_data` (base64, max 200KB)
+- `services.js` — CRUD for the relational `services` table (replaces old JSONB services field on `business_profiles`)
+- `public-booking.js` — Unauthenticated client-facing booking via `book.html?owner=<slug>`. AI tools: `find_available_slots` + `confirm_booking`. Returns `.ics` on booking, sends Web Push to owner
+- `busy-blocks.js` — Calendar busy blocks (Pro: max 200, Black: unlimited)
+- `ical-import.js` — Parses `.ics` uploads into busy blocks; inline RFC 5545 parser, no external deps
+- `follow-up.js` / `send-follow-ups.js` — AI-drafted follow-up messages; scheduled daily at 9am UTC
+- `send-reminders.js` — Scheduled hourly; Web Push appointment reminders 24h before
+- `send-todo-reminders.js` — Scheduled every 15 min; Web Push + Resend email fallback for due to-do reminders
+- `push-subscribe.js` / `vapid-key.js` — Web Push subscription management
+- `threads.js` — Conversation thread persistence
+
+### Scheduler AI model (`_lib/scheduler.js`)
+`findAvailableSlots({appointments, busyBlocks, workingHours, durationMinutes, preBuffer, postBuffer, startDate, endDate, maxSlotsPerDay, stepMinutes})` — pure function, no DB calls. `workingHoursToArray(jsonObj)` converts `business_profiles.working_hours` format (`{"1":{start,end}}`) to array form.
+
+### Black tier persistent memory
+`schedule-chat.js` loads a `memory_text` blob from `scheduler_memory` (one row per owner) and injects it as `=== MEMORY ===` into the system prompt. The `remember` tool lets the AI persist preference updates back to that row. Core/Pro do not get this tool or memory injection.
+
+### Supabase tables
+| Table | Migration | Notes |
+|---|---|---|
+| `entitlements` | — | Stripe-managed subscription state |
+| `threads` / `messages` | 001 | Chat thread persistence |
+| `availability` | 003 | Weekly availability slots |
+| `appointments` | 003 | Booked appointments; `reminder_sent_at` added in 002 |
+| `business_profiles` | 004 | Per-user scheduler config + avatar + business details |
+| `push_subscriptions` | 004 | Web Push endpoint storage |
+| `public_booking_links` | 005 | Public booking slug → owner mapping |
+| `follow_up_jobs` | 006 | Queued follow-up messages |
+| `busy_blocks` | 007 | Calendar blocks; `batch_id` for iCal import undo |
+| `users` | 008 | PBKDF2 password credentials |
+| `services` | 009 | Relational services (title, duration_min, price, buffer_time_min) |
+| `scheduler_memory` | 010 | Black tier AI persistent memory (one row per owner) |
+| `todos` | 011 | To-do items with urgency, reminders, done state |
+
+### Client-side architecture
+App pages (`app-pro.html`, `app-black.html`, `app-core.html`) are single-page shells with a scrollable tab bar. All tabs lazy-init on first click. Scripts loaded as plain `<script>` tags (no bundler):
+
+| Script | Exported global | Purpose |
+|---|---|---|
+| `app-client.js` | — | Session verify, logout, char count, thread UI |
+| `scheduler-client.js` | `window.initScheduler`, `window.checkOnboardingOnLoad` | Scheduler tab, calendar, wizard, services, working hours |
+| `followup-client.js` | `window.initFollowUps` | Follow-ups tab |
+| `prompts-client.js` | `window.initPrompts` | Prompts tab — fetches tier HTML file, parses with DOMParser, renders cards natively with `{{variable}}` auto-fill from profile |
+| `todos-client.js` | `window.initTodos` | To-Do tab + collapsible Notes (localStorage) |
+| `settings-client.js` | `window.initSettings` | Settings tab — avatar upload, business details, booking link generate/copy |
+
+`app-pro.html` and `app-black.html` call `window.checkOnboardingOnLoad({ tier })` on DOMContentLoaded — shows the 4-step onboarding wizard immediately if `onboarding_complete` is false on the profile.
+
+### Onboarding wizard (4 steps)
+Defined in `scheduler-client.js`. Steps: (1) personal & business details, (2) occupation, (3) services + pricing, (4) buffer times. On finish, saves all fields to `business_profiles` and services to the relational `services` table.
+
+### Public booking page (`book.html`)
+Accessed via `book.html?owner=<slug>`. Unauthenticated. On load, calls `public-booking.js` with `message: "__init__"` to fetch `businessName`, `occupation`, `ownerName`, `city`, `avatarData`, and `services`. Renders a chat UI — clients select a service chip or type freely. AI handles availability checking and booking confirmation, returns `.ics`.
+
+### `sw.js` (service worker)
+Handles Web Push `push` events and shows notifications. Routes notification clicks: `type: "appointment"` → `/#scheduler`, `type: "follow_up"` → `/#follow-ups`, `type: "todo"` → `/#todos`. Must be registered from app pages.
 
 ### Testing pattern
-Tests use Node's built-in `assert/strict` — no test framework. Each test file exports nothing; tests are self-executing async functions. The `npm test` script discovers and runs all `tests/*.test.js` files. Runtime-integration tests (e.g. `*-runtime.test.js`) require real env vars and are meant for manual runs.
+Tests use Node's built-in `assert/strict` — no test framework. Each test file is a self-executing async function. `npm test` discovers and runs all `tests/*.test.js`. Runtime-integration tests (`*-runtime.test.js`) require real env vars and are for manual runs only.
 
 ## Project rules
 - Tiers must stay strictly separated — Core/Pro/Black behavior must not bleed across
 - Denied users must never receive business advice (no OpenAI call without a valid, active entitlement)
 - All backend logic goes in `netlify/functions/`; no secrets in committed code
-- Do not modify `index.html`, `core.html`, `pro.html`, or `black.html` unless intentionally replacing them — these are the marketing/landing pages, distinct from the subscriber app pages (`app-core.html`, `app-pro.html`, `app-black.html`)
+- Do not modify `index.html`, `core.html`, `pro.html`, or `black.html` — these are marketing/landing pages, distinct from the subscriber app pages (`app-core.html`, `app-pro.html`, `app-black.html`)
+- Services are stored in the relational `services` table — do not use the old `services` JSONB column on `business_profiles`
+- `business-profile.js` is Pro/Black only — Core has no profile or scheduling features
