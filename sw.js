@@ -6,7 +6,7 @@
  *   navigator.serviceWorker.register('/sw.js')
  */
 
-const APP_SHELL_CACHE = "tb-shell-v1";
+const APP_SHELL_CACHE = "tb-shell-v2";
 const APP_SHELL_FILES = [
   "/app.html",
   "/app-mobile.css",
