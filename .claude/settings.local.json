@@ -51,7 +51,12 @@
       "Bash(claude mcp *)",
       "mcp__supabase__apply_migration",
       "WebFetch(domain:api.github.com)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "WebFetch(domain:www.mobilemessage.com.au)",
+      "WebFetch(domain:help.mobilemessage.com.au)",
+      "WebFetch(domain:app.mobilemessage.com.au)",
+      "WebFetch(domain:mobilemessage.com.au)",
+      "mcp__supabase__list_projects"
     ]
   }
 }

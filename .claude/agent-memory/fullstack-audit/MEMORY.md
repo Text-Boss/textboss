@@ -1,0 +1,3 @@
+- [Persistent Memory Tier Misattribution](project_persistent_memory_bug.md) — BLACK-ONLY in code; index.html lists it as Pro+Black — HIGH severity marketing bug
+- [Features Built But Not in Marketing](project_missing_marketing_features.md) — Follow-ups, public booking, SMS, To-Do, iCal import all absent from marketing pages
+- [Tier Gating Patterns](project_tier_gating_patterns.md) — How Core/Pro/Black boundaries are enforced across all backend functions
