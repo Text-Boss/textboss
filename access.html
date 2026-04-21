@@ -200,6 +200,10 @@
           return;
         }
         if (data && data.ok && data.redirectTo) {
+          if (window.PasswordCredential) {
+            const cred = new PasswordCredential({ id: email, password });
+            await navigator.credentials.store(cred).catch(() => {});
+          }
           window.location.href = data.redirectTo;
           return;
         }
@@ -249,6 +253,10 @@
         const data = await res.json().catch(() => null);
 
         if (data && data.ok && data.redirectTo) {
+          if (window.PasswordCredential) {
+            const cred = new PasswordCredential({ id: email, password });
+            await navigator.credentials.store(cred).catch(() => {});
+          }
           window.location.href = data.redirectTo;
           return;
         }

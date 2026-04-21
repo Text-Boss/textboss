@@ -476,6 +476,7 @@ function createHandler(deps) {
     }
 
     const isBlack = sessionTier === "Black";
+    const hasMemory = isBlack || sessionTier === "Pro";
 
     let profile = null;
     let appointments = [];
@@ -489,7 +490,7 @@ function createHandler(deps) {
         listAppointments(session.email, true),
         listBusyBlocks ? listBusyBlocks(session.email, today) : Promise.resolve([]),
         listServices(session.email),
-        isBlack && getMemory ? getMemory(session.email) : Promise.resolve(null),
+        hasMemory && getMemory ? getMemory(session.email) : Promise.resolve(null),
       ];
       [profile, appointments, busyBlocks, services, memory] = await Promise.all(dataLoads);
     } catch (_) {
@@ -498,14 +499,14 @@ function createHandler(deps) {
 
     const schedulingInstructions = getSchedulingInstructions(sessionTier);
     let contextBlock = buildSchedulingContext(profile, appointments, services);
-    if (isBlack && memory) {
+    if (hasMemory && memory) {
       contextBlock += `\n\n=== MEMORY ===\n${memory}`;
     }
     const extraSystemContext = schedulingInstructions
       ? `${schedulingInstructions}\n\n${contextBlock}`
       : contextBlock;
 
-    const tools = isBlack ? [...SCHEDULING_TOOLS, REMEMBER_TOOL] : SCHEDULING_TOOLS;
+    const tools = hasMemory ? [...SCHEDULING_TOOLS, REMEMBER_TOOL] : SCHEDULING_TOOLS;
 
     const toolContext = {
       profile,

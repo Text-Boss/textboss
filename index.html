@@ -110,6 +110,11 @@ p { margin: 0; }
   letter-spacing: .04em;
 }
 .pill b { color: var(--green); }
+.pill-cta {
+  border-color: var(--green);
+  color: var(--green) !important;
+  font-weight: 700;
+}
 
 /* HERO CONTENT */
 .hero {
@@ -863,6 +868,7 @@ hr.sep {
         <a class="pill" href="#scheduler">scheduling</a>
         <a class="pill" href="#compare">compare</a>
         <a class="pill" href="#pricing">pricing</a>
+        <a class="pill pill-cta" href="/access.html">Enter Text Boss &rarr;</a>
       </nav>
     </div>
 
@@ -1036,9 +1042,10 @@ hr.sep {
         </p>
         <ul class="sched-bullets">
           <li><span class="sdot"></span><span><strong>Conversational booking</strong> — clients respond in plain language. The AI resolves it.</span></li>
-          <li><span class="sdot"></span><span><strong>Persistent memory</strong> — nothing is repeated. Context carries across sessions.</span></li>
-          <li><span class="sdot"></span><span><strong>Confirmation + reminders</strong> — no-shows become harder to claim as accidents.</span></li>
-          <li><span class="sdot"></span><span><strong>Rebooking flows</strong> — cancellations and reschedules handled cleanly. Full records kept.</span></li>
+          <li><span class="sdot"></span><span><strong>Public booking page</strong> — share one link. Clients self-book through AI chat. No login, no thread.</span></li>
+          <li><span class="sdot"></span><span><strong>SMS both sides</strong> — owner and client texted on confirmation. You also get a Web Push alert.</span></li>
+          <li><span class="sdot"></span><span><strong>Persistent memory + rebooking</strong> — context carries across sessions. Cancellations and reschedules handled cleanly.</span></li>
+          <li><span class="sdot"></span><span><strong>Post-service follow-ups</strong> — AI-drafted multi-message sequences that run on autopilot after the job.</span></li>
           <li><span class="sdot"></span><span><strong>Tier-calibrated tone</strong> — Pro is firm. Black is the kind of precise that holds up in disputes.</span></li>
         </ul>
       </div>
@@ -1118,6 +1125,29 @@ hr.sep {
           <span>AI retains context across sessions — clients never repeat availability or details.</span>
         </div>
       </div>
+      <div class="feature pro-only">
+        <div class="feature-dot cyan"></div>
+        <div>
+          <span class="tier-badge pro">Pro + Black</span>
+          <strong>Public client booking page</strong>
+          <span>A shareable AI booking link. Clients self-book via chat. SMS confirmation to both sides. No login required.</span>
+        </div>
+      </div>
+      <div class="feature pro-only">
+        <div class="feature-dot cyan"></div>
+        <div>
+          <span class="tier-badge pro">Pro + Black</span>
+          <strong>AI follow-up sequences</strong>
+          <span>After a service, the AI drafts a timed multi-message sequence. Pro: 2 messages (Day 7, 14). Black: 4 messages (Day 3, 7, 14, 30), unlimited active.</span>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-dot"></div>
+        <div>
+          <strong>To-Do list with timed reminders</strong>
+          <span>Urgency flags, done state, notes pane. Pro + Black add Web Push + email alerts when items come due.</span>
+        </div>
+      </div>
       <div class="feature black-only">
         <div class="feature-dot purple"></div>
         <div>
@@ -1184,8 +1214,28 @@ hr.sep {
             <td class="dash">—</td><td class="tick">✓</td><td class="tick">✓</td>
           </tr>
           <tr class="sched-row">
+            <td><b>Public client booking page</b><br><span class="tok-muted">shareable AI link — clients self-book, no login</span></td>
+            <td class="dash">—</td><td class="tick">✓</td><td class="tick">✓</td>
+          </tr>
+          <tr class="sched-row">
+            <td><b>SMS booking notifications</b><br><span class="tok-muted">owner + client both texted on confirmation</span></td>
+            <td class="dash">—</td><td class="tick">✓</td><td class="tick">✓</td>
+          </tr>
+          <tr class="sched-row">
+            <td><b>AI follow-up sequences (post-service)</b><br><span class="tok-muted">timed, multi-message drip drafted per client</span></td>
+            <td class="dash">—</td><td class="tick">2 msgs (D7+14), 10 active</td><td class="tick">4 msgs (D3/7/14/30), unlimited</td>
+          </tr>
+          <tr class="sched-row">
             <td><b>Bulk .ics calendar export</b><br><span class="tok-muted">export all confirmed appointments at once</span></td>
             <td class="dash">—</td><td class="dash">—</td><td class="tick">✓</td>
+          </tr>
+          <tr>
+            <td><b>To-Do list</b><br><span class="tok-muted">urgency flags, done state, notes pane</span></td>
+            <td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td>
+          </tr>
+          <tr>
+            <td><b>Timed reminders (Web Push + email)</b><br><span class="tok-muted">for to-do items and appointments</span></td>
+            <td class="dash">—</td><td class="tick">✓</td><td class="tick">✓</td>
           </tr>
           <tr class="sched-row">
             <td><b>Legally defensible scheduling language</b><br><span class="tok-muted">screenshot-safe confirmation + cancellation</span></td>
@@ -1265,8 +1315,11 @@ hr.sep {
           <li><span class="pi-dot on"></span><b>Core-tier AI assistant</b></li>
           <li><span class="pi-dot on"></span><b>Boundary enforcement scripts</b></li>
           <li><span class="pi-dot on"></span><b>10 saved conversation threads</b></li>
+          <li><span class="pi-dot on"></span><b>To-Do list with urgency flags</b></li>
           <li><span class="pi-dot"></span><span style="color:var(--muted)">AI Appointment Scheduler</span></li>
-          <li><span class="pi-dot"></span><span style="color:var(--muted)">Escalation sequences</span></li>
+          <li><span class="pi-dot"></span><span style="color:var(--muted)">Public booking page + SMS</span></li>
+          <li><span class="pi-dot"></span><span style="color:var(--muted)">AI follow-up sequences</span></li>
+          <li><span class="pi-dot"></span><span style="color:var(--muted)">Timed reminders (push + email)</span></li>
         </ul>
         <p class="price-best">Best for: the soft spots in your replies you haven't noticed yet.</p>
         <div>
@@ -1292,6 +1345,9 @@ hr.sep {
           <li><span class="pi-dot cyan"></span><b style="color:var(--cyan)">Persistent scheduling memory</b></li>
           <li><span class="pi-dot cyan"></span><b style="color:var(--cyan)">Booking confirmations + push reminders</b></li>
           <li><span class="pi-dot cyan"></span><b style="color:var(--cyan)">Add to Calendar (Google, Outlook, Apple)</b></li>
+          <li><span class="pi-dot cyan"></span><b style="color:var(--cyan)">Public client booking page + SMS notifications</b></li>
+          <li><span class="pi-dot cyan"></span><b style="color:var(--cyan)">AI follow-up sequences (2 msgs, 10 active)</b></li>
+          <li><span class="pi-dot cyan"></span><b style="color:var(--cyan)">To-Do list + timed reminders (push + email)</b></li>
         </ul>
         <p class="price-best">Best for: retainers, repeat pushback, and anyone who's lost a morning to a no-show.</p>
         <div>
@@ -1316,6 +1372,8 @@ hr.sep {
           <li><span class="pi-dot purple"></span><b style="color:var(--purple)">Legally defensible scheduling language</b></li>
           <li><span class="pi-dot purple"></span><b style="color:var(--purple)">No-show containment scripts</b></li>
           <li><span class="pi-dot purple"></span><b style="color:var(--purple)">Bulk .ics calendar export</b></li>
+          <li><span class="pi-dot purple"></span><b style="color:var(--purple)">AI follow-up sequences (4 msgs, unlimited)</b></li>
+          <li><span class="pi-dot purple"></span><b style="color:var(--purple)">Public booking page + SMS confirmations</b></li>
         </ul>
         <p class="price-best">Best for: the situation you already have in mind reading this.</p>
         <div>
@@ -1346,6 +1404,18 @@ hr.sep {
       <details>
         <summary>Does the AI Scheduler integrate with my calendar?</summary>
         <p>Yes. Every confirmed appointment includes one-click "Add to Calendar" links for Google Calendar, Outlook, and Apple Calendar — no account connections or downloads required for most users. Black members also get bulk .ics export to sync all confirmed appointments at once.</p>
+      </details>
+      <details>
+        <summary>Can clients book me without creating an account?</summary>
+        <p>Yes. Pro and Black members get a shareable public booking link — send it to a client, they chat with the AI, they self-book. No login, no download. The moment a booking confirms, both you and the client receive an SMS, and you also get a Web Push alert with a deep link to the appointment.</p>
+      </details>
+      <details>
+        <summary>How do the post-service follow-up sequences work?</summary>
+        <p>After a job, enter the client and service details. The AI drafts a timed multi-message sequence and queues it. Pro: 2 messages at Day 7 and Day 14, up to 10 active sequences. Black: 4 messages at Day 3, 7, 14, and 30, with unlimited active sequences. You review before anything sends.</p>
+      </details>
+      <details>
+        <summary>Do I get reminded about tasks and appointments?</summary>
+        <p>All tiers get a built-in To-Do list with urgency flags. Pro and Black add timed reminders — set a due time and get a Web Push notification plus an email alert when the item comes due. The same reminder system runs 24-hour reminders on upcoming appointments.</p>
       </details>
       <details>
         <summary>Why not a one-time purchase?</summary>

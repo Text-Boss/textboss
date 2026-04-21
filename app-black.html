@@ -1117,22 +1117,40 @@
     }
     #sched-output .msg-ai .msg-label { color: var(--gold); }
 
-    /* History depth badge — shown in sidebar when Black history limit is loaded */
-    .history-depth-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+    /* Upcoming confirmed appointments strip */
+    .upcoming-appts {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .upcoming-appts-title {
       font-size: 10px;
       font-weight: 700;
-      letter-spacing: .06em;
+      letter-spacing: .08em;
       text-transform: uppercase;
-      color: var(--gold);
-      border: 1px solid var(--gold-border);
-      border-radius: 4px;
-      padding: 2px 7px;
-      margin-left: auto;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+    .upcoming-appt-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .upcoming-appt-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--gold);
       flex-shrink: 0;
     }
+    .upcoming-appt-date {
+      color: var(--gold);
+      font-weight: 600;
+      min-width: 90px;
+    }
+    .upcoming-appt-name { flex: 1; }
 
     /* ── Avatar ── */
     .app-avatar {
@@ -1268,8 +1286,10 @@
             Black &mdash; precision scheduling
             &nbsp;<span class="black-greeting-email" id="black-greeting-email"></span>
           </span>
-          <span class="history-depth-badge" title="Appointment history depth">10 appt history</span>
         </div>
+
+        <!-- Upcoming confirmed appointments (hidden until populated by scheduler-client.js) -->
+        <div class="upcoming-appts" id="upcoming-appts" style="display:none;"></div>
 
         <!-- Notification prompt (hidden by default, shown by scheduler-client.js) -->
         <div class="notify-prompt" id="notify-prompt" style="display:none;">

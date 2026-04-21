@@ -121,16 +121,42 @@
 
   function updateSchedulerBadge() {
     var badge = document.getElementById('scheduler-badge');
-    if (!badge) return;
+    var panel = document.getElementById('upcoming-appts');
     var today = todayStr();
-    var count = cachedAppointments.filter(function (a) {
-      return a.status === 'confirmed' && a.scheduled_date >= today;
-    }).length;
-    if (count > 0) {
-      badge.textContent = String(count);
-      badge.style.display = '';
-    } else {
-      badge.style.display = 'none';
+    var upcoming = cachedAppointments
+      .filter(function (a) { return a.status === 'confirmed' && a.scheduled_date >= today; })
+      .sort(function (a, b) { return a.scheduled_date < b.scheduled_date ? -1 : 1; });
+
+    if (badge) {
+      if (upcoming.length > 0) {
+        badge.textContent = String(upcoming.length);
+        badge.style.display = '';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    if (panel) {
+      if (upcoming.length > 0) {
+        var html = '<div class="upcoming-appts-title">Upcoming confirmed</div>';
+        upcoming.forEach(function (a) {
+          var d = a.scheduled_date; // YYYY-MM-DD
+          var parts = d.split('-');
+          var dateLabel = parts[2] + '/' + parts[1] + '/' + parts[0].slice(2);
+          var time = a.scheduled_time ? a.scheduled_time.slice(0, 5) : '';
+          var name = a.client_name || a.title || 'Appointment';
+          var svc = a.service_name ? ' &mdash; ' + a.service_name : '';
+          html += '<div class="upcoming-appt-row">'
+            + '<span class="upcoming-appt-dot"></span>'
+            + '<span class="upcoming-appt-date">' + dateLabel + (time ? ' ' + time : '') + '</span>'
+            + '<span class="upcoming-appt-name">' + name + svc + '</span>'
+            + '</div>';
+        });
+        panel.innerHTML = html;
+        panel.style.display = '';
+      } else {
+        panel.style.display = 'none';
+      }
     }
   }
 
