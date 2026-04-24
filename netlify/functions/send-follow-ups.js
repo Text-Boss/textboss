@@ -43,11 +43,18 @@ function createHandler(deps) {
 
     const accessResult = verifyScheduledAccess(event);
     if (!accessResult.ok) {
+      console.error("[send-follow-ups] auth rejected:", accessResult.reason, "method:", event.httpMethod, "x-nf-event:", (event.headers || {})["x-nf-event"]);
       return deny(403, accessResult.reason);
     }
 
     const today = new Date().toISOString().split("T")[0];
-    const messages = await listPendingMessages(today);
+    let messages;
+    try {
+      messages = await listPendingMessages(today);
+    } catch (dbErr) {
+      console.error("[send-follow-ups] DB query failed:", dbErr);
+      return deny(500, "db_error");
+    }
 
     if (messages.length === 0) {
       return json(200, { ok: true, notified: [], count: 0 });
@@ -126,15 +133,19 @@ function createRuntimeHandler(overrides = {}) {
   const followUpStore = overrides.followUpStore || createFollowUpStore();
   const pushStore     = overrides.pushStore     || createPushSubscriptionStore();
 
-  // Configure VAPID once; skip if keys not present
+  // Configure VAPID once; skip if keys not present or invalid
   let vapidReady = false;
   if (webpush && process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-    webpush.setVapidDetails(
-      process.env.VAPID_SUBJECT || "mailto:noreply@textboss.app",
-      process.env.VAPID_PUBLIC_KEY,
-      process.env.VAPID_PRIVATE_KEY
-    );
-    vapidReady = true;
+    try {
+      webpush.setVapidDetails(
+        process.env.VAPID_SUBJECT || "mailto:noreply@textboss.app",
+        process.env.VAPID_PUBLIC_KEY,
+        process.env.VAPID_PRIVATE_KEY
+      );
+      vapidReady = true;
+    } catch (vapidErr) {
+      console.error("[send-follow-ups] VAPID setup failed:", vapidErr.message);
+    }
   }
 
   return createHandler({
@@ -180,7 +191,8 @@ function createRuntimeHandler(overrides = {}) {
 async function handler(event, context) {
   try {
     return await createRuntimeHandler()(event, context);
-  } catch {
+  } catch (err) {
+    console.error("[send-follow-ups] unhandled error:", err);
     return deny(500, "server_error");
   }
 }

@@ -436,15 +436,19 @@ function createRuntimeHandler(overrides = {}) {
   const pushStore        = overrides.pushStore        || createPushSubscriptionStore();
   const serviceStore     = overrides.serviceStore     || createServiceStore();
 
-  // Configure VAPID once
+  // Configure VAPID once; skip if keys not present or invalid
   let vapidReady = false;
   if (webpush && process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-    webpush.setVapidDetails(
-      process.env.VAPID_SUBJECT || "mailto:noreply@textboss.app",
-      process.env.VAPID_PUBLIC_KEY,
-      process.env.VAPID_PRIVATE_KEY
-    );
-    vapidReady = true;
+    try {
+      webpush.setVapidDetails(
+        process.env.VAPID_SUBJECT || "mailto:noreply@textboss.app",
+        process.env.VAPID_PUBLIC_KEY,
+        process.env.VAPID_PRIVATE_KEY
+      );
+      vapidReady = true;
+    } catch (vapidErr) {
+      console.error("[public-booking] VAPID setup failed:", vapidErr.message);
+    }
   }
 
   return createHandler({

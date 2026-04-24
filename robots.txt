@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /.netlify/
+Disallow: /app-core.html
+Disallow: /app-pro.html
+Disallow: /app-black.html

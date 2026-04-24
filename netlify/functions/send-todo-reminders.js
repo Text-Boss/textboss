@@ -48,9 +48,18 @@ function createHandler(deps) {
     if (event.httpMethod !== "POST") return json(405, { ok: false, reason: "method_not_allowed" });
 
     const access = verifyScheduledAccess(event);
-    if (!access.ok) return json(403, { ok: false, reason: access.reason });
+    if (!access.ok) {
+      console.error("[send-todo-reminders] auth rejected:", access.reason, "method:", event.httpMethod, "x-nf-event:", (event.headers || {})["x-nf-event"]);
+      return json(403, { ok: false, reason: access.reason });
+    }
 
-    const dueTodos = await findDueUnreminded();
+    let dueTodos;
+    try {
+      dueTodos = await findDueUnreminded();
+    } catch (dbErr) {
+      console.error("[send-todo-reminders] DB query failed:", dbErr);
+      return json(500, { ok: false, reason: "db_error" });
+    }
     if (dueTodos.length === 0) return json(200, { ok: true, reminded: 0 });
 
     let reminded = 0;
@@ -115,7 +124,11 @@ function createRuntimeHandler(overrides = {}) {
     const priv = process.env.VAPID_PRIVATE_KEY;
     const subj = process.env.VAPID_SUBJECT;
     if (pub && priv && subj) {
-      webpush.setVapidDetails(subj, pub, priv);
+      try {
+        webpush.setVapidDetails(subj, pub, priv);
+      } catch (vapidErr) {
+        console.error("[send-todo-reminders] VAPID setup failed:", vapidErr.message);
+      }
     }
   }
   setupWebPush();
