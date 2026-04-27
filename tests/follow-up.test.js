@@ -24,7 +24,7 @@ const NOOP = {
   markSent:            async () => { throw new Error("should not mark sent"); },
   skipMessage:         async () => { throw new Error("should not skip"); },
   updateJob:           async () => { throw new Error("should not update job"); },
-  callOpenAI:          async () => { throw new Error("should not call OpenAI"); },
+  callAnthropic:          async () => { throw new Error("should not call OpenAI"); },
 };
 
 const VALID_AI_RESPONSE = JSON.stringify([
@@ -64,7 +64,7 @@ async function testPostCreatesJobAndMessages() {
       capturedMessages = msgs;
       return createdMessages;
     },
-    callOpenAI: async () => VALID_AI_RESPONSE,
+    callAnthropic: async () => VALID_AI_RESPONSE,
   });
 
   const res = await handler({
@@ -211,7 +211,7 @@ async function testBlackTierNoLimit() {
     countActiveJobs: async () => 999, // Would block Pro but not Black
     createJob: async () => createdJob,
     createMessages: async () => [],
-    callOpenAI: async () => JSON.stringify([
+    callAnthropic: async () => JSON.stringify([
       { delay_days: 3, purpose: "quality check", draft: "Hi Bob." },
       { delay_days: 7, purpose: "review request", draft: "Hi Bob, review?" },
       { delay_days: 14, purpose: "rebooking", draft: "Hi Bob, rebook?" },
@@ -429,7 +429,7 @@ async function testAiParseErrorReturns502() {
     ...makeAuth("Pro"),
     ...NOOP,
     countActiveJobs: async () => 0,
-    callOpenAI: async () => "This is not valid JSON at all.",
+    callAnthropic: async () => "This is not valid JSON at all.",
   });
 
   const res = await handler({

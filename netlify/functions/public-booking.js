@@ -57,10 +57,9 @@ function buildClientSystemPrompt(profile, services) {
 
 const BOOKING_TOOLS = [
   {
-    type: "function",
     name: "find_available_slots",
     description: "Find open time slots for a new booking. Always call this to check availability — do not guess.",
-    parameters: {
+    input_schema: {
       type: "object",
       properties: {
         duration_minutes: {
@@ -77,15 +76,12 @@ const BOOKING_TOOLS = [
         },
       },
       required: ["duration_minutes"],
-      additionalProperties: false,
     },
-    strict: false,
   },
   {
-    type: "function",
     name: "confirm_booking",
     description: "Confirm and create an appointment booking. Only call this after you have collected: client name, client mobile phone number, selected service, and confirmed date/time.",
-    parameters: {
+    input_schema: {
       type: "object",
       properties: {
         client_name:      { type: "string", description: "Client's full name." },
@@ -99,9 +95,7 @@ const BOOKING_TOOLS = [
         notes:            { type: "string", description: "Optional notes." },
       },
       required: ["client_name", "client_phone", "service_id", "scheduled_date", "scheduled_time"],
-      additionalProperties: false,
     },
-    strict: false,
   },
 ];
 
@@ -118,7 +112,7 @@ function createHandler(deps) {
     sendClientSms,
     sendOwnerEmail,
     sendClientEmail,
-    callOpenAI,
+    callAnthropic,
     getServicesByMerchant,
     getServiceByIdPublic,
   } = deps;
@@ -344,16 +338,15 @@ function createHandler(deps) {
     const systemPrompt = buildClientSystemPrompt(profile, services);
 
     // ── Tool-calling loop ──────────────────────────────────────────────────
-    let currentConversation = conversation.slice();
+    let messages = [...conversation, { role: "user", content: message }];
     let finalOutput = "";
     let bookingResult = null;
 
     try {
       for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-        const response = await callOpenAI({
+        const response = await callAnthropic({
+          messages,
           systemPrompt,
-          message: round === 0 ? message : null,
-          conversation: currentConversation,
           tools: BOOKING_TOOLS,
         });
 
@@ -364,28 +357,14 @@ function createHandler(deps) {
           break;
         }
 
-        // Persist the user message on the first round so subsequent rounds
-        // have context for why the tool was called (message=null on round 1+).
-        if (round === 0) {
-          currentConversation.push({
-            role: "user",
-            content: [{ type: "input_text", text: message }],
-          });
-        }
+        // Append assistant turn with tool_use content blocks
+        messages.push({ role: "assistant", content: response.rawContent });
 
-        // Add raw assistant output to conversation for continuation
-        currentConversation.push({
-          type: "function_call_output",
-          _raw: response.rawOutput,
-        });
-
+        const toolResults = [];
         for (const call of toolCalls) {
           let toolResult;
           try {
-            const args = typeof call.arguments === "string"
-              ? JSON.parse(call.arguments)
-              : (call.arguments || {});
-            toolResult = await executeTool(call.name, args, toolContext);
+            toolResult = await executeTool(call.name, call.input, toolContext);
 
             if (toolResult.booked) {
               bookingResult = {
@@ -401,16 +380,19 @@ function createHandler(deps) {
             toolResult = { error: err.message || "tool_execution_failed" };
           }
 
-          // Strip icsData from tool result sent back to OpenAI (too large for context)
+          // Strip icsData from tool result sent back to Claude (too large for context)
           const toolResultForAI = { ...toolResult };
           delete toolResultForAI.icsData;
 
-          currentConversation.push({
-            type: "function_call_output",
-            call_id: call.call_id,
-            output: JSON.stringify(toolResultForAI),
+          toolResults.push({
+            type: "tool_result",
+            tool_use_id: call.id,
+            content: JSON.stringify(toolResultForAI),
           });
         }
+
+        // Append tool results as user turn
+        messages.push({ role: "user", content: toolResults });
       }
     } catch (_) {
       return json(500, { ok: false, reason: "ai_error" });
@@ -496,86 +478,50 @@ function createRuntimeHandler(overrides = {}) {
         }
       : null,
 
-    callOpenAI: async ({ systemPrompt, message, conversation, tools }) => {
-      const apiKey = process.env.OPENAI_API_KEY;
-      const model = process.env.OPENAI_MODEL;
+    callAnthropic: async ({ messages, systemPrompt, tools }) => {
+      const apiKey = process.env.ANTHROPIC_API_KEY;
+      const model = process.env.ANTHROPIC_MODEL || "claude-opus-4-7";
       const fetchImpl = overrides.fetchImpl || fetch;
 
-      const input = [];
-
-      for (const item of conversation) {
-        if (item.type === "function_call_output" && item.call_id) {
-          input.push(item);
-        } else if (item.type === "function_call_output" && item._raw) {
-          if (Array.isArray(item._raw)) {
-            for (const rawItem of item._raw) {
-              input.push(rawItem);
-            }
-          }
-        } else if (item.role) {
-          input.push(item);
-        }
-      }
-
-      if (message) {
-        input.push({
-          role: "user",
-          content: [{ type: "input_text", text: message }],
-        });
-      }
-
-      const response = await fetchImpl("https://api.openai.com/v1/responses", {
+      const response = await fetchImpl("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          authorization: `Bearer ${apiKey}`,
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
           model,
-          instructions: systemPrompt,
-          input,
-          max_output_tokens: 600,
+          system: systemPrompt,
+          messages,
+          max_tokens: 600,
           tools,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("OpenAI request failed");
+        throw new Error("Anthropic request failed");
       }
 
       const data = await response.json();
+      const rawContent = Array.isArray(data.content) ? data.content : [];
 
       const toolCalls = [];
-      const rawOutput = [];
-
-      if (Array.isArray(data.output)) {
-        for (const item of data.output) {
-          rawOutput.push(item);
-          if (item.type === "function_call") {
-            toolCalls.push({
-              call_id: item.call_id,
-              name: item.name,
-              arguments: item.arguments,
-            });
-          }
+      for (const block of rawContent) {
+        if (block.type === "tool_use") {
+          toolCalls.push({ id: block.id, name: block.name, input: block.input });
         }
       }
 
-      let outputText = "";
-      if (typeof data.output_text === "string" && data.output_text) {
-        outputText = data.output_text;
-      } else if (Array.isArray(data.output)) {
-        outputText = data.output
-          .flatMap((item) => Array.isArray(item?.content) ? item.content : [])
-          .filter((item) => item?.type === "output_text" && typeof item.text === "string")
-          .map((item) => item.text)
-          .join("");
-      }
+      const outputText = rawContent
+        .filter((b) => b.type === "text" && typeof b.text === "string")
+        .map((b) => b.text)
+        .join("");
 
       return {
         output: outputText,
         toolCalls,
-        rawOutput,
+        rawContent,
       };
     },
   });

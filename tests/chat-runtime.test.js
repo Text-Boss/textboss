@@ -26,7 +26,7 @@ async function testRuntimeHandlerUsesSharedDeps() {
         responseMaxTokens: 500,
       }),
     },
-    openaiClient: {
+    anthropicClient: {
       createResponse: async () => ({
         output: "Use the agreed scope only.",
         usage: { total_tokens: 9 },

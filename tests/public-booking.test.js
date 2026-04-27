@@ -47,10 +47,10 @@ function makeDeps(overrides = {}) {
       if (id === "svc-1") return { id: "svc-1", title: "Cut & Style", duration_min: 60, buffer_time_min: 0, price: null };
       return null;
     },
-    callOpenAI: async () => ({
+    callAnthropic: async () => ({
       output: "I can help you book an appointment.",
       toolCalls: [],
-      rawOutput: [],
+      rawContent: [],
     }),
     ...overrides,
   };
@@ -195,12 +195,12 @@ async function testNormalConversation() {
 
   let capturedArgs = null;
   const handler = createHandler(makeDeps({
-    callOpenAI: async (args) => {
+    callAnthropic: async (args) => {
       capturedArgs = args;
       return {
         output: "I have availability on Monday at 10am.",
         toolCalls: [],
-        rawOutput: [],
+        rawContent: [],
       };
     },
   }));
@@ -219,7 +219,8 @@ async function testNormalConversation() {
   // Verify system prompt was constructed correctly
   assert.ok(capturedArgs.systemPrompt.includes("Mobile Hairdresser"));
   assert.ok(capturedArgs.systemPrompt.includes("Cut & Style"));
-  assert.ok(capturedArgs.message === "I need a haircut");
+  const lastMsg = capturedArgs.messages[capturedArgs.messages.length - 1];
+  assert.equal(lastMsg.content, "I need a haircut");
 }
 
 // ── Booking confirmation flow ──────────────────────────────────────────────────
@@ -248,21 +249,21 @@ async function testBookingConfirmation() {
       icsGenerated = params;
       return "BEGIN:VCALENDAR\r\nTEST\r\nEND:VCALENDAR";
     },
-    callOpenAI: async () => ({
+    callAnthropic: async () => ({
       output: "",
       toolCalls: [{
-        call_id: "call-1",
+        id: "call-1",
         name: "confirm_booking",
-        arguments: JSON.stringify({
+        input: {
           client_name: "Jane Doe",
           client_email: "jane@example.com",
           service_name: "Cut & Style",
           scheduled_date: "2026-04-15",
           scheduled_time: "10:00",
           duration_minutes: 60,
-        }),
+        },
       }],
-      rawOutput: [{ type: "function_call", call_id: "call-1", name: "confirm_booking", arguments: "{}" }],
+      rawContent: [{ type: "tool_use", id: "call-1", name: "confirm_booking", input: {} }],
     }),
   }));
 
@@ -286,30 +287,30 @@ async function testBookingConfirmation() {
       icsGenerated = params;
       return "BEGIN:VCALENDAR\r\nTEST\r\nEND:VCALENDAR";
     },
-    callOpenAI: async () => {
+    callAnthropic: async () => {
       callCount++;
       if (callCount === 1) {
         return {
           output: "",
           toolCalls: [{
-            call_id: "call-1",
+            id: "call-1",
             name: "confirm_booking",
-            arguments: JSON.stringify({
+            input: {
               client_name: "Jane Doe",
               client_email: "jane@example.com",
               service_name: "Cut & Style",
               scheduled_date: "2026-04-15",
               scheduled_time: "10:00",
               duration_minutes: 60,
-            }),
+            },
           }],
-          rawOutput: [{ type: "function_call", call_id: "call-1", name: "confirm_booking", arguments: "{}" }],
+          rawContent: [{ type: "tool_use", id: "call-1", name: "confirm_booking", input: {} }],
         };
       }
       return {
         output: "Confirmed — Tuesday, 2026-04-15 at 10:00, 60 minutes.",
         toolCalls: [],
-        rawOutput: [],
+        rawContent: [],
       };
     },
   }));

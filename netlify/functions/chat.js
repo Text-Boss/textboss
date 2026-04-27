@@ -1,7 +1,7 @@
 const { createEntitlementStore, createServiceRoleClient } = require("./_lib/supabase");
 const sessionLib = require("./_lib/session");
 const tierPolicyLib = require("./_lib/tier-policy");
-const { createResponsesClient } = require("./_lib/openai");
+const { createAnthropicClient } = require("./_lib/anthropic");
 const { normalizeTier, getThreadLimit } = require("./_lib/tier-policy");
 
 function json(statusCode, body) {
@@ -101,17 +101,7 @@ function createHandler(deps) {
       const storedMessages = await loadThreadMessages(threadId, session.email);
       if (storedMessages && storedMessages.length > 0) {
         conversation = storedMessages.map(function (m) {
-          if (m.role === "user") {
-            return {
-              role: "user",
-              content: [{ type: "input_text", text: m.content }],
-            };
-          }
-
-          return {
-            role: "assistant",
-            content: [{ type: "output_text", text: m.content }],
-          };
+          return { role: m.role, content: m.content };
         });
       }
     }
@@ -169,7 +159,7 @@ function createRuntimeHandler(overrides = {}) {
   const store = overrides.store || createEntitlementStore();
   const runtimeSessionLib = overrides.sessionLib || sessionLib;
   const runtimeTierPolicyLib = overrides.tierPolicyLib || tierPolicyLib;
-  const openaiClient = overrides.openaiClient || createResponsesClient();
+  const anthropicClient = overrides.anthropicClient || createAnthropicClient();
 
   let _supabase;
   function getSupabase() {
@@ -183,7 +173,7 @@ function createRuntimeHandler(overrides = {}) {
     verifySessionCookie: (headers) => runtimeSessionLib.verifySessionCookie(headers),
     findEntitlementByEmail: (email) => store.findEntitlementByEmail(email),
     getTierPolicy: (tier) => runtimeTierPolicyLib.getTierPolicy(tier),
-    createResponse: (input) => openaiClient.createResponse(input),
+    createResponse: (input) => anthropicClient.createResponse(input),
 
     loadThreadMessages: async (threadId, email) => {
       const normalizedEmail = String(email || "").trim().toLowerCase();
@@ -232,7 +222,7 @@ function createRuntimeHandler(overrides = {}) {
 
     generateThreadTitle: async (firstMessage) => {
       try {
-        const titleResponse = await openaiClient.createResponse({
+        const titleResponse = await anthropicClient.createResponse({
           tier: "Core",
           message: firstMessage,
           conversation: [],

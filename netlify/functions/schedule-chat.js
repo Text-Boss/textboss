@@ -67,10 +67,9 @@ function buildSchedulingContext(profile, appointments, services) {
 
 const SCHEDULING_TOOLS = [
   {
-    type: "function",
     name: "resolve_service",
     description: "Look up a service by its ID to get the authoritative duration, buffer, and price. MUST be called before find_available_slots when the user has selected a service.",
-    parameters: {
+    input_schema: {
       type: "object",
       properties: {
         service_id: {
@@ -79,15 +78,12 @@ const SCHEDULING_TOOLS = [
         },
       },
       required: ["service_id"],
-      additionalProperties: false,
     },
-    strict: true,
   },
   {
-    type: "function",
     name: "find_available_slots",
     description: "Find open time slots for a new booking. Computes gaps between existing appointments using the business profile's buffer settings. Always call this to check availability — do not guess.",
-    parameters: {
+    input_schema: {
       type: "object",
       properties: {
         duration_minutes: {
@@ -117,15 +113,12 @@ const SCHEDULING_TOOLS = [
         },
       },
       required: ["duration_minutes"],
-      additionalProperties: false,
     },
-    strict: false,
   },
   {
-    type: "function",
     name: "list_appointments",
     description: "List the business owner's upcoming confirmed appointments.",
-    parameters: {
+    input_schema: {
       type: "object",
       properties: {
         include_all: {
@@ -134,15 +127,12 @@ const SCHEDULING_TOOLS = [
         },
       },
       required: [],
-      additionalProperties: false,
     },
-    strict: false,
   },
   {
-    type: "function",
     name: "book_appointment",
     description: "Book a new appointment. Use this after confirming the details with the user.",
-    parameters: {
+    input_schema: {
       type: "object",
       properties: {
         client_name:      { type: "string", description: "Client's name." },
@@ -155,29 +145,23 @@ const SCHEDULING_TOOLS = [
         service_id:       { type: "string", description: "UUID of the resolved service. Include if resolve_service was called." },
       },
       required: ["scheduled_date", "scheduled_time"],
-      additionalProperties: false,
     },
-    strict: false,
   },
   {
-    type: "function",
     name: "cancel_appointment",
     description: "Cancel an existing appointment by its ID.",
-    parameters: {
+    input_schema: {
       type: "object",
       properties: {
         appointment_id: { type: "string", description: "The UUID of the appointment to cancel." },
       },
       required: ["appointment_id"],
-      additionalProperties: false,
     },
-    strict: true,
   },
   {
-    type: "function",
     name: "reschedule_appointment",
     description: "Reschedule an existing appointment to a new date and/or time.",
-    parameters: {
+    input_schema: {
       type: "object",
       properties: {
         appointment_id:   { type: "string", description: "The UUID of the appointment to reschedule." },
@@ -186,15 +170,12 @@ const SCHEDULING_TOOLS = [
         duration_minutes: { type: "number", description: "New duration in minutes, if changed." },
       },
       required: ["appointment_id"],
-      additionalProperties: false,
     },
-    strict: false,
   },
   {
-    type: "function",
     name: "add_busy_block",
     description: "Mark specific date/time ranges as unavailable. Always confirm with user before calling. For recurring commitments, insert one block per date.",
-    parameters: {
+    input_schema: {
       type: "object",
       properties: {
         blocks: {
@@ -209,22 +190,18 @@ const SCHEDULING_TOOLS = [
               label:       { type: "string", description: "Short reason e.g. 'Dentist', 'Travel'." },
             },
             required: ["block_date", "start_time", "end_time"],
-            additionalProperties: false,
           },
         },
       },
       required: ["blocks"],
-      additionalProperties: false,
     },
-    strict: false,
   },
 ];
 
 const REMEMBER_TOOL = {
-  type: "function",
   name: "remember",
   description: "Save a persistent memory note about how this business owner runs their schedule. Always pass the FULL updated memory text — this overwrites the previous memory. Use when the user states a standing preference, rule, or client-specific note.",
-  parameters: {
+  input_schema: {
     type: "object",
     properties: {
       memory_text: {
@@ -233,9 +210,7 @@ const REMEMBER_TOOL = {
       },
     },
     required: ["memory_text"],
-    additionalProperties: false,
   },
-  strict: true,
 };
 
 const MAX_TOOL_ROUNDS = 5;
@@ -466,12 +441,7 @@ function createHandler(deps) {
     if (threadId && loadThreadMessages) {
       const stored = await loadThreadMessages(threadId, session.email);
       if (stored && stored.length > 0) {
-        conversation = stored.map((m) => {
-          if (m.role === "user") {
-            return { role: "user", content: [{ type: "input_text", text: m.content }] };
-          }
-          return { role: "assistant", content: [{ type: "output_text", text: m.content }] };
-        });
+        conversation = stored.map((m) => ({ role: m.role, content: m.content }));
       }
     }
 
@@ -518,7 +488,9 @@ function createHandler(deps) {
       getService,
     };
 
-    let currentConversation = conversation.slice();
+    let messages = conversation.slice();
+    messages.push({ role: "user", content: message });
+
     let finalOutput = "";
     let finalUsage  = null;
     let toolActions = [];
@@ -526,11 +498,10 @@ function createHandler(deps) {
     try {
       for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
         const response = await createSchedulingResponse({
-          tier: sessionTier,
-          message: round === 0 ? message : null,
-          conversation: currentConversation,
+          messages,
           policy,
           extraSystemContext,
+          tier: sessionTier,
           tools,
         });
 
@@ -542,34 +513,28 @@ function createHandler(deps) {
           break;
         }
 
-        if (round === 0) {
-          currentConversation.push({
-            role: "user",
-            content: [{ type: "input_text", text: message }],
-          });
-        }
+        // Append assistant turn with tool_use content blocks
+        messages.push({ role: "assistant", content: response.rawContent });
 
-        currentConversation.push({ type: "function_call_output", _raw: response.rawOutput });
-
+        const toolResults = [];
         for (const call of toolCalls) {
           let toolResult;
           try {
-            const args = typeof call.arguments === "string"
-              ? JSON.parse(call.arguments)
-              : (call.arguments || {});
-            toolResult = await executeTool(call.name, args, session.email, toolContext);
+            toolResult = await executeTool(call.name, call.input, session.email, toolContext);
             toolActions.push({ tool: call.name, result: toolResult });
           } catch (err) {
             toolResult = { error: err.message || "tool_execution_failed" };
             toolActions.push({ tool: call.name, error: toolResult.error });
           }
-
-          currentConversation.push({
-            type: "function_call_output",
-            call_id: call.call_id,
-            output: JSON.stringify(toolResult),
+          toolResults.push({
+            type: "tool_result",
+            tool_use_id: call.id,
+            content: JSON.stringify(toolResult),
           });
         }
+
+        // Append tool results as user turn
+        messages.push({ role: "user", content: toolResults });
       }
     } catch (err) {
       console.error("[schedule-chat] ai loop error:", err?.message || err);
@@ -639,67 +604,48 @@ function createRuntimeHandler(overrides = {}) {
     getMemory:                 (e)    => memoryStore.getMemory(e),
     upsertMemory:              (e, t) => memoryStore.upsertMemory(e, t),
 
-    createSchedulingResponse: async ({ tier, message, conversation, policy, extraSystemContext, tools }) => {
-      const instructions = [`Tier: ${tier}`, extraSystemContext].filter(Boolean).join("\n\n");
+    createSchedulingResponse: async ({ messages, policy, extraSystemContext, tier, tools }) => {
+      const system = [tier ? `Tier: ${tier}` : null, extraSystemContext].filter(Boolean).join("\n\n");
 
-      const input = [];
-      for (const item of conversation) {
-        if (item.type === "function_call_output" && item.call_id) {
-          input.push(item);
-        } else if (item.type === "function_call_output" && item._raw) {
-          if (Array.isArray(item._raw)) for (const r of item._raw) input.push(r);
-        } else if (item.role) {
-          input.push(item);
-        }
-      }
-      if (message) {
-        input.push({ role: "user", content: [{ type: "input_text", text: message }] });
-      }
-
-      const apiKey    = process.env.OPENAI_API_KEY;
-      const model     = process.env.OPENAI_MODEL;
+      const apiKey    = process.env.ANTHROPIC_API_KEY;
+      const model     = process.env.ANTHROPIC_MODEL || "claude-opus-4-7";
       const fetchImpl = overrides.fetchImpl || fetch;
 
-      console.log("[schedule-chat] OpenAI request model=%s inputItems=%d hasKey=%s", model, input.length, !!apiKey);
+      console.log("[schedule-chat] Anthropic request model=%s messages=%d hasKey=%s", model, messages.length, !!apiKey);
 
-      const response = await fetchImpl("https://api.openai.com/v1/responses", {
+      const response = await fetchImpl("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify({ model, instructions, input, max_output_tokens: policy.responseMaxTokens, tools }),
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({ model, system, messages, max_tokens: policy.responseMaxTokens, tools }),
       });
 
       if (!response.ok) {
         let errBody;
         try { errBody = await response.json(); } catch (_) { errBody = await response.text().catch(() => "(unreadable)"); }
-        console.error("[schedule-chat] OpenAI error", response.status, JSON.stringify(errBody));
-        throw new Error(`OpenAI request failed: ${response.status}`);
+        console.error("[schedule-chat] Anthropic error", response.status, JSON.stringify(errBody));
+        throw new Error(`Anthropic request failed: ${response.status}`);
       }
 
       const data = await response.json();
       const toolCalls = [];
-      const rawOutput = [];
+      const rawContent = Array.isArray(data.content) ? data.content : [];
 
-      if (Array.isArray(data.output)) {
-        for (const item of data.output) {
-          rawOutput.push(item);
-          if (item.type === "function_call") {
-            toolCalls.push({ call_id: item.call_id, name: item.name, arguments: item.arguments });
-          }
+      for (const block of rawContent) {
+        if (block.type === "tool_use") {
+          toolCalls.push({ id: block.id, name: block.name, input: block.input });
         }
       }
 
-      let outputText = "";
-      if (typeof data.output_text === "string" && data.output_text) {
-        outputText = data.output_text;
-      } else if (Array.isArray(data.output)) {
-        outputText = data.output
-          .flatMap((item) => Array.isArray(item?.content) ? item.content : [])
-          .filter((item) => item?.type === "output_text" && typeof item.text === "string")
-          .map((item) => item.text)
-          .join("");
-      }
+      const outputText = rawContent
+        .filter((b) => b.type === "text" && typeof b.text === "string")
+        .map((b) => b.text)
+        .join("");
 
-      return { output: outputText, usage: data.usage, toolCalls, rawOutput };
+      return { output: outputText, usage: data.usage, toolCalls, rawContent };
     },
 
     loadThreadMessages: async (threadId, email) => {

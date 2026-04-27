@@ -1507,7 +1507,7 @@
     var settingsInited  = false;
     var profile         = null;
 
-    fetch("/.netlify/functions/business-profile")
+    fetch("/.netlify/functions/business-profile", { credentials: "same-origin" })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         if (!d || !d.ok) return;

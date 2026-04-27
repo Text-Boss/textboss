@@ -24,8 +24,8 @@ npx netlify dev
 | `TEXTBOSS_SESSION_SECRET` | HMAC key for signing session cookies |
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (bypasses RLS) |
-| `OPENAI_API_KEY` | OpenAI API key |
-| `OPENAI_MODEL` | OpenAI model name (e.g. `gpt-4o`) |
+| `ANTHROPIC_API_KEY` | Anthropic API key |
+| `ANTHROPIC_MODEL` | Anthropic model name (optional, defaults to `claude-opus-4-7`) |
 | `STRIPE_SECRET_KEY` | Stripe secret key |
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
 | `STRIPE_PRICE_CORE` | Stripe price ID for Core tier |

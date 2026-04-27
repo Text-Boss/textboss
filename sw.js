@@ -54,10 +54,6 @@ self.addEventListener("notificationclick", (event) => {
   // Determine target URL — prefer an explicit url in the payload, then fall back by type
   var notifData = (event.notification.data) || {};
   var targetUrl = notifData.url || "/access.html";
-  if (!notifData.url) {
-    if (notifData.type === "follow_up") targetUrl = "/access.html#follow-ups";
-    else if (notifData.type === "todo")  targetUrl = "/access.html#todos";
-  }
 
   event.waitUntil(
     clients

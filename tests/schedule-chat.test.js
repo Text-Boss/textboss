@@ -31,7 +31,7 @@ function makeProDeps(overrides = {}) {
       output: "Book you in.",
       usage: { total_tokens: 20 },
       toolCalls: [],
-      rawOutput: [],
+      rawContent: [],
     }),
     getBusinessProfile: async () => SAMPLE_PROFILE,
     listAppointments: async () => [],
@@ -64,7 +64,7 @@ async function testProTierGetsSchedulingResponse() {
         output: "Monday at 9am works.",
         usage: { total_tokens: 30 },
         toolCalls: [],
-        rawOutput: [],
+        rawContent: [],
       };
     },
   }));
@@ -124,7 +124,7 @@ async function testBlackTierGetsSchedulingResponse() {
         output: "Confirmed.",
         usage: { total_tokens: 10 },
         toolCalls: [],
-        rawOutput: [],
+        rawContent: [],
       };
     },
     getBusinessProfile: async () => null,
@@ -318,16 +318,16 @@ async function testToolCallBookAppointment() {
           output: "",
           usage: { total_tokens: 15 },
           toolCalls: [{
-            call_id: "call_123",
+            id: "call_123",
             name: "book_appointment",
-            arguments: JSON.stringify({
+            input: {
               client_name: "Jane",
               scheduled_date: "2026-04-15",
               scheduled_time: "14:00",
               duration_minutes: 30,
-            }),
+            },
           }],
-          rawOutput: [{ type: "function_call", call_id: "call_123", name: "book_appointment" }],
+          rawContent: [{ type: "tool_use", id: "call_123", name: "book_appointment", input: {} }],
         };
       }
       // Second round: AI produces final text after tool result
@@ -335,7 +335,7 @@ async function testToolCallBookAppointment() {
         output: "Booked Jane for April 15 at 2pm, 30 minutes.",
         usage: { total_tokens: 25 },
         toolCalls: [],
-        rawOutput: [],
+        rawContent: [],
       };
     },
     createAppointment: async (email, appt) => {
@@ -384,18 +384,18 @@ async function testToolCallCancelAppointment() {
           output: "",
           usage: { total_tokens: 10 },
           toolCalls: [{
-            call_id: "call_456",
+            id: "call_456",
             name: "cancel_appointment",
-            arguments: JSON.stringify({ appointment_id: "appt-to-cancel" }),
+            input: { appointment_id: "appt-to-cancel" },
           }],
-          rawOutput: [{ type: "function_call", call_id: "call_456", name: "cancel_appointment" }],
+          rawContent: [{ type: "tool_use", id: "call_456", name: "cancel_appointment", input: {} }],
         };
       }
       return {
         output: "The appointment has been cancelled.",
         usage: { total_tokens: 20 },
         toolCalls: [],
-        rawOutput: [],
+        rawContent: [],
       };
     },
     updateAppointment: async (id, email, updates) => {
@@ -435,22 +435,22 @@ async function testToolCallRescheduleAppointment() {
           output: "",
           usage: { total_tokens: 10 },
           toolCalls: [{
-            call_id: "call_789",
+            id: "call_789",
             name: "reschedule_appointment",
-            arguments: JSON.stringify({
+            input: {
               appointment_id: "appt-to-move",
               scheduled_date: "2026-04-17",
               scheduled_time: "15:00",
-            }),
+            },
           }],
-          rawOutput: [{ type: "function_call", call_id: "call_789", name: "reschedule_appointment" }],
+          rawContent: [{ type: "tool_use", id: "call_789", name: "reschedule_appointment", input: {} }],
         };
       }
       return {
         output: "Rescheduled to Thursday at 3pm.",
         usage: { total_tokens: 20 },
         toolCalls: [],
-        rawOutput: [],
+        rawContent: [],
       };
     },
     updateAppointment: async (id, email, updates) => {
@@ -488,7 +488,7 @@ async function testThreadMessagesPersisted() {
       output: "Done.",
       usage: { total_tokens: 5 },
       toolCalls: [],
-      rawOutput: [],
+      rawContent: [],
     }),
     loadThreadMessages: async (threadId, email) => {
       assert.equal(threadId, "thread-abc");
@@ -538,7 +538,7 @@ async function testSystemPromptExcludesTextMessagingInstructions() {
     getSchedulingInstructions: () => "You are the Text Boss scheduling assistant.",
     createSchedulingResponse: async (input) => {
       capturedInput = input;
-      return { output: "Done.", usage: { total_tokens: 5 }, toolCalls: [], rawOutput: [] };
+      return { output: "Done.", usage: { total_tokens: 5 }, toolCalls: [], rawContent: [] };
     },
   }));
 
@@ -633,14 +633,14 @@ async function testBookAppointmentEmitsNotification() {
           output: "",
           usage: { total_tokens: 10 },
           toolCalls: [{
-            call_id: "call_notif",
+            id: "call_notif",
             name: "book_appointment",
-            arguments: JSON.stringify({ scheduled_date: "2026-04-15", scheduled_time: "10:00" }),
+            input: { scheduled_date: "2026-04-15", scheduled_time: "10:00" },
           }],
-          rawOutput: [{ type: "function_call", call_id: "call_notif", name: "book_appointment" }],
+          rawContent: [{ type: "tool_use", id: "call_notif", name: "book_appointment", input: {} }],
         };
       }
-      return { output: "Booked.", usage: { total_tokens: 5 }, toolCalls: [], rawOutput: [] };
+      return { output: "Booked.", usage: { total_tokens: 5 }, toolCalls: [], rawContent: [] };
     },
     createAppointment: async (email, appt) => ({
       id: "notif-appt",

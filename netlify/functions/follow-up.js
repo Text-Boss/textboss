@@ -1,7 +1,7 @@
 const { createEntitlementStore, createFollowUpStore } = require("./_lib/supabase");
 const sessionLib    = require("./_lib/session");
 const { normalizeTier, isFollowUpTier, getFollowUpLimit, getFollowUpSystemPrompt, getTierPolicy } = require("./_lib/tier-policy");
-const { createResponsesClient } = require("./_lib/openai");
+const { createAnthropicClient } = require("./_lib/anthropic");
 
 function json(statusCode, body) {
   return {
@@ -49,7 +49,7 @@ function createHandler(deps) {
     markSent,
     skipMessage,
     updateJob,
-    callOpenAI,
+    callAnthropic,
   } = deps;
 
   async function verifySession(event) {
@@ -128,7 +128,7 @@ function createHandler(deps) {
       // Call OpenAI for follow-up drafts
       const systemPrompt = getFollowUpSystemPrompt(auth.tier);
       const userMessage = buildUserMessage(body);
-      const aiOutput = await callOpenAI(auth.tier, systemPrompt, userMessage);
+      const aiOutput = await callAnthropic(auth.tier, systemPrompt, userMessage);
 
       // Parse JSON from AI response
       let drafts;
@@ -210,7 +210,7 @@ function createRuntimeHandler(overrides = {}) {
   const entitlementStore = overrides.entitlementStore || createEntitlementStore();
   const followUpStore    = overrides.followUpStore    || createFollowUpStore();
   const runtimeSessionLib = overrides.sessionLib      || sessionLib;
-  const openaiClient     = overrides.openaiClient     || createResponsesClient();
+  const anthropicClient  = overrides.anthropicClient  || createAnthropicClient();
 
   return createHandler({
     verifySessionCookie:    (h) => runtimeSessionLib.verifySessionCookie(h),
@@ -224,9 +224,9 @@ function createRuntimeHandler(overrides = {}) {
     markSent:               (id, e) => followUpStore.markSent(id, e),
     skipMessage:            (id, e) => followUpStore.skipMessage(id, e),
     updateJob:              (id, e, u) => followUpStore.updateJob(id, e, u),
-    callOpenAI:             async (tier, systemPrompt, userMessage) => {
+    callAnthropic:          async (tier, systemPrompt, userMessage) => {
       const policy = getTierPolicy(tier);
-      const result = await openaiClient.createResponse({
+      const result = await anthropicClient.createResponse({
         tier,
         message: userMessage,
         conversation: [],

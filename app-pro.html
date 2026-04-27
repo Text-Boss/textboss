@@ -823,16 +823,7 @@
     .action-chip.chip-red   { background: rgba(239,68,68,.08); color: #ef4444; border: 1px solid rgba(239,68,68,.25); }
     .action-chip.chip-amber { background: rgba(245,158,11,.08); color: #f59e0b; border: 1px solid rgba(245,158,11,.25); }
 
-    /* ── iCal export button ── */
-    .export-btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      margin-top: 10px; padding: 6px 14px; border-radius: 6px;
-      border: 1px solid var(--line-hi); background: var(--panel); color: var(--muted);
-      font: inherit; font-size: 11px; cursor: pointer; transition: color .12s, border-color .12s;
-    }
-    .export-btn:hover { color: var(--accent); border-color: var(--accent); }
-
-    /* ── Onboarding wizard ── */
+/* ── Onboarding wizard ── */
     .wizard-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,.75);
       backdrop-filter: blur(6px); display: flex; align-items: center;
@@ -1360,7 +1351,7 @@
     var userEmail       = "";
 
     // Load profile once — used by avatar, prompts, settings
-    fetch("/.netlify/functions/business-profile")
+    fetch("/.netlify/functions/business-profile", { credentials: "same-origin" })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         if (!d || !d.ok) return;
