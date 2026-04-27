@@ -32,8 +32,7 @@ self.addEventListener("push", (event) => {
   const title   = data.title || "Text Boss";
   const options = {
     body:    data.body  || "You have an upcoming appointment.",
-    icon:    data.icon  || "/icon-192.png",
-    badge:   "/icon-72.png",
+    icon:    data.icon  || "/icons/icon-192.png",
     data:    data.data  || {},
     actions: [
       { action: "view", title: "View" },

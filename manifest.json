@@ -2,7 +2,7 @@
   "name": "Text Boss",
   "short_name": "TextBoss",
   "description": "AI-powered client communication for freelancers",
-  "start_url": "/app.html",
+  "start_url": "/access.html",
   "display": "standalone",
   "background_color": "#0a0d10",
   "theme_color": "#0a0d10",
