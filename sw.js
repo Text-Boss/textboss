@@ -60,6 +60,7 @@ self.addEventListener("notificationclick", (event) => {
       .then((clientList) => {
         // If the app is already open, focus it
         for (const client of clientList) {
+          if ("navigate" in client && "focus" in client) return client.navigate(targetUrl).then((c) => c.focus());
           if ("focus" in client) return client.focus();
         }
         // Otherwise open a new window

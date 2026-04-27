@@ -125,7 +125,7 @@ function createHandler(deps) {
         }
       }
 
-      // Call OpenAI for follow-up drafts
+      // Call Anthropic for follow-up drafts
       const systemPrompt = getFollowUpSystemPrompt(auth.tier);
       const userMessage = buildUserMessage(body);
       const aiOutput = await callAnthropic(auth.tier, systemPrompt, userMessage);

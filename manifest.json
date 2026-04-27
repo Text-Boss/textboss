@@ -1,7 +1,7 @@
 {
   "name": "Text Boss",
   "short_name": "TextBoss",
-  "description": "AI-powered client communication for freelancers",
+  "description": "AI-powered client communication and scheduling for service businesses",
   "start_url": "/access.html",
   "display": "standalone",
   "background_color": "#0a0d10",

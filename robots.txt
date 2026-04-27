@@ -4,3 +4,7 @@ Disallow: /.netlify/
 Disallow: /app-core.html
 Disallow: /app-pro.html
 Disallow: /app-black.html
+Disallow: /app.html
+Disallow: /index-draft.html
+Disallow: /scheduler-mockup.html
+Disallow: /mockup-scheduler-v2.html
