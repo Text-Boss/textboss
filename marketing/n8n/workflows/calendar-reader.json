@@ -1,0 +1,159 @@
+{
+  "name": "Text Boss - Calendar Reader",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "36dc9829-4f04-4e13-9138-6e4d8c2413bb",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "const fs = require('fs');\n\n  const calPath = 'C:\\\\Users\\\\adele\\\\OneDrive\\\\Desktop\\\\tb\\\\textboss\\\\marketing\n  \\\\content-calendar\\\\approved\\\\calendar.json';\n\n  if (!fs.existsSync(calPath)) return [];\n\n  const calendar = JSON.parse(fs.readFileSync(calPath, 'utf8'));\n  const now = new Date();\n  const windowMs = 5 * 60 * 1000;\n\n  const due = calendar.filter(post => {\n    if (post.status !== 'approved') return false;\n    const postTime = new Date(post.scheduled_time);\n    return postTime >= now && postTime <= new Date(now.getTime() + windowMs);\n  });\n\n  return due.map(post => ({ json: post }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c0be8ca9-7791-4948-90e7-e049e83db9c5",
+      "name": "Code in Python"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.platform }}",
+                    "rightValue": "reddit",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ccdde2a2-a3cf-4638-949c-77176095d851"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9dcd50f5-02d4-4895-be86-65cc677fa63f",
+                    "leftValue": "={{ $json.platform }}",
+                    "rightValue": "x",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "250c2d28-da2a-4125-aea4-d79c6b7d9ccf",
+                    "leftValue": "={{ $json.platform }}",
+                    "rightValue": "instagram",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "38656c1b-fbaf-49bf-b8e3-a2fcf114488e",
+      "name": "Switch"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "60c8dbd6-6f2f-45ba-b8ba-9804a17de26a",
+  "meta": {
+    "instanceId": "0346674ad7a54c0ccb6a0933133940595a391a17f70805ff2841771dcb10157e"
+  },
+  "id": "AnF3ZLyg2dhC62J1",
+  "tags": []
+}
