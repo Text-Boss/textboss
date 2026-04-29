@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TextBoss Content Calendar",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "platform", "pillar", "audience", "copy", "hashtags", "scheduled_time", "status"],
+    "properties": {
+      "id": { "type": "string", "description": "Unique post ID e.g. post-001" },
+      "platform": { "type": "string", "enum": ["reddit", "linkedin", "x", "instagram"] },
+      "pillar": {
+        "type": "string",
+        "enum": [
+          "soft-reply-tax",
+          "before-after",
+          "language-problem",
+          "no-show-chaos",
+          "tier-awareness"
+        ]
+      },
+      "audience": {
+        "type": "string",
+        "enum": ["freelancers-contractors", "tradespeople-service", "consultants-agency"]
+      },
+      "copy": { "type": "string", "description": "Full post copy ready to publish" },
+      "hashtags": { "type": "array", "items": { "type": "string" } },
+      "scheduled_time": { "type": "string", "format": "date-time", "description": "ISO 8601 UTC" },
+      "status": { "type": "string", "enum": ["draft", "approved", "posted", "failed"] },
+      "subreddit": { "type": "string", "description": "Required for reddit platform posts" },
+      "instagram_layout_brief": { "type": "string", "description": "Carousel/quote tile design brief for Instagram" },
+      "reddit_type": { "type": "string", "enum": ["comment", "post"], "description": "Reddit only: comment for warm-up, post for promotional" }
+    }
+  }
+}
