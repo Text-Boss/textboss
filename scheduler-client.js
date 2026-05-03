@@ -1349,7 +1349,7 @@
 
       var typing = showSchedulerTyping();
       var historySnapshot = schedConversation.slice();
-      schedConversation.push({ role: 'user', content: [{ type: 'input_text', text: message }] });
+      schedConversation.push({ role: 'user', content: message });
 
       try {
         var result = await getJson('/.netlify/functions/schedule-chat', {
@@ -1371,7 +1371,7 @@
         var output = result.data.output || '';
         var actions = result.data.actions || [];
         appendSchedulerMessage('assistant', output, actions);
-        schedConversation.push({ role: 'assistant', content: [{ type: 'output_text', text: output }] });
+        schedConversation.push({ role: 'assistant', content: output });
         schedStatus.textContent = 'Ready.';
         if (actions.length > 0) await loadAppointments();
       } catch (_) {

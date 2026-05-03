@@ -394,7 +394,8 @@ function createHandler(deps) {
         // Append tool results as user turn
         messages.push({ role: "user", content: toolResults });
       }
-    } catch (_) {
+    } catch (err) {
+      console.error("[public-booking] ai loop error:", err?.message || err);
       return json(500, { ok: false, reason: "ai_error" });
     }
 
@@ -483,6 +484,8 @@ function createRuntimeHandler(overrides = {}) {
       const model = process.env.ANTHROPIC_MODEL || "claude-opus-4-7";
       const fetchImpl = overrides.fetchImpl || fetch;
 
+      console.log("[public-booking] Anthropic request model=%s messages=%d hasKey=%s", model, messages.length, !!apiKey);
+
       const response = await fetchImpl("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
@@ -500,7 +503,10 @@ function createRuntimeHandler(overrides = {}) {
       });
 
       if (!response.ok) {
-        throw new Error("Anthropic request failed");
+        let errBody;
+        try { errBody = await response.json(); } catch (_) { errBody = await response.text().catch(() => "(unreadable)"); }
+        console.error("[public-booking] Anthropic error", response.status, JSON.stringify(errBody));
+        throw new Error(`Anthropic request failed: ${response.status}`);
       }
 
       const data = await response.json();

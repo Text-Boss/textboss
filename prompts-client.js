@@ -74,7 +74,7 @@
 
   // ── Apply variable substitution to a template body ──────────────────────────
   function applyFields(body, fields) {
-    return body.replace(/\{\{(\w+)\}\}/g, function (match, key) {
+    return esc(body).replace(/\{\{(\w+)\}\}/g, function (match, key) {
       var val = fields[key];
       return val
         ? '<span class="pf-filled">' + esc(val) + '</span>'

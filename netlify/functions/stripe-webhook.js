@@ -159,7 +159,8 @@ function createHandler(deps) {
 
       return { statusCode: 200, body: "Event ignored." };
     } catch (error) {
-      return { statusCode: 200, body: `Handled error: ${error.message}` };
+      console.error("[stripe-webhook] unhandled error:", error);
+      return { statusCode: 500, body: "Internal error" };
     }
   };
 }

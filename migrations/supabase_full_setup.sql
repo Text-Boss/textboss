@@ -192,3 +192,111 @@ BEGIN
   EXCEPTION WHEN duplicate_table THEN NULL;
   END;
 END $$;
+
+
+-- ── 007: busy_blocks ──────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS busy_blocks (
+  id           uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_email  text        NOT NULL,
+  block_date   date        NOT NULL,
+  start_time   text        NOT NULL,
+  end_time     text        NOT NULL,
+  label        text,
+  source       text        NOT NULL DEFAULT 'manual'
+               CHECK (source IN ('ical_import', 'ai_parsed', 'manual')),
+  import_batch uuid,
+  expires_at   date,
+  created_at   timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_busy_blocks_owner_date
+  ON busy_blocks (owner_email, block_date);
+
+CREATE INDEX IF NOT EXISTS idx_busy_blocks_batch
+  ON busy_blocks (import_batch)
+  WHERE import_batch IS NOT NULL;
+
+
+-- ── 008: password authentication ─────────────────────────────
+-- CRITICAL: verify-email.js selects password_hash on every login attempt.
+-- Without this column, all logins return server_error (500).
+
+ALTER TABLE entitlements
+  ADD COLUMN IF NOT EXISTS password_hash TEXT;
+
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  token       TEXT        PRIMARY KEY,
+  email       TEXT        NOT NULL,
+  expires_at  TIMESTAMPTZ NOT NULL,
+  used_at     TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_prt_email
+  ON password_reset_tokens (email);
+
+
+-- ── 009: services table + slot_duration_min ───────────────────
+
+ALTER TABLE business_profiles
+  ADD COLUMN IF NOT EXISTS slot_duration_min integer NOT NULL DEFAULT 30
+    CHECK (slot_duration_min > 0 AND slot_duration_min % 15 = 0);
+
+CREATE TABLE IF NOT EXISTS services (
+  id               uuid          PRIMARY KEY DEFAULT gen_random_uuid(),
+  merchant_email   text          NOT NULL,
+  title            text          NOT NULL CHECK (char_length(trim(title)) > 0 AND char_length(title) <= 120),
+  description      text          CHECK (char_length(description) <= 500),
+  duration_min     integer       NOT NULL CHECK (duration_min > 0 AND duration_min % 15 = 0),
+  price            numeric(10,2) CHECK (price >= 0),
+  buffer_time_min  integer       NOT NULL DEFAULT 0 CHECK (buffer_time_min >= 0 AND buffer_time_min <= 240),
+  is_active        boolean       NOT NULL DEFAULT true,
+  sort_order       integer       NOT NULL DEFAULT 0,
+  created_at       timestamptz   NOT NULL DEFAULT now(),
+  updated_at       timestamptz   NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS services_merchant_email_idx ON services (lower(merchant_email));
+
+
+-- ── 010: scheduler memory (Black tier) ───────────────────────
+
+CREATE TABLE IF NOT EXISTS scheduler_memory (
+  owner_email  text        PRIMARY KEY,
+  memory_text  text        NOT NULL DEFAULT '',
+  updated_at   timestamptz NOT NULL DEFAULT now()
+);
+
+
+-- ── 011: todos + business profile detail columns ──────────────
+
+ALTER TABLE business_profiles
+  ADD COLUMN IF NOT EXISTS avatar_data       text,
+  ADD COLUMN IF NOT EXISTS business_name     text,
+  ADD COLUMN IF NOT EXISTS owner_first_name  text,
+  ADD COLUMN IF NOT EXISTS owner_full_name   text,
+  ADD COLUMN IF NOT EXISTS business_phone    text,
+  ADD COLUMN IF NOT EXISTS website           text,
+  ADD COLUMN IF NOT EXISTS abn               text,
+  ADD COLUMN IF NOT EXISTS city              text;
+
+CREATE TABLE IF NOT EXISTS todos (
+  id           uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_email  text        NOT NULL,
+  text         text        NOT NULL CHECK (char_length(trim(text)) > 0 AND char_length(text) <= 2000),
+  is_done      boolean     NOT NULL DEFAULT false,
+  is_urgent    boolean     NOT NULL DEFAULT false,
+  reminder_at  timestamptz,
+  reminder_sent boolean    NOT NULL DEFAULT false,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  updated_at   timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS todos_owner_email_idx ON todos (lower(owner_email));
+CREATE INDEX IF NOT EXISTS todos_reminder_idx    ON todos (reminder_at)
+  WHERE reminder_at IS NOT NULL AND reminder_sent = false AND is_done = false;
+
+
+-- ── 012: client_phone on appointments ────────────────────────
+
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS client_phone text;

@@ -6,7 +6,7 @@
  *   navigator.serviceWorker.register('/sw.js')
  */
 
-const APP_SHELL_CACHE = "tb-shell-v3";
+const APP_SHELL_CACHE = "tb-shell-v4";
 const APP_SHELL_FILES = [
   "/app-core.html",
   "/app-pro.html",
