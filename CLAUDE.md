@@ -75,13 +75,20 @@ All backend logic lives in `netlify/functions/`. Each function exports three thi
 
 Skipping step 3 is a security gap. All current functions enforce it.
 
+### Shared `_lib` utilities
+- `anthropic.js` — Anthropic Messages API client (see above)
+- `booking-auth.js` — `verifyBookingAccess(event, deps)` implements the three-way auth check + scheduling-tier gate in one call; returns `{ session, tier }` or `{ error }`. Also exports `getHistoryLimit(tier)` (Pro: 50, Black: unlimited) and `isBlackTier(tier)`. All scheduling functions use this instead of duplicating the auth logic.
+- `password.js` — `hashPassword(plaintext)` and `verifyPassword(plaintext, stored)` using PBKDF2-SHA256 (100k iterations). Format: `salt_hex:hash_hex`.
+- `ical.js` — RFC 5545 iCal parser extracted from `ical-import.js` (no external deps).
+- `session.js`, `http.js`, `tier-policy.js`, `scheduler.js`, `sms.js`, `supabase.js` — documented below.
+
 ### Supabase stores (`_lib/supabase.js`)
 Exports store factories: `createEntitlementStore`, `createAvailabilityStore`, `createAppointmentStore`, `createBusinessProfileStore`, `createPushSubscriptionStore`, `createBusyBlockStore`, `createPublicBookingStore`, `createFollowUpStore`, `createSchedulerMemoryStore`, `createTodoStore`, `createServiceStore`. Each accepts an optional `{ client }` override for testing.
 
 All tables are accessed via the service role key (bypasses RLS). RLS is intentionally not used — access control is enforced at the function level by verifying the session cookie before every DB operation.
 
-### OpenAI integration
-`netlify/functions/_lib/openai.js` uses the **Responses API** (`POST /v1/responses`), not the Chat Completions API. User turns use `{ type: "input_text", text }`, assistant turns use `{ type: "output_text", text }`. System instructions go in the top-level `instructions` field of the request body — **not** as a `role: "system"` item inside `input` (that is the Chat Completions format and is wrong for the Responses API). System content is injected per-request from `tier-policy.js`.
+### Anthropic integration
+`netlify/functions/_lib/anthropic.js` wraps the **Messages API** (`POST /v1/messages`). Conversations use the standard `{ role, content }` messages array format — `role` is `"user"` or `"assistant"`, `content` is a plain string. System instructions go in the top-level `system` field of the request body. `createAnthropicClient()` exposes `createResponse({ tier, message, conversation, policy, extraSystemContext })` which assembles the system string from `tier-policy.js` instructions, builds the messages array, and returns `{ output, usage }`. Default model is `claude-opus-4-7`.
 
 ### Stripe webhook
 `stripe-webhook.js` handles `checkout.session.completed`, `customer.subscription.updated`, and `customer.subscription.deleted`. Upserts `entitlements` using `email` as the conflict key.
@@ -100,6 +107,7 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 - `follow-up.js` / `send-follow-ups.js` — AI-drafted follow-up messages; scheduled daily at 9am UTC
 - `send-reminders.js` — Scheduled hourly; Web Push appointment reminders 24h before. Looks up owner tier to embed a tier-specific `url` in the push payload.
 - `send-todo-reminders.js` — Scheduled every 15 min; Web Push + Resend email fallback for due to-do reminders. Same tier-lookup pattern for `url`.
+- `todos.js` — CRUD for the `todos` table (urgency, reminders, done state); gated on Pro/Black
 - `push-subscribe.js` / `vapid-key.js` — Web Push subscription management
 - `threads.js` — Conversation thread persistence
 
@@ -131,7 +139,7 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 | `appointments.client_phone` | 012 | Client mobile number (mandatory on public bookings) |
 
 ### Client-side architecture
-App pages (`app-pro.html`, `app-black.html`, `app-core.html`) are single-page shells with a scrollable tab bar. All tabs lazy-init on first click. Scripts loaded as plain `<script>` tags (no bundler):
+App pages (`app-pro.html`, `app-black.html`, `app-core.html`) are single-page shells with a scrollable tab bar. All tabs lazy-init on first click. Scripts loaded as plain `<script>` tags (no bundler). `app-mobile.css` is the shared stylesheet — it defines CSS custom properties for tier accent colours (`--accent`, `--accent-bg`) via `[data-tier="Core/Pro/Black"]` selectors, and is included by all three app pages.
 
 | Script | Exported global | Purpose |
 |---|---|---|
