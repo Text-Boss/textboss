@@ -1,5 +1,6 @@
 const { createServiceRoleClient, createPushSubscriptionStore, createEntitlementStore } = require("./_lib/supabase");
 const { normalizeTier } = require("./_lib/tier-policy");
+const onesignal = require("./_lib/onesignal");
 
 // web-push is optional — gracefully skip push delivery if not installed or VAPID not configured
 let webpush;
@@ -31,6 +32,7 @@ function createHandler(deps) {
     deleteSubscriptionById,
     sendPushNotification,
     findEntitlementByEmail,
+    sendOneSignalPush,
   } = deps;
 
   const tierCache = new Map();
@@ -73,8 +75,8 @@ function createHandler(deps) {
       };
       reminded.push(record);
 
-      // Deliver push notification to all of this owner's subscribed devices
-      if (sendPushNotification) {
+      // Push notification delivery (OneSignal preferred, VAPID fallback)
+      if (sendOneSignalPush || sendPushNotification) {
         let ownerTier = tierCache.get(appt.owner_email);
         if (!ownerTier && findEntitlementByEmail) {
           try {
@@ -84,24 +86,34 @@ function createHandler(deps) {
           tierCache.set(appt.owner_email, ownerTier);
         }
 
-        const subscriptions = await getSubscriptionsByEmail(appt.owner_email);
-        for (const sub of subscriptions) {
-          try {
-            await sendPushNotification(sub, {
-              title: "Text Boss · Upcoming Appointment",
-              body: [
-                appt.title || "Appointment",
-                appt.client_name ? `with ${appt.client_name}` : null,
-                `at ${appt.scheduled_time}`,
-              ].filter(Boolean).join(" "),
-              data: { appointmentId: appt.id, url: tierAppUrl(ownerTier, "#scheduler") },
-            });
-          } catch (err) {
-            // 410 Gone = subscription expired; remove it so we don't retry
-            if (err && (err.statusCode === 410 || err.statusCode === 404)) {
-              await deleteSubscriptionById(sub.id).catch(() => {});
+        const pushPayload = {
+          title: "Text Boss · Upcoming Appointment",
+          body: [
+            appt.title || "Appointment",
+            appt.client_name ? `with ${appt.client_name}` : null,
+            `at ${appt.scheduled_time}`,
+          ].filter(Boolean).join(" "),
+          data: { appointmentId: appt.id, url: tierAppUrl(ownerTier, "#scheduler") },
+        };
+
+        // OneSignal (primary)
+        let osDelivered = false;
+        if (sendOneSignalPush) {
+          const r = await sendOneSignalPush(appt.owner_email, pushPayload).catch(() => ({ ok: false }));
+          osDelivered = !!r.ok;
+        }
+
+        // VAPID web-push fallback
+        if (!osDelivered && sendPushNotification) {
+          const subscriptions = await getSubscriptionsByEmail(appt.owner_email);
+          for (const sub of subscriptions) {
+            try {
+              await sendPushNotification(sub, pushPayload);
+            } catch (err) {
+              if (err && (err.statusCode === 410 || err.statusCode === 404)) {
+                await deleteSubscriptionById(sub.id).catch(() => {});
+              }
             }
-            // All other errors: log and continue — don't block marking reminded
           }
         }
       }
@@ -198,6 +210,8 @@ function createRuntimeHandler(overrides = {}) {
     deleteSubscriptionById:   (id) => pushStore.deleteSubscriptionById(id),
     findEntitlementByEmail:   (email) => (overrides.entitlementStore || createEntitlementStore()).findEntitlementByEmail(email),
 
+    sendOneSignalPush: (email, payload) => onesignal.sendPushToUser(email, payload),
+
     sendPushNotification: vapidReady
       ? async (sub, payload) => {
           const subscription = {
@@ -206,7 +220,7 @@ function createRuntimeHandler(overrides = {}) {
           };
           await webpush.sendNotification(subscription, JSON.stringify(payload));
         }
-      : null, // null = push delivery skipped (VAPID not configured)
+      : null, // null = VAPID delivery skipped (not configured)
   });
 }
 

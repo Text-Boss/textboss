@@ -6,11 +6,21 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
 <link rel="shortcut icon" href="assets/favicon-32.png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="vapid-public-key" content="">
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
-    fetch('/.netlify/functions/vapid-key').then(r=>r.ok?r.json():null).then(d=>{
-      if(d&&d.key){var m=document.querySelector('meta[name="vapid-public-key"]');if(m)m.setAttribute('content',d.key);}
-    }).catch(()=>{});
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    window.addEventListener('tbsession', function(e) {
+      window.OneSignalDeferred.push(async function(OneSignal) {
+        try {
+          var r = await fetch('/.netlify/functions/onesignal-config', { credentials: 'same-origin' });
+          if (!r.ok) return;
+          var cfg = await r.json();
+          if (!cfg.appId) return;
+          await OneSignal.init({ appId: cfg.appId, serviceWorkerPath: '/sw.js', notifyButton: { enable: false }, allowLocalhostAsSecureOrigin: true });
+          if (e.detail.email) await OneSignal.login(e.detail.email).catch(function() {});
+        } catch (_) {}
+      });
+    });
   </script>
   <title>Text Boss · Black</title>
   <style>

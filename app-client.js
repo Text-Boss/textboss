@@ -141,6 +141,7 @@
     // This is safe to publish: it contains no secrets — same data is in the cookie
     // payload which is not HttpOnly-protected from reads. Never put auth tokens here.
     window.__tbSession = { email: session.data.email, tier: session.data.tier };
+    window.dispatchEvent(new CustomEvent("tbsession", { detail: window.__tbSession }));
 
     setStatus("Ready.");
 

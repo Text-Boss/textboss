@@ -13,6 +13,9 @@ node tests/<name>.test.js
 
 # Local dev server (Netlify CLI)
 npx netlify dev
+
+# Regenerate prompts-data.json from pro_subscriber_prompts.html (run after editing prompt templates)
+node scripts/extract-prompts.js
 ```
 
 `netlify dev` serves static files from `.` and Netlify Functions from `netlify/functions/` on port 8888.
@@ -41,6 +44,8 @@ npx netlify dev
 | `VAPID_SUBJECT` | Web Push VAPID subject (`mailto:you@domain.com`) |
 | `BEEHIIV_PUBLICATION_ID` | Beehiiv publication ID for newsletter signups via `subscribe.js` |
 | `BEEHIIV_API_KEY` | Beehiiv API key for newsletter signups |
+| `ONESIGNAL_APP_ID` | OneSignal application ID — used by web SDK (frontend) and REST API (backend push delivery) |
+| `ONESIGNAL_REST_API_KEY` | OneSignal REST API key — authorises server-side push via `_lib/onesignal.js` |
 
 ## Architecture
 
@@ -53,7 +58,7 @@ System prompts instruct the AI to write in a natural human voice — no AI-givea
 1. User submits email on `access.html` → `POST /.netlify/functions/verify-email`
 2. `verify-email` checks Supabase `entitlements` table, verifies `subscription_status` is `active`/`trialing`, then sets a signed `HttpOnly` cookie (`textboss_session`)
 3. Each app page loads `app-client.js`, which calls `GET /.netlify/functions/session-verify` on boot and redirects to `denied.html` if the session is invalid or the tier doesn't match `data-app-tier` on the root element
-4. `POST /.netlify/functions/chat` re-verifies the session cookie AND re-checks Supabase entitlements on every request before calling OpenAI
+4. `POST /.netlify/functions/chat` re-verifies the session cookie AND re-checks Supabase entitlements on every request before calling Anthropic
 
 Password auth is also supported — `forgot-password.js` / `reset-password.js` / `set-password.js` handle the full PBKDF2 reset flow via Resend email.
 
@@ -109,6 +114,7 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 - `send-todo-reminders.js` — Scheduled every 15 min; Web Push + Resend email fallback for due to-do reminders. Same tier-lookup pattern for `url`.
 - `todos.js` — CRUD for the `todos` table (urgency, reminders, done state); gated on Pro/Black
 - `push-subscribe.js` / `vapid-key.js` — Web Push subscription management
+- `subscribe.js` — Beehiiv newsletter signup (unauthenticated; uses `BEEHIIV_PUBLICATION_ID` + `BEEHIIV_API_KEY`)
 - `threads.js` — Conversation thread persistence
 
 ### SMS utility (`_lib/sms.js`)
@@ -139,6 +145,10 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 | `appointments.client_phone` | 012 | Client mobile number (mandatory on public bookings) |
 
 ### Client-side architecture
+There are two app shell architectures:
+- **`app-core.html` / `app-pro.html` / `app-black.html`** — tier-specific single-page shells with a scrollable tab bar. Each reads its tier from the `data-app-tier` attribute and loads the matching tier policy at boot. These are the primary subscriber app pages.
+- **`app.html`** — a unified drawer-nav shell that serves all tiers. It dynamically fetches the session tier at boot rather than baking it into the HTML. Uses inline JS and a sidebar drawer for navigation instead of the tab bar. Does not use `data-app-tier` — avoid deploying this alongside the tier-specific pages without understanding the session flow difference.
+
 App pages (`app-pro.html`, `app-black.html`, `app-core.html`) are single-page shells with a scrollable tab bar. All tabs lazy-init on first click. Scripts loaded as plain `<script>` tags (no bundler). `app-mobile.css` is the shared stylesheet — it defines CSS custom properties for tier accent colours (`--accent`, `--accent-bg`) via `[data-tier="Core/Pro/Black"]` selectors, and is included by all three app pages.
 
 | Script | Exported global | Purpose |
@@ -146,7 +156,7 @@ App pages (`app-pro.html`, `app-black.html`, `app-core.html`) are single-page sh
 | `app-client.js` | — | Session verify, logout, char count, thread UI |
 | `scheduler-client.js` | `window.initScheduler`, `window.checkOnboardingOnLoad`, `window.refreshScheduler` | Scheduler tab, calendar, wizard, services, working hours; badge shows upcoming confirmed count; auto-refreshes on `visibilitychange` |
 | `followup-client.js` | `window.initFollowUps` | Follow-ups tab |
-| `prompts-client.js` | `window.initPrompts` | Prompts tab — fetches tier HTML file, parses with DOMParser, renders cards natively with `{{variable}}` auto-fill from profile |
+| `prompts-client.js` | `window.initPrompts` | Prompts tab — fetches the tier-specific prompts HTML (`core_subscriber_prompts.html`, `pro_subscriber_prompts.html`, `black_subscriber_prompts.html`), parses with DOMParser, renders cards natively with `{{variable}}` auto-fill from profile |
 | `todos-client.js` | `window.initTodos` | To-Do tab + collapsible Notes (localStorage) |
 | `settings-client.js` | `window.initSettings` | Settings tab — avatar upload, business details, booking link generate/copy |
 
@@ -161,14 +171,14 @@ Defined in `scheduler-client.js`. Steps: (1) personal & business details, (2) oc
 Accessed via `book.html?owner=<slug>`. Unauthenticated. On load, calls `public-booking.js` with `message: "__init__"` to fetch `businessName`, `occupation`, `ownerName`, `city`, `avatarData`, and `services`. Renders a chat UI — clients select a service chip or type freely. AI handles availability checking and booking confirmation. On confirmation, the client sees "Add to Google Calendar" (deep-link) and "Add to Apple / Outlook Calendar" (.ics download) buttons — do not label these as ".ics" to the user. Client phone is collected as mandatory; email is optional.
 
 ### `sw.js` (service worker)
-Handles Web Push `push` events, app-shell caching (cache name `tb-shell-v3`), and offline fallback. On notification click, navigates to `data.url` from the push payload if present; falls back to `/access.html`. The send functions (`send-reminders.js`, `send-follow-ups.js`, `send-todo-reminders.js`) look up the owner's tier and include a tier-specific deep-link URL in every push payload. `APP_SHELL_FILES` caches all three app pages plus all client scripts — bump the cache name (`tb-shell-vN`) whenever cached static files change.
+Handles Web Push `push` events, app-shell caching (cache name `tb-shell-v4`), and offline fallback. On notification click, navigates to `data.url` from the push payload if present; falls back to `/access.html`. The send functions (`send-reminders.js`, `send-follow-ups.js`, `send-todo-reminders.js`) look up the owner's tier and include a tier-specific deep-link URL in every push payload. `APP_SHELL_FILES` caches all three app pages plus all client scripts — bump the cache name (`tb-shell-vN`, currently `tb-shell-v4`) whenever cached static files change.
 
 ### Testing pattern
 Tests use Node's built-in `assert/strict` — no test framework. Each test file is a self-executing async function. `npm test` discovers and runs all `tests/*.test.js`. Runtime-integration tests (`*-runtime.test.js`) require real env vars and are for manual runs only.
 
 ## Project rules
 - Tiers must stay strictly separated — Core/Pro/Black behavior must not bleed across
-- Denied users must never receive business advice (no OpenAI call without a valid, active entitlement)
+- Denied users must never receive business advice (no Anthropic call without a valid, active entitlement)
 - All backend logic goes in `netlify/functions/`; no secrets in committed code
 - Do not modify `index.html`, `core.html`, `pro.html`, or `black.html` — these are marketing/landing pages, distinct from the subscriber app pages (`app-core.html`, `app-pro.html`, `app-black.html`)
 - Services are stored in the relational `services` table — do not use the old `services` JSONB column on `business_profiles`

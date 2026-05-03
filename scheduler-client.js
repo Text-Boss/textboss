@@ -345,6 +345,17 @@
   }
 
   async function enableNotifications() {
+    // OneSignal path (web SDK v16 or Capacitor native plugin)
+    if (window.OneSignal && window.OneSignal.Notifications) {
+      try {
+        await OneSignal.Notifications.requestPermission();
+        return Notification.permission === 'granted';
+      } catch (err) {
+        console.error('OneSignal permission error:', err);
+        return false;
+      }
+    }
+    // VAPID fallback for browsers without OneSignal loaded
     var metaEl = document.querySelector('meta[name="vapid-public-key"]');
     if (!metaEl || !metaEl.content) return false;
     try {

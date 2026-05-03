@@ -1,0 +1,19 @@
+{
+  "appId": "com.textboss.app",
+  "appName": "Text Boss",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "url": "https://YOUR_NETLIFY_URL.netlify.app"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "backgroundColor": "#0a0d10",
+      "showSpinner": false
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
+}

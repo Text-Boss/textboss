@@ -2,6 +2,7 @@
 
 const { createServiceRoleClient, createTodoStore, createPushSubscriptionStore, createEntitlementStore } = require("./_lib/supabase");
 const { normalizeTier } = require("./_lib/tier-policy");
+const onesignal = require("./_lib/onesignal");
 
 let webpush;
 try { webpush = require("web-push"); } catch (_) {}
@@ -40,6 +41,7 @@ function createHandler(deps) {
     sendPushNotification,
     sendEmail,
     findEntitlementByEmail,
+    sendOneSignalPush,
   } = deps;
 
   const tierCache = new Map();
@@ -85,8 +87,14 @@ function createHandler(deps) {
 
       let pushDelivered = false;
 
-      // ── Web Push (primary) ────────────────────────────────────────────────
-      if (sendPushNotification) {
+      // ── OneSignal (primary) ───────────────────────────────────────────────
+      if (sendOneSignalPush) {
+        const r = await sendOneSignalPush(todo.owner_email, payload).catch(() => ({ ok: false }));
+        pushDelivered = !!r.ok;
+      }
+
+      // ── VAPID web-push fallback ───────────────────────────────────────────
+      if (!pushDelivered && sendPushNotification) {
         const subs = await getSubscriptionsByEmail(todo.owner_email).catch(() => []);
         for (const sub of subs) {
           try {
@@ -139,6 +147,8 @@ function createRuntimeHandler(overrides = {}) {
     getSubscriptionsByEmail: (e) => pushStore.getSubscriptionsByEmail(e),
     deleteSubscriptionById:  (id) => pushStore.deleteSubscriptionById(id),
     findEntitlementByEmail:  (e) => (overrides.entitlementStore || createEntitlementStore()).findEntitlementByEmail(e),
+
+    sendOneSignalPush: (email, payload) => onesignal.sendPushToUser(email, payload),
 
     sendPushNotification: webpush
       ? async (sub, payload) => {

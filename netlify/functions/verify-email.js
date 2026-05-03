@@ -13,10 +13,8 @@ function json(statusCode, body, headers = {}) {
 
 function normalizeEmail(value) { return String(value || "").trim().toLowerCase(); }
 function normalizeStatus(value) { return String(value || "").trim().toLowerCase(); }
-function getRedirectForTier(tier) {
-  if (tier === 'Black') return '/app-black.html';
-  if (tier === 'Pro')   return '/app-pro.html';
-  return '/app-core.html';
+function getRedirectForTier(_tier) {
+  return '/app.html';
 }
 
 function createHandler(deps) {

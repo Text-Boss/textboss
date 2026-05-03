@@ -7,7 +7,9 @@
     "textboss": "./bin/textboss.js"
   },
   "scripts": {
-    "test": "node -e \"const fs=require('node:fs'); const path=require('node:path'); const cp=require('node:child_process'); for (const file of fs.readdirSync('tests').filter((name)=>name.endsWith('.test.js')).sort()) { cp.execFileSync(process.execPath,[path.join('tests',file)],{stdio:'inherit'}); }\""
+    "test": "node -e \"const fs=require('node:fs'); const path=require('node:path'); const cp=require('node:child_process'); for (const file of fs.readdirSync('tests').filter((name)=>name.endsWith('.test.js')).sort()) { cp.execFileSync(process.execPath,[path.join('tests',file)],{stdio:'inherit'}); }\"",
+    "build:app": "node scripts/build-www.js",
+    "cap:sync": "npx cap sync"
   },
   "repository": {
     "type": "git",
@@ -28,7 +30,10 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
     "netlify-cli": "^24.9.0",
+    "onesignal-capacitor": "^5.0.0",
     "sharp": "^0.34.5"
   }
 }

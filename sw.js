@@ -1,13 +1,17 @@
 /**
  * sw.js — Text Boss service worker
  *
- * Handles Web Push notification delivery and app shell caching for offline use.
- * Register from the scheduler app pages:
+ * App shell caching for offline use. Push notification delivery is handled by
+ * the OneSignal SDK (imported below). Register from app pages:
  *   navigator.serviceWorker.register('/sw.js')
  */
 
-const APP_SHELL_CACHE = "tb-shell-v4";
+// OneSignal handles push events — import its SW SDK first
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
+
+const APP_SHELL_CACHE = "tb-shell-v5";
 const APP_SHELL_FILES = [
+  "/app.html",
   "/app-core.html",
   "/app-pro.html",
   "/app-black.html",
@@ -21,53 +25,6 @@ const APP_SHELL_FILES = [
   "/prompts-data.json",
   "/manifest.json",
 ];
-
-// ── Push event: show notification ────────────────────────────────────────────
-self.addEventListener("push", (event) => {
-  let data = {};
-  if (event.data) {
-    try { data = event.data.json(); } catch (_) { data = { body: event.data.text() }; }
-  }
-
-  const title   = data.title || "Text Boss";
-  const options = {
-    body:    data.body  || "You have an upcoming appointment.",
-    icon:    data.icon  || "/icons/icon-192.png",
-    data:    data.data  || {},
-    actions: [
-      { action: "view", title: "View" },
-      { action: "dismiss", title: "Dismiss" },
-    ],
-    requireInteraction: false,
-  };
-
-  event.waitUntil(self.registration.showNotification(title, options));
-});
-
-// ── Notification click: focus or open the app ─────────────────────────────────
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-
-  if (event.action === "dismiss") return;
-
-  // Determine target URL — prefer an explicit url in the payload, then fall back by type
-  var notifData = (event.notification.data) || {};
-  var targetUrl = notifData.url || "/access.html";
-
-  event.waitUntil(
-    clients
-      .matchAll({ type: "window", includeUncontrolled: true })
-      .then((clientList) => {
-        // If the app is already open, focus it
-        for (const client of clientList) {
-          if ("navigate" in client && "focus" in client) return client.navigate(targetUrl).then((c) => c.focus());
-          if ("focus" in client) return client.focus();
-        }
-        // Otherwise open a new window
-        return clients.openWindow(targetUrl);
-      })
-  );
-});
 
 // ── Install: cache app shell files and skip waiting ───────────────────────────
 self.addEventListener("install", (event) => {
@@ -99,10 +56,7 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     fetch(event.request)
-      .then((networkResponse) => {
-        // Optionally update the cache with a fresh copy on network success
-        return networkResponse;
-      })
+      .then((networkResponse) => networkResponse)
       .catch(() =>
         caches.match(event.request).then((cached) => {
           if (cached) return cached;

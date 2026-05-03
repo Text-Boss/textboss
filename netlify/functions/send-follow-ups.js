@@ -1,5 +1,6 @@
 const { createFollowUpStore, createPushSubscriptionStore, createEntitlementStore } = require("./_lib/supabase");
 const { normalizeTier } = require("./_lib/tier-policy");
+const onesignal = require("./_lib/onesignal");
 
 // web-push is optional — gracefully skip push delivery if not installed or VAPID not configured
 let webpush;
@@ -32,6 +33,7 @@ function createHandler(deps) {
     sendPushNotification,
     getJobById,
     findEntitlementByEmail,
+    sendOneSignalPush,
   } = deps;
 
   const tierCache = new Map();
@@ -73,8 +75,8 @@ function createHandler(deps) {
       };
       notified.push(record);
 
-      // Deliver push notification to all of this owner's subscribed devices
-      if (sendPushNotification) {
+      // Push notification delivery (OneSignal preferred, VAPID fallback)
+      if (sendOneSignalPush || sendPushNotification) {
         let ownerTier = tierCache.get(msg.owner_email);
         if (!ownerTier && findEntitlementByEmail) {
           try {
@@ -84,38 +86,44 @@ function createHandler(deps) {
           tierCache.set(msg.owner_email, ownerTier);
         }
 
-        const subscriptions = await getSubscriptionsByEmail(msg.owner_email);
-        for (const sub of subscriptions) {
+        // Build notification body from job details
+        let clientName = "";
+        let serviceName = "";
+        if (getJobById) {
           try {
-            // Try to get job details for better notification text
-            let clientName = "";
-            let serviceName = "";
-            if (getJobById) {
-              try {
-                const job = await getJobById(msg.job_id);
-                if (job) {
-                  clientName = job.client_name || "";
-                  serviceName = job.service_name || "";
-                }
-              } catch (_) { /* best-effort */ }
-            }
+            const job = await getJobById(msg.job_id);
+            if (job) { clientName = job.client_name || ""; serviceName = job.service_name || ""; }
+          } catch (_) { /* best-effort */ }
+        }
+        const bodyParts = [];
+        if (clientName) bodyParts.push(`Message for ${clientName}`);
+        if (serviceName) bodyParts.push(`(${serviceName})`);
+        bodyParts.push("is ready to send");
 
-            const bodyParts = [];
-            if (clientName) bodyParts.push(`Message for ${clientName}`);
-            if (serviceName) bodyParts.push(`(${serviceName})`);
-            bodyParts.push("is ready to send");
+        const pushPayload = {
+          title: "Text Boss · Follow-Up Ready",
+          body: bodyParts.join(" "),
+          data: { type: "follow_up", messageId: msg.id, url: tierAppUrl(ownerTier, "#follow-ups") },
+        };
 
-            await sendPushNotification(sub, {
-              title: "Text Boss \u00b7 Follow-Up Ready",
-              body: bodyParts.join(" "),
-              data: { type: "follow_up", messageId: msg.id, url: tierAppUrl(ownerTier, "#follow-ups") },
-            });
-          } catch (err) {
-            // 410 Gone = subscription expired; remove it so we don't retry
-            if (err && (err.statusCode === 410 || err.statusCode === 404)) {
-              await deleteSubscriptionById(sub.id).catch(() => {});
+        // OneSignal (primary)
+        let osDelivered = false;
+        if (sendOneSignalPush) {
+          const r = await sendOneSignalPush(msg.owner_email, pushPayload).catch(() => ({ ok: false }));
+          osDelivered = !!r.ok;
+        }
+
+        // VAPID web-push fallback
+        if (!osDelivered && sendPushNotification) {
+          const subscriptions = await getSubscriptionsByEmail(msg.owner_email);
+          for (const sub of subscriptions) {
+            try {
+              await sendPushNotification(sub, pushPayload);
+            } catch (err) {
+              if (err && (err.statusCode === 410 || err.statusCode === 404)) {
+                await deleteSubscriptionById(sub.id).catch(() => {});
+              }
             }
-            // All other errors: log and continue — don't block marking notified
           }
         }
       }
@@ -174,7 +182,9 @@ function createRuntimeHandler(overrides = {}) {
     deleteSubscriptionById:  (id) => pushStore.deleteSubscriptionById(id),
     findEntitlementByEmail:  (email) => (overrides.entitlementStore || createEntitlementStore()).findEntitlementByEmail(email),
 
-    getJobById: null, // In runtime, we rely on the message's owner_email + job data embedded in notification
+    getJobById: null,
+
+    sendOneSignalPush: (email, payload) => onesignal.sendPushToUser(email, payload),
 
     sendPushNotification: vapidReady
       ? async (sub, payload) => {
