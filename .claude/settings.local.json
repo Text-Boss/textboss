@@ -56,7 +56,14 @@
       "WebFetch(domain:help.mobilemessage.com.au)",
       "WebFetch(domain:app.mobilemessage.com.au)",
       "WebFetch(domain:mobilemessage.com.au)",
-      "mcp__supabase__list_projects"
+      "mcp__supabase__list_projects",
+      "PowerShell(Get-Command *)",
+      "PowerShell(gh api *)",
+      "PowerShell(npm audit *)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; & \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" ls resend svix --depth=0 2>&1)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; & \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" ls netlify-cli --depth=0 2>&1)",
+      "PowerShell(git check-ignore *)",
+      "PowerShell(git add *)"
     ]
   }
 }

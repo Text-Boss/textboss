@@ -65,7 +65,12 @@ function createHandler(deps) {
       catch { return denied(400, "invalid_json"); }
 
       const updates = {};
-      if (body.text      !== undefined) updates.text       = body.text;
+      if (body.text !== undefined) {
+        const t = String(body.text || "").trim();
+        if (!t) return denied(400, "text_required");
+        if (t.length > 2000) return denied(400, "text_too_long");
+        updates.text = t;
+      }
       if (body.is_done   !== undefined) updates.is_done    = body.is_done;
       if (body.is_urgent !== undefined) updates.is_urgent  = body.is_urgent;
       if (body.reminder_at !== undefined) updates.reminder_at = canRemind ? body.reminder_at : null;
