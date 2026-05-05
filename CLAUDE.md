@@ -16,9 +16,17 @@ npx netlify dev
 
 # Regenerate prompts-data.json from pro_subscriber_prompts.html (run after editing prompt templates)
 node scripts/extract-prompts.js
+
+# Capacitor mobile build — copy static assets to www/ then sync native projects
+npm run build:app
+npx cap sync
 ```
 
 `netlify dev` serves static files from `.` and Netlify Functions from `netlify/functions/` on port 8888.
+
+`bin/textboss.js` is a local CLI (`npx textboss` or `./bin/textboss.js`) for admin tasks — read it before adding new commands there.
+
+`scripts/generate-icons.js` generates app icons into `icons/` with no external deps (pure PNG via zlib). Run it if icon assets need regenerating.
 
 ## Required environment variables
 
@@ -83,6 +91,7 @@ Skipping step 3 is a security gap. All current functions enforce it.
 ### Shared `_lib` utilities
 - `anthropic.js` — Anthropic Messages API client (see above)
 - `booking-auth.js` — `verifyBookingAccess(event, deps)` implements the three-way auth check + scheduling-tier gate in one call; returns `{ session, tier }` or `{ error }`. Also exports `getHistoryLimit(tier)` (Pro: 50, Black: unlimited) and `isBlackTier(tier)`. All scheduling functions use this instead of duplicating the auth logic.
+- `onesignal.js` — `sendPushToUser(externalUserId, { title, body, data })` delivers push via OneSignal REST API. Returns `{ skipped: true }` if env vars are absent (safe in local dev).
 - `password.js` — `hashPassword(plaintext)` and `verifyPassword(plaintext, stored)` using PBKDF2-SHA256 (100k iterations). Format: `salt_hex:hash_hex`.
 - `ical.js` — RFC 5545 iCal parser extracted from `ical-import.js` (no external deps).
 - `session.js`, `http.js`, `tier-policy.js`, `scheduler.js`, `sms.js`, `supabase.js` — documented below.
@@ -114,6 +123,7 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 - `send-todo-reminders.js` — Scheduled every 15 min; Web Push + Resend email fallback for due to-do reminders. Same tier-lookup pattern for `url`.
 - `todos.js` — CRUD for the `todos` table (urgency, reminders, done state); gated on Pro/Black
 - `push-subscribe.js` / `vapid-key.js` — Web Push subscription management
+- `onesignal-config.js` — Unauthenticated; returns `ONESIGNAL_APP_ID` to the frontend so the OneSignal web SDK can initialise without embedding the key in HTML
 - `subscribe.js` — Beehiiv newsletter signup (unauthenticated; uses `BEEHIIV_PUBLICATION_ID` + `BEEHIIV_API_KEY`)
 - `threads.js` — Conversation thread persistence
 
@@ -173,8 +183,11 @@ Accessed via `book.html?owner=<slug>`. Unauthenticated. On load, calls `public-b
 ### `sw.js` (service worker)
 Handles Web Push `push` events, app-shell caching (cache name `tb-shell-v4`), and offline fallback. On notification click, navigates to `data.url` from the push payload if present; falls back to `/access.html`. The send functions (`send-reminders.js`, `send-follow-ups.js`, `send-todo-reminders.js`) look up the owner's tier and include a tier-specific deep-link URL in every push payload. `APP_SHELL_FILES` caches all three app pages plus all client scripts — bump the cache name (`tb-shell-vN`, currently `tb-shell-v4`) whenever cached static files change.
 
+### Capacitor mobile build
+`npm run build:app` copies static web assets to `www/` (defined in `scripts/build-www.js`). `npx cap sync` syncs `www/` into the native iOS/Android projects. `capacitor.config.json` sets `server.url` to the live Netlify URL so the app shell loads remotely — `www/` is a fallback only. Update the `server.url` in `capacitor.config.json` before syncing for a new deployment target.
+
 ### Testing pattern
-Tests use Node's built-in `assert/strict` — no test framework. Each test file is a self-executing async function. `npm test` discovers and runs all `tests/*.test.js`. Runtime-integration tests (`*-runtime.test.js`) require real env vars and are for manual runs only.
+Tests use Node's built-in `assert/strict` — no test framework. Each test file is a self-executing async function. `npm test` discovers and runs all `tests/*.test.js`. Runtime-integration tests (`*-runtime.test.js`) require real env vars and are for manual runs only. Note: `tests/openai-lib.test.js` is misnamed — it tests `netlify/functions/_lib/anthropic.js`, not any OpenAI integration.
 
 ## Project rules
 - Tiers must stay strictly separated — Core/Pro/Black behavior must not bleed across
