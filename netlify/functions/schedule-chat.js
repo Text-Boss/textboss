@@ -446,7 +446,7 @@ function createHandler(deps) {
     }
 
     const isBlack = sessionTier === "Black";
-    const hasMemory = isBlack || sessionTier === "Pro";
+    const hasMemory = isBlack;
 
     let profile = null;
     let appointments = [];
@@ -567,6 +567,12 @@ function createHandler(deps) {
 }
 
 function createRuntimeHandler(overrides = {}) {
+  const schedulingApiKey = overrides.apiKey || process.env.ANTHROPIC_API_KEY;
+  if (!schedulingApiKey) {
+    console.error("[schedule-chat] ANTHROPIC_API_KEY is not configured");
+    return async () => deny(500, "ai_not_configured");
+  }
+
   let entitlementStore, profileStore, appointmentStore, busyBlockStore, serviceStore, memoryStore;
   try {
     entitlementStore = overrides.entitlementStore || createEntitlementStore();
@@ -607,7 +613,7 @@ function createRuntimeHandler(overrides = {}) {
     createSchedulingResponse: async ({ messages, policy, extraSystemContext, tier, tools }) => {
       const system = [tier ? `Tier: ${tier}` : null, extraSystemContext].filter(Boolean).join("\n\n");
 
-      const apiKey    = process.env.ANTHROPIC_API_KEY;
+      const apiKey    = schedulingApiKey;
       const model     = process.env.ANTHROPIC_MODEL || "claude-opus-4-7";
       const fetchImpl = overrides.fetchImpl || fetch;
 
