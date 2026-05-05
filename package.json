@@ -33,7 +33,6 @@
     "@capacitor/cli": "^7.0.0",
     "@capacitor/core": "^7.0.0",
     "netlify-cli": "^24.9.0",
-    "onesignal-capacitor-plugin": "^5.0.0"
     "sharp": "^0.34.5"
   }
 }
