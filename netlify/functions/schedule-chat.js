@@ -620,7 +620,7 @@ function createRuntimeHandler(overrides = {}) {
           "x-api-key": apiKey,
           "anthropic-version": "2023-06-01",
         },
-        body: JSON.stringify({ model, system, messages, max_tokens: policy.responseMaxTokens, tools }),
+        body: JSON.stringify({ model, system, messages, max_tokens: 4096, tools }),
       });
 
       if (!response.ok) {
