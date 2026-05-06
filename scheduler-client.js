@@ -1157,6 +1157,7 @@
       try {
         var res = await fetch('/.netlify/functions/services', {
           method: 'POST',
+          credentials: 'same-origin',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             title:        s.name,

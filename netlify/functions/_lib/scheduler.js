@@ -128,7 +128,7 @@ function findAvailableSlots(params) {
   // Index appointments by date for fast lookup
   const apptsByDate = {};
   for (const appt of appointments) {
-    if (appt.status && appt.status !== "confirmed") continue;
+    if (appt.status === "cancelled" || appt.status === "pending") continue;
     const d = appt.scheduled_date;
     if (!apptsByDate[d]) apptsByDate[d] = [];
     const apptStart = parseTime(appt.scheduled_time);
@@ -209,7 +209,7 @@ function findAvailableSlots(params) {
             durationMinutes,
           });
           daySlots++;
-          slotStart += 30;
+          slotStart += stepMinutes;
         }
       }
     }

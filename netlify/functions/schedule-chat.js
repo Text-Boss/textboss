@@ -446,7 +446,7 @@ function createHandler(deps) {
     }
 
     const isBlack = sessionTier === "Black";
-    const hasMemory = isBlack || sessionTier === "Pro";
+    const hasMemory = isBlack;
 
     let profile = null;
     let appointments = [];
