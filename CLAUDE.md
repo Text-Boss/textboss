@@ -85,6 +85,7 @@ Skipping step 3 is a security gap. All current functions enforce it.
 - `booking-auth.js` — `verifyBookingAccess(event, deps)` implements the three-way auth check + scheduling-tier gate in one call; returns `{ session, tier }` or `{ error }`. Also exports `getHistoryLimit(tier)` (Pro: 50, Black: unlimited) and `isBlackTier(tier)`. All scheduling functions use this instead of duplicating the auth logic.
 - `password.js` — `hashPassword(plaintext)` and `verifyPassword(plaintext, stored)` using PBKDF2-SHA256 (100k iterations). Format: `salt_hex:hash_hex`.
 - `ical.js` — RFC 5545 iCal parser extracted from `ical-import.js` (no external deps).
+- `onesignal.js` — `sendPushToUser(externalUserId, { title, body, data })` — sends push via OneSignal REST API targeting by external user ID (email). Returns `{ skipped: true }` if `ONESIGNAL_APP_ID` / `ONESIGNAL_REST_API_KEY` are unset (safe in local dev). Used by scheduling notification functions as the push delivery layer.
 - `session.js`, `http.js`, `tier-policy.js`, `scheduler.js`, `sms.js`, `supabase.js` — documented below.
 
 ### Supabase stores (`_lib/supabase.js`)
@@ -173,6 +174,9 @@ Accessed via `book.html?owner=<slug>`. Unauthenticated. On load, calls `public-b
 ### `sw.js` (service worker)
 Handles Web Push `push` events, app-shell caching (cache name `tb-shell-v4`), and offline fallback. On notification click, navigates to `data.url` from the push payload if present; falls back to `/access.html`. The send functions (`send-reminders.js`, `send-follow-ups.js`, `send-todo-reminders.js`) look up the owner's tier and include a tier-specific deep-link URL in every push payload. `APP_SHELL_FILES` caches all three app pages plus all client scripts — bump the cache name (`tb-shell-vN`, currently `tb-shell-v4`) whenever cached static files change.
 
+### Native app (Capacitor)
+`capacitor.config.json` configures a Capacitor 7 wrapper (`appId: "com.textboss.app"`, `webDir: "www"`). The `server.url` field points to the live Netlify deployment — update it before building. Push notifications use OneSignal's native SDK on-device (not the web VAPID stack). The `www/` directory is the Capacitor web build output and is not used by the Netlify/browser deployment.
+
 ### Testing pattern
 Tests use Node's built-in `assert/strict` — no test framework. Each test file is a self-executing async function. `npm test` discovers and runs all `tests/*.test.js`. Runtime-integration tests (`*-runtime.test.js`) require real env vars and are for manual runs only.
 
@@ -180,6 +184,6 @@ Tests use Node's built-in `assert/strict` — no test framework. Each test file 
 - Tiers must stay strictly separated — Core/Pro/Black behavior must not bleed across
 - Denied users must never receive business advice (no Anthropic call without a valid, active entitlement)
 - All backend logic goes in `netlify/functions/`; no secrets in committed code
-- Do not modify `index.html`, `core.html`, `pro.html`, or `black.html` — these are marketing/landing pages, distinct from the subscriber app pages (`app-core.html`, `app-pro.html`, `app-black.html`)
+- `index.html`, `core.html`, `pro.html`, and `black.html` are marketing/landing pages — keep them separate from the subscriber app pages (`app-core.html`, `app-pro.html`, `app-black.html`). Do not confuse the two sets
 - Services are stored in the relational `services` table — do not use the old `services` JSONB column on `business_profiles`
 - `business-profile.js` is Pro/Black only — Core has no profile or scheduling features
