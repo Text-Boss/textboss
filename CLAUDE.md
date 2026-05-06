@@ -104,7 +104,7 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 
 - `appointments.js` — CRUD for booked appointments
 - `availability.js` — CRUD for weekly availability slots
-- `schedule-chat.js` — AI conversational scheduling; tools: `find_available_slots`, `create_appointment`, `update_appointment`, `cancel_appointment`, `list_appointments`, `resolve_service`, plus `remember` (Black only)
+- `schedule-chat.js` — AI conversational scheduling; tools: `resolve_service`, `find_available_slots`, `list_appointments`, `book_appointment`, `cancel_appointment`, `reschedule_appointment`, `add_busy_block`, plus `remember` (Pro/Black). Uses `max_tokens: 4096` hardcoded — do not replace with `policy.responseMaxTokens`, which is too low for tool-call round-trips.
 - `business-profile.js` — GET/POST for business profile (occupation, working hours, buffer times, avatar, business details, booking slug). Also validates and saves: `business_name`, `owner_first_name`, `owner_full_name`, `business_phone`, `website`, `abn`, `city`, `avatar_data` (base64, max 200KB)
 - `services.js` — CRUD for the relational `services` table (replaces old JSONB services field on `business_profiles`)
 - `public-booking.js` — Unauthenticated client-facing booking via `book.html?owner=<slug>`. AI tools: `find_available_slots` + `confirm_booking`. `confirm_booking` requires `client_phone` (mandatory) and accepts optional `client_email`. On confirmation: sends SMS to owner (`business_phone`) + client via Mobile Message; sends Resend email to owner + client (if email provided); sends Web Push to owner with deep-link URL. Uses `_lib/sms.js` for SMS delivery.
@@ -124,8 +124,8 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 ### Scheduler AI model (`_lib/scheduler.js`)
 `findAvailableSlots({appointments, busyBlocks, workingHours, durationMinutes, preBuffer, postBuffer, startDate, endDate, maxSlotsPerDay, stepMinutes})` — pure function, no DB calls. `workingHoursToArray(jsonObj)` converts `business_profiles.working_hours` format (`{"1":{start,end}}`) to array form.
 
-### Black tier persistent memory
-`schedule-chat.js` loads a `memory_text` blob from `scheduler_memory` (one row per owner) and injects it as `=== MEMORY ===` into the system prompt. The `remember` tool lets the AI persist preference updates back to that row. Core/Pro do not get this tool or memory injection.
+### Pro/Black persistent memory
+`schedule-chat.js` loads a `memory_text` blob from `scheduler_memory` (one row per owner) and injects it as `=== MEMORY ===` into the system prompt for both Pro and Black. The `remember` tool lets the AI persist preference updates back to that row. Core does not get this tool or memory injection.
 
 ### Supabase tables
 | Table | Migration | Notes |
@@ -141,7 +141,7 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 | `busy_blocks` | 007 | Calendar blocks; `batch_id` for iCal import undo |
 | `users` | 008 | PBKDF2 password credentials |
 | `services` | 009 | Relational services (title, duration_min, price, buffer_time_min) |
-| `scheduler_memory` | 010 | Black tier AI persistent memory (one row per owner) |
+| `scheduler_memory` | 010 | Pro/Black AI persistent memory (one row per owner) |
 | `todos` | 011 | To-do items with urgency, reminders, done state |
 | `appointments.client_phone` | 012 | Client mobile number (mandatory on public bookings) |
 
@@ -151,6 +151,8 @@ There are two app shell architectures:
 - **`app.html`** — a unified drawer-nav shell that serves all tiers. It dynamically fetches the session tier at boot rather than baking it into the HTML. Uses inline JS and a sidebar drawer for navigation instead of the tab bar. Does not use `data-app-tier` — avoid deploying this alongside the tier-specific pages without understanding the session flow difference.
 
 App pages (`app-pro.html`, `app-black.html`, `app-core.html`) are single-page shells with a scrollable tab bar. All tabs lazy-init on first click. Scripts loaded as plain `<script>` tags (no bundler). `app-mobile.css` is the shared stylesheet — it defines CSS custom properties for tier accent colours (`--accent`, `--accent-bg`) via `[data-tier="Core/Pro/Black"]` selectors, and is included by all three app pages.
+
+The `.sidebar-toggle` (hamburger) button is `display: none` in all three subscriber app pages — the tab bar is the sole navigation. Do not re-enable it. On Pro/Black, the scheduler panel's `.sched-sidebar` (calendar/hours/services/settings) slides off-screen at ≤700px; it is revealed by the `.sched-mobile-toggle` button (`#sched-mobile-toggle`) which is only visible at that breakpoint. The backdrop (`#sidebar-backdrop`) closes it on tap.
 
 | Script | Exported global | Purpose |
 |---|---|---|
