@@ -1595,6 +1595,23 @@
     bindIcalImport();
     bindProfilePanel();
 
+    // Mobile: toggle sched-sidebar via the "Calendar & Settings" button
+    var schedMobileToggle = document.getElementById('sched-mobile-toggle');
+    var schedSidebar = document.querySelector('.sched-sidebar');
+    var backdrop = document.getElementById('sidebar-backdrop');
+    if (schedMobileToggle && schedSidebar) {
+      schedMobileToggle.addEventListener('click', function () {
+        schedSidebar.classList.add('mobile-open');
+        if (backdrop) backdrop.classList.add('visible');
+      });
+      if (backdrop) {
+        backdrop.addEventListener('click', function () {
+          schedSidebar.classList.remove('mobile-open');
+          backdrop.classList.remove('visible');
+        });
+      }
+    }
+
     // Unlock form now that all handlers are registered
     if (submitBtn) submitBtn.disabled = false;
     if (schedStatusEl) schedStatusEl.textContent = 'Ready.';
