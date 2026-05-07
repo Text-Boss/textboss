@@ -5,3 +5,4 @@
 - [project_growth_priorities.md](project_growth_priorities.md) — Ranked channel priority report from session 1 with reasoning and execution notes
 - [project_seo_infrastructure.md](project_seo_infrastructure.md) — Current SEO state: no blog, no meta descriptions, no keyword targeting observed
 - [project_lead_magnet_playbook.md](project_lead_magnet_playbook.md) — Day 1-2 complete: "Client Message Playbook" PDF content produced, opt-in copy written, delivery email written
+- [project_growth_sprint_may2026.md](project_growth_sprint_may2026.md) — May 2026 zero-traffic growth strategy: top 5 channels, 30-day plans, 3 ready-to-post content pieces
