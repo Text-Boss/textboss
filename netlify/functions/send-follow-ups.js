@@ -160,17 +160,19 @@ function createRuntimeHandler(overrides = {}) {
     verifyScheduledAccess: (event) => {
       const headers = event.headers || {};
 
-      // Netlify scheduled functions set this header
-      if (headers["x-nf-event"] === "schedule") {
-        return { ok: true };
-      }
+      // Netlify scheduled functions send this header (older runtime)
+      if (headers["x-nf-event"] === "schedule") return { ok: true };
 
-      // Fallback: require a shared secret
+      // Netlify scheduled functions send a body with next_run (newer runtime)
+      try {
+        const body = event.body ? JSON.parse(event.body) : null;
+        if (body && typeof body.next_run === "string") return { ok: true };
+      } catch (_) {}
+
+      // Manual invocation via shared secret
       const authHeader = headers.authorization || headers.Authorization || "";
       const expectedToken = process.env.REMINDERS_SECRET;
-      if (expectedToken && authHeader === `Bearer ${expectedToken}`) {
-        return { ok: true };
-      }
+      if (expectedToken && authHeader === `Bearer ${expectedToken}`) return { ok: true };
 
       return { ok: false, reason: "unauthorized" };
     },

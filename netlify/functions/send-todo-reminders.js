@@ -19,11 +19,22 @@ function json(statusCode, body) {
 }
 
 function verifyScheduledAccess(event) {
-  const nfEvent = (event.headers || {})["x-nf-event"];
-  if (nfEvent === "schedule") return { ok: true };
-  const auth = (event.headers || {})["authorization"] || "";
+  const headers = event.headers || {};
+
+  // Netlify scheduled functions send this header (older runtime)
+  if (headers["x-nf-event"] === "schedule") return { ok: true };
+
+  // Netlify scheduled functions send a body with next_run (newer runtime)
+  try {
+    const body = event.body ? JSON.parse(event.body) : null;
+    if (body && typeof body.next_run === "string") return { ok: true };
+  } catch (_) {}
+
+  // Manual invocation via shared secret
+  const auth = headers["authorization"] || "";
   const secret = process.env.REMINDERS_SECRET;
   if (secret && auth === `Bearer ${secret}`) return { ok: true };
+
   return { ok: false, reason: "unauthorized" };
 }
 
