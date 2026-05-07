@@ -1,6 +1,8 @@
 # Text Boss — Full Marketing Strategy (Zero Ad Budget)
 *Generated: May 2026 | Assumes $0 paid advertising*
 
+**Live site:** https://textboss.com.au/
+
 ---
 
 ## Situation Summary
@@ -260,7 +262,7 @@ Here's a before/after that illustrates the difference:
 
 The second versions aren't harsh. They're just closed. They don't invite a negotiation you didn't start.
 
-Happy to share more examples if useful. I built a tool around this problem if anyone wants to check it out — free playbook at [YOUR OPT-IN LINK].
+Happy to share more examples if useful. I built a tool around this problem if anyone wants to check it out — free playbook at https://textboss.com.au/.
 
 ---
 
@@ -334,7 +336,7 @@ This is why I built Text Boss — AI calibrated to the exact situation, risk lev
 
 Not generic AI. Specific to client communication.
 
-Free playbook: [YOUR OPT-IN LINK]
+Free playbook: https://textboss.com.au/
 
 ---
 

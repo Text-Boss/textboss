@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://textboss.app/</loc>
+    <loc>https://textboss.com.au/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://textboss.app/core.html</loc>
+    <loc>https://textboss.com.au/core.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://textboss.app/pro.html</loc>
+    <loc>https://textboss.com.au/pro.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://textboss.app/black.html</loc>
+    <loc>https://textboss.com.au/black.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://textboss.app/privacy.html</loc>
+    <loc>https://textboss.com.au/privacy.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://textboss.app/terms.html</loc>
+    <loc>https://textboss.com.au/terms.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
