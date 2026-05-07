@@ -20,15 +20,21 @@
 
   <!-- Header -->
   <header id="app-header">
-    <button id="sidebar-toggle" aria-label="Open menu">
-      <span></span><span></span><span></span>
-    </button>
     <div id="header-center">
-      <div class="wordmark">Text Boss</div>
-      <div class="section-label" id="section-label">Chat</div>
+      <div class="wordmark">TEXT BOSS</div>
+      <span class="drawer-tier" id="header-tier">—</span>
     </div>
     <button id="header-action" aria-label="New chat">+</button>
   </header>
+
+  <!-- Tab bar -->
+  <nav id="tab-bar">
+    <button class="tab-btn active" data-section="chat" type="button">Chat</button>
+    <button class="tab-btn pro-only" data-section="schedule" style="display:none;" type="button">Schedule<span class="tab-badge" id="scheduler-badge" style="display:none;"></span></button>
+    <button class="tab-btn pro-only" data-section="prompts" style="display:none;" type="button">Prompts</button>
+    <button class="tab-btn" data-section="threads" type="button">Threads</button>
+    <button class="tab-btn" data-section="settings" type="button">Settings</button>
+  </nav>
 
   <!-- Thread chip strip (Chat section only) -->
   <div id="thread-chips" style="display:none;"></div>
@@ -194,38 +200,8 @@
   </main>
 </div>
 
-<!-- Drawer -->
-<nav id="threads-sidebar" role="dialog" aria-label="Navigation">
-  <div class="drawer-header">
-    <span class="drawer-wordmark">TEXT BOSS</span>
-    <span class="drawer-tier" id="drawer-tier">—</span>
-    <button id="sidebar-close" aria-label="Close menu">×</button>
-  </div>
-  <div class="drawer-nav" id="drawer-nav">
-    <div class="drawer-nav-item active" data-section="chat">
-      <span class="nav-icon">💬</span><span class="nav-label">Chat</span>
-    </div>
-    <div class="drawer-nav-item pro-only" data-section="schedule" style="display:none;">
-      <span class="nav-icon">📅</span><span class="nav-label">Schedule</span>
-    </div>
-    <div class="drawer-nav-item pro-only" data-section="prompts" style="display:none;">
-      <span class="nav-icon">📋</span><span class="nav-label">Prompts</span>
-    </div>
-    <div class="drawer-nav-item" data-section="threads">
-      <span class="nav-icon">🗂️</span><span class="nav-label">Threads</span>
-    </div>
-    <div class="drawer-divider"></div>
-    <div class="drawer-nav-item" data-section="settings">
-      <span class="nav-icon">⚙️</span><span class="nav-label">Settings</span>
-    </div>
-  </div>
-  <div class="drawer-footer">
-    <div style="font-size:12px;color:var(--muted);" id="drawer-email"></div>
-  </div>
-</nav>
-
-<!-- Dim overlay -->
-<div id="sidebar-backdrop"></div>
+<!-- Hidden sidebar-backdrop stub (app-client.js may reference it) -->
+<div id="sidebar-backdrop" style="display:none;"></div>
 
 <!-- Hidden new-chat-button (triggered by header-action and + chip) -->
 <button id="new-chat-button" style="display:none;" aria-hidden="true"></button>
@@ -282,9 +258,8 @@
     app.setAttribute('data-tier', tier);
     app.setAttribute('data-input-limit', tier === 'Black' ? 8000 : tier === 'Pro' ? 6000 : 4000);
 
-    document.getElementById('drawer-tier').textContent = tier;
+    document.getElementById('header-tier').textContent = tier;
     document.getElementById('tier-badge').textContent  = tier;
-    document.getElementById('drawer-email').textContent = email || '';
     document.title = 'Text Boss \u00b7 ' + tier;
 
     if (PRO_TIERS.has(tier)) {
@@ -293,44 +268,17 @@
   }
 
   function initShell() {
-    initDrawer();
     initSectionNav();
     initThreadChips();
     initOfflineBanner();
     loadSettingsProfile();
   }
 
-  // Drawer
-  function initDrawer() {
-    const toggle   = document.getElementById('sidebar-toggle');
-    const drawer   = document.getElementById('threads-sidebar');
-    const backdrop = document.getElementById('sidebar-backdrop');
-    const closeBtn = document.getElementById('sidebar-close');
-
-    function openDrawer() {
-      drawer.classList.add('open');
-      backdrop.classList.add('visible');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeDrawer() {
-      drawer.classList.remove('open');
-      backdrop.classList.remove('visible');
-      document.body.style.overflow = '';
-    }
-
-    toggle.addEventListener('click', openDrawer);
-    closeBtn.addEventListener('click', closeDrawer);
-    backdrop.addEventListener('click', closeDrawer);
-  }
-
   // Section navigation
   function initSectionNav() {
-    document.querySelectorAll('.drawer-nav-item[data-section]').forEach(item => {
-      item.addEventListener('click', () => {
-        switchSection(item.dataset.section);
-        document.getElementById('threads-sidebar').classList.remove('open');
-        document.getElementById('sidebar-backdrop').classList.remove('visible');
-        document.body.style.overflow = '';
+    document.querySelectorAll('.tab-btn[data-section]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchSection(btn.dataset.section);
       });
     });
 
@@ -347,9 +295,6 @@
   function switchSection(section) {
     currentSection = section;
 
-    const labels = { chat: 'Chat', schedule: 'Schedule', prompts: 'Prompts', threads: 'Threads', settings: 'Settings' };
-    document.getElementById('section-label').textContent = labels[section] || section;
-
     const headerAction = document.getElementById('header-action');
     headerAction.classList.toggle('hidden', section !== 'chat' && section !== 'threads');
 
@@ -359,8 +304,8 @@
     const target = document.getElementById('panel-' + section);
     if (target) target.classList.add('active');
 
-    document.querySelectorAll('.drawer-nav-item[data-section]').forEach(item => {
-      item.classList.toggle('active', item.dataset.section === section);
+    document.querySelectorAll('.tab-btn[data-section]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.section === section);
     });
 
     if (section === 'schedule' && !schedulerInitialised && PRO_TIERS.has(appTier)) {
