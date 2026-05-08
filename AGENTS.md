@@ -24,7 +24,7 @@ Text Boss
 
 \- Use Supabase for entitlement verification
 
-\- Use OpenAI Responses API for model calls
+\- Use the Anthropic Messages API for model calls (see netlify/functions/\_lib/anthropic.js)
 
 \- Keep Core / Pro / Black behavior strictly separated
 

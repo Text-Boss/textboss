@@ -9,6 +9,8 @@
 // OneSignal handles push events — import its SW SDK first
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
+// Bump this version (tb-shell-vN → tb-shell-v(N+1)) whenever any file in
+// APP_SHELL_FILES changes. The activate handler evicts older tb-shell-* caches.
 const APP_SHELL_CACHE = "tb-shell-v5";
 const APP_SHELL_FILES = [
   "/app.html",

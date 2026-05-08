@@ -20,7 +20,7 @@
       },
       "audience": {
         "type": "string",
-        "enum": ["freelancers-contractors", "tradespeople-service", "consultants-agency"]
+        "enum": ["freelancers-contractors", "tradespeople-service", "consultants-agency", "med-spas", "real-estate", "law-firms"]
       },
       "copy": { "type": "string", "description": "Full post copy ready to publish" },
       "hashtags": { "type": "array", "items": { "type": "string" } },

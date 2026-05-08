@@ -30,6 +30,10 @@ node scripts/extract-prompts.js
 
 `netlify dev` serves static files from `.` and Netlify Functions from `netlify/functions/` on port 8888.
 
+`npm test` is an inline Node script that runs every `tests/*.test.js` sequentially in alphabetical order with `stdio: 'inherit'`. There is no parallelism, no reporter, and no aggregated summary — the first failing file aborts the run via `execFileSync`. Use `node tests/<name>.test.js` to run a single file in isolation.
+
+`bin/textboss.js` is the `textboss` npm-bin entry — a vanity ANSI splash CLI (`textboss`, `--version`, `--help`). It is unrelated to the running web app and not used in production.
+
 ## Required environment variables
 
 | Variable | Purpose |
@@ -72,6 +76,8 @@ System prompts instruct the AI to write in a natural human voice — no AI-givea
 
 Password auth is also supported — `forgot-password.js` / `reset-password.js` / `set-password.js` handle the full PBKDF2 reset flow via Resend email.
 
+`session-logout.js` is a lightweight `POST` endpoint that returns the cleared-session `Set-Cookie` header (no auth check; idempotent).
+
 ### Session cookie
 Implemented in `netlify/functions/_lib/session.js`. Format: `base64url(payload).hmac_signature`. Payload contains `email`, `tier`, `iat`, `exp` (30-day TTL). Uses `crypto.timingSafeEqual` for signature comparison. The `Secure` flag is always set unconditionally — do not gate it on `NODE_ENV`.
 
@@ -112,22 +118,26 @@ All tables are accessed via the service role key (bypasses RLS). RLS is intentio
 ### Scheduling subsystem (Pro/Black only)
 All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core users are denied at the function level.
 
+**Endpoints (request-driven):**
 - `appointments.js` — CRUD for booked appointments
 - `availability.js` — CRUD for weekly availability slots
 - `schedule-chat.js` — AI conversational scheduling; tools: `resolve_service`, `find_available_slots`, `list_appointments`, `book_appointment`, `cancel_appointment`, `reschedule_appointment`, `add_busy_block`, plus `remember` (Pro/Black). Uses `max_tokens: 4096` hardcoded — do not replace with `policy.responseMaxTokens`, which is too low for tool-call round-trips.
 - `business-profile.js` — GET/POST for business profile (occupation, working hours, buffer times, avatar, business details, booking slug). Also validates and saves: `business_name`, `owner_first_name`, `owner_full_name`, `business_phone`, `website`, `abn`, `city`, `avatar_data` (base64, max 200KB)
 - `services.js` — CRUD for the relational `services` table (replaces old JSONB services field on `business_profiles`)
-- `public-booking.js` — Unauthenticated client-facing booking via `book.html?owner=<slug>`. AI tools: `find_available_slots` + `confirm_booking`. `confirm_booking` requires `client_phone` (mandatory) and accepts optional `client_email`. On confirmation: sends SMS to owner (`business_phone`) + client via Mobile Message; sends Resend email to owner + client (if email provided); sends Web Push to owner with deep-link URL. Uses `_lib/sms.js` for SMS delivery.
 - `busy-blocks.js` — Calendar busy blocks (Pro: max 200, Black: unlimited)
 - `ical-import.js` — Parses `.ics` uploads into busy blocks; inline RFC 5545 parser, no external deps
-- `follow-up.js` / `send-follow-ups.js` — AI-drafted follow-up messages; scheduled daily at 9am UTC
-- `send-reminders.js` — Scheduled hourly; Web Push appointment reminders 24h before. Looks up owner tier to embed a tier-specific `url` in the push payload.
-- `send-todo-reminders.js` — Scheduled every 15 min; Web Push + Resend email fallback for due to-do reminders. Same tier-lookup pattern for `url`.
 - `todos.js` — CRUD for the `todos` table (urgency, reminders, done state); gated on Pro/Black
+- `follow-up.js` — AI-drafted follow-up messages (the request-driven half of the follow-up pair)
+- `threads.js` — Conversation thread persistence
+- `public-booking.js` — Unauthenticated client-facing booking via `book.html?owner=<slug>`. AI tools: `find_available_slots` + `confirm_booking`. `confirm_booking` requires `client_phone` (mandatory) and accepts optional `client_email`. On confirmation: sends SMS to owner (`business_phone`) + client via Mobile Message; sends Resend email to owner + client (if email provided); sends Web Push to owner with deep-link URL. Uses `_lib/sms.js` for SMS delivery.
 - `push-subscribe.js` / `vapid-key.js` — Web Push subscription management
 - `subscribe.js` — Beehiiv newsletter signup (unauthenticated; uses `BEEHIIV_PUBLICATION_ID` + `BEEHIIV_API_KEY`)
 - `onesignal-config.js` — Unauthenticated GET; returns `{ appId }` from `ONESIGNAL_APP_ID` so the frontend OneSignal Web SDK can initialise without hardcoding the app ID. Returns 503 `{ error: "not_configured" }` if unset.
-- `threads.js` — Conversation thread persistence
+
+**Scheduled jobs (Netlify cron):**
+- `send-follow-ups.js` — Daily at 9am UTC; sends queued follow-up messages
+- `send-reminders.js` — Hourly; Web Push appointment reminders 24h before. Looks up owner tier to embed a tier-specific `url` in the push payload.
+- `send-todo-reminders.js` — Every 15 min; Web Push + Resend email fallback for due to-do reminders. Same tier-lookup pattern for `url`.
 
 ### SMS utility (`_lib/sms.js`)
 `sendSms({ to, body })` — sends via Mobile Message REST API (`POST https://api.mobilemessage.com.au/v1/messages`, Basic Auth). Normalises AU mobile numbers (`04xx` → `61xx`). Reads `MOBILEMESSAGE_USERNAME`, `MOBILEMESSAGE_PASSWORD`, `MOBILEMESSAGE_SENDER` from env — returns silently if credentials are missing (safe in local dev).
@@ -187,7 +197,7 @@ Defined in `scheduler-client.js`. Steps: (1) personal & business details, (2) oc
 Accessed via `book.html?owner=<slug>`. Unauthenticated. On load, calls `public-booking.js` with `message: "__init__"` to fetch `businessName`, `occupation`, `ownerName`, `city`, `avatarData`, and `services`. Renders a chat UI — clients select a service chip or type freely. AI handles availability checking and booking confirmation. On confirmation, the client sees "Add to Google Calendar" (deep-link) and "Add to Apple / Outlook Calendar" (.ics download) buttons — do not label these as ".ics" to the user. Client phone is collected as mandatory; email is optional.
 
 ### `sw.js` (service worker)
-Handles Web Push `push` events, app-shell caching (cache name `tb-shell-v5`), and offline fallback. On notification click, navigates to `data.url` from the push payload if present; falls back to `/access.html`. The send functions (`send-reminders.js`, `send-follow-ups.js`, `send-todo-reminders.js`) look up the owner's tier and include a tier-specific deep-link URL in every push payload. `APP_SHELL_FILES` caches all three app pages plus all client scripts — bump the cache name (`tb-shell-vN`, currently `tb-shell-v5`) whenever cached static files change.
+Handles Web Push `push` events, app-shell caching, and offline fallback. On notification click, navigates to `data.url` from the push payload if present; falls back to `/access.html`. The send functions (`send-reminders.js`, `send-follow-ups.js`, `send-todo-reminders.js`) look up the owner's tier and include a tier-specific deep-link URL in every push payload. `APP_SHELL_FILES` caches all three app pages plus all client scripts. Cache name is `APP_SHELL_CACHE` at the top of `sw.js` (`tb-shell-vN`) — bump it whenever cached static files change so old shells are evicted on activate.
 
 ### Native app (Capacitor)
 `capacitor.config.json` configures a Capacitor 7 wrapper (`appId: "com.textboss.app"`, `webDir: "www"`). The `server.url` field points to the live Netlify deployment — update it before building. Push notifications use OneSignal's native SDK on-device (not the web VAPID stack). The `www/` directory is a build artefact produced by `npm run build:app` (`scripts/build-www.js`) — it is gitignored, regenerated on demand, and not used by the Netlify/browser deployment. Run `npm run cap:sync` after `build:app` to push the bundle into the native iOS/Android projects.
@@ -202,3 +212,9 @@ Tests use Node's built-in `assert/strict` — no test framework. Each test file 
 - `index.html`, `core.html`, `pro.html`, and `black.html` are marketing/landing pages — keep them separate from the subscriber app pages (`app-core.html`, `app-pro.html`, `app-black.html`). Do not confuse the two sets
 - Services are stored in the relational `services` table — do not use the old `services` JSONB column on `business_profiles`
 - `business-profile.js` is Pro/Black only — Core has no profile or scheduling features
+
+## Non-production scratch files
+The following files at the repo root are scratch/draft artefacts — **not** part of the live site, and not linked from any production page. Do not treat them as canonical when answering questions about real behaviour:
+- `index-draft.html`, `mockup-scheduler-v2.html`, `scheduler-mockup.html` — design mockups
+- `audit_results.md`, `MARKETING_STRATEGY.md` — internal notes
+- `AGENTS.md` — older agent guidance; if it conflicts with this file, this file wins
