@@ -18,6 +18,12 @@ node tests/<name>.test.js
 # Local dev server (Netlify CLI)
 npx netlify dev
 
+# Build the Capacitor `www/` bundle from the static site
+npm run build:app
+
+# Sync the built web bundle into the native iOS/Android Capacitor projects
+npm run cap:sync
+
 # Regenerate prompts-data.json from pro_subscriber_prompts.html (run after editing prompt templates)
 node scripts/extract-prompts.js
 ```
@@ -120,6 +126,7 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 - `todos.js` — CRUD for the `todos` table (urgency, reminders, done state); gated on Pro/Black
 - `push-subscribe.js` / `vapid-key.js` — Web Push subscription management
 - `subscribe.js` — Beehiiv newsletter signup (unauthenticated; uses `BEEHIIV_PUBLICATION_ID` + `BEEHIIV_API_KEY`)
+- `onesignal-config.js` — Unauthenticated GET; returns `{ appId }` from `ONESIGNAL_APP_ID` so the frontend OneSignal Web SDK can initialise without hardcoding the app ID. Returns 503 `{ error: "not_configured" }` if unset.
 - `threads.js` — Conversation thread persistence
 
 ### SMS utility (`_lib/sms.js`)
@@ -132,6 +139,8 @@ All scheduling endpoints gate on `SCHEDULING_TIERS = {"Pro", "Black"}` — Core 
 `schedule-chat.js` loads a `memory_text` blob from `scheduler_memory` (one row per owner) and injects it as `=== MEMORY ===` into the system prompt for both Pro and Black. The `remember` tool lets the AI persist preference updates back to that row. Core does not get this tool or memory injection.
 
 ### Supabase tables
+SQL migrations live in `migrations/` at the repo root (not `supabase/migrations/`). `migrations/supabase_full_setup.sql` is a consolidated bootstrap script for fresh projects.
+
 | Table | Migration | Notes |
 |---|---|---|
 | `entitlements` | — | Stripe-managed subscription state |
@@ -178,10 +187,10 @@ Defined in `scheduler-client.js`. Steps: (1) personal & business details, (2) oc
 Accessed via `book.html?owner=<slug>`. Unauthenticated. On load, calls `public-booking.js` with `message: "__init__"` to fetch `businessName`, `occupation`, `ownerName`, `city`, `avatarData`, and `services`. Renders a chat UI — clients select a service chip or type freely. AI handles availability checking and booking confirmation. On confirmation, the client sees "Add to Google Calendar" (deep-link) and "Add to Apple / Outlook Calendar" (.ics download) buttons — do not label these as ".ics" to the user. Client phone is collected as mandatory; email is optional.
 
 ### `sw.js` (service worker)
-Handles Web Push `push` events, app-shell caching (cache name `tb-shell-v4`), and offline fallback. On notification click, navigates to `data.url` from the push payload if present; falls back to `/access.html`. The send functions (`send-reminders.js`, `send-follow-ups.js`, `send-todo-reminders.js`) look up the owner's tier and include a tier-specific deep-link URL in every push payload. `APP_SHELL_FILES` caches all three app pages plus all client scripts — bump the cache name (`tb-shell-vN`, currently `tb-shell-v4`) whenever cached static files change.
+Handles Web Push `push` events, app-shell caching (cache name `tb-shell-v5`), and offline fallback. On notification click, navigates to `data.url` from the push payload if present; falls back to `/access.html`. The send functions (`send-reminders.js`, `send-follow-ups.js`, `send-todo-reminders.js`) look up the owner's tier and include a tier-specific deep-link URL in every push payload. `APP_SHELL_FILES` caches all three app pages plus all client scripts — bump the cache name (`tb-shell-vN`, currently `tb-shell-v5`) whenever cached static files change.
 
 ### Native app (Capacitor)
-`capacitor.config.json` configures a Capacitor 7 wrapper (`appId: "com.textboss.app"`, `webDir: "www"`). The `server.url` field points to the live Netlify deployment — update it before building. Push notifications use OneSignal's native SDK on-device (not the web VAPID stack). The `www/` directory is the Capacitor web build output and is not used by the Netlify/browser deployment.
+`capacitor.config.json` configures a Capacitor 7 wrapper (`appId: "com.textboss.app"`, `webDir: "www"`). The `server.url` field points to the live Netlify deployment — update it before building. Push notifications use OneSignal's native SDK on-device (not the web VAPID stack). The `www/` directory is a build artefact produced by `npm run build:app` (`scripts/build-www.js`) — it is gitignored, regenerated on demand, and not used by the Netlify/browser deployment. Run `npm run cap:sync` after `build:app` to push the bundle into the native iOS/Android projects.
 
 ### Testing pattern
 Tests use Node's built-in `assert/strict` — no test framework. Each test file is a self-executing async function. `npm test` discovers and runs all `tests/*.test.js`. Runtime-integration tests (`*-runtime.test.js`) require real env vars and are for manual runs only.
