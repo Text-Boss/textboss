@@ -1,0 +1,86 @@
+{
+  "name": "TextBoss — Reddit Comment",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "reddit-comment",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://oauth.reddit.com/api/comment",
+        "authentication": "oAuth2",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "thing_id",
+              "value": "={{ $json.post_link.split('/comments/')[1].split('/')[0].startsWith('t3_') ? $json.post_link.split('/comments/')[1].split('/')[0] : 't3_' + $json.post_link.split('/comments/')[1].split('/')[0] }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.copy }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        250,
+        0
+      ],
+      "id": "reddit-api-post",
+      "name": "Reddit API Post"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Read, update, write back to mark as posted\nconst fs = require('fs');\nconst path = require('path');\n\nconst calPath = $vars.CALENDAR_PATH || path.join(process.cwd(), 'marketing/content-calendar/approved/reddit_calendar.json');\n\nif (fs.existsSync(calPath)) {\n  const calendar = JSON.parse(fs.readFileSync(calPath, 'utf8'));\n  const post = calendar.find(p => p.id === $node[\"Webhook\"].json.id);\n  if (post) {\n    post.status = 'posted';\n    fs.writeFileSync(calPath, JSON.stringify(calendar, null, 2));\n  }\n}\n\nreturn [{ json: { status: 'success', id: $node[\"Webhook\"].json.id } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        0
+      ],
+      "id": "update-calendar-status",
+      "name": "Update Calendar Status"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Reddit API Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reddit API Post": {
+      "main": [
+        [
+          {
+            "node": "Update Calendar Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

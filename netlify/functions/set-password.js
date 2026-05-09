@@ -28,6 +28,7 @@ function createHandler(deps) {
       const email           = String(body.email           || "").trim().toLowerCase();
       const password        = String(body.password        || "");
       const confirmPassword = String(body.confirmPassword || "");
+      const remember        = !!body.remember;
 
       if (!email)    return json(400, { ok: false, denied: true, reason: "missing_email" });
       if (!password) return json(400, { ok: false, denied: true, reason: "missing_password" });
@@ -51,7 +52,7 @@ function createHandler(deps) {
 
       await updatePasswordHash(email, hashPassword(password));
 
-      const setCookie = createSessionCookie({ email, tier });
+      const setCookie = createSessionCookie({ email, tier }, remember);
       const redirectTo = tier === 'Black' ? '/app-black.html' : tier === 'Pro' ? '/app-pro.html' : '/app-core.html';
       return json(200, { ok: true, tier, redirectTo }, { "set-cookie": setCookie });
 

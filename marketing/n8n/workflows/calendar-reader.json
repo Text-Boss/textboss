@@ -22,8 +22,7 @@
     },
     {
       "parameters": {
-        "language": "pythonNative",
-        "pythonCode": "const fs = require('fs');\n\n  const calPath = 'C:\\\\Users\\\\adele\\\\OneDrive\\\\Desktop\\\\tb\\\\textboss\\\\marketing\n  \\\\content-calendar\\\\approved\\\\calendar.json';\n\n  if (!fs.existsSync(calPath)) return [];\n\n  const calendar = JSON.parse(fs.readFileSync(calPath, 'utf8'));\n  const now = new Date();\n  const windowMs = 5 * 60 * 1000;\n\n  const due = calendar.filter(post => {\n    if (post.status !== 'approved') return false;\n    const postTime = new Date(post.scheduled_time);\n    return postTime >= now && postTime <= new Date(now.getTime() + windowMs);\n  });\n\n  return due.map(post => ({ json: post }));"
+        "jsCode": "const fs = require('fs');\nconst path = require('path');\n\n// Use n8n variable or fallback to relative path in the current project\n// Note: n8n usually runs from its own directory, so we use an absolute path resolved from process.cwd() \n// assuming n8n is started from the project root.\nconst calPath = $vars.CALENDAR_PATH || path.join(process.cwd(), 'marketing/content-calendar/approved/reddit_calendar.json');\n\nif (!fs.existsSync(calPath)) return [];\n\nconst calendar = JSON.parse(fs.readFileSync(calPath, 'utf8'));\nconst now = new Date();\nconst windowMs = 5 * 60 * 1000;\n\nconst due = calendar.filter(post => {\n  if (post.status !== 'approved') return false;\n  const postTime = new Date(post.scheduled_time);\n  return postTime >= now && postTime <= new Date(now.getTime() + windowMs);\n});\n\nreturn due.map(post => ({ json: post }));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -32,7 +31,7 @@
         0
       ],
       "id": "c0be8ca9-7791-4948-90e7-e049e83db9c5",
-      "name": "Code in Python"
+      "name": "Code"
     },
     {
       "parameters": {
@@ -126,14 +125,14 @@
       "main": [
         [
           {
-            "node": "Code in Python",
+            "node": "Code",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code in Python": {
+    "Code": {
       "main": [
         [
           {

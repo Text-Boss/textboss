@@ -21,6 +21,7 @@ function createHandler(deps) {
       const token           = String(body.token           || "").trim();
       const password        = String(body.password        || "");
       const confirmPassword = String(body.confirmPassword || "");
+      const remember        = !!body.remember;
 
       if (!token || token.length > 128) return denied(400, "invalid_token");
       if (!password) return denied(400, "missing_password");
@@ -48,7 +49,7 @@ function createHandler(deps) {
       await markTokenUsed(token);
       await updatePasswordHash(tokenRecord.email, hashPassword(password));
 
-      const setCookie = createSessionCookie({ email: tokenRecord.email, tier });
+      const setCookie = createSessionCookie({ email: tokenRecord.email, tier }, remember);
       const redirectTo = tier === 'Black' ? '/app-black.html' : tier === 'Pro' ? '/app-pro.html' : '/app-core.html';
       return json(200, { ok: true, tier, redirectTo }, { "set-cookie": setCookie });
 

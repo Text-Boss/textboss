@@ -55,7 +55,10 @@
     input:read-only { opacity: .55; cursor: default; }
     .field { margin-bottom: 16px; }
     .field:last-of-type { margin-bottom: 0; }
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .field-row { display: flex; align-items: center; gap: 10px; margin-top: 16px; margin-bottom: 4px; }
+    .field-row input { width: 18px; height: 18px; cursor: pointer; border-radius: 4px; border-color: var(--line-hi); }
+    .field-row label { margin-bottom: 0; cursor: pointer; color: var(--muted-hi); font-size: 13px; user-select: none; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
     button, .back-link {
       display: inline-flex; justify-content: center; align-items: center;
       min-height: 44px; border-radius: 10px; padding: 0 18px;
@@ -103,6 +106,10 @@
           <label for="signin-password">Password</label>
           <input id="signin-password" type="password" autocomplete="current-password" placeholder="••••••••" required>
         </div>
+        <div class="field-row">
+          <input id="signin-remember" type="checkbox" checked>
+          <label for="signin-remember">Remember me</label>
+        </div>
         <div class="actions">
           <button class="primary" type="submit">Sign in</button>
         </div>
@@ -127,6 +134,10 @@
         <div class="field">
           <label for="setup-confirm">Confirm password</label>
           <input id="setup-confirm" type="password" autocomplete="new-password" placeholder="••••••••" required>
+        </div>
+        <div class="field-row">
+          <input id="setup-remember" type="checkbox" checked>
+          <label for="setup-remember">Remember me</label>
         </div>
         <div class="actions">
           <button class="primary" type="submit">Set password &amp; sign in</button>
@@ -179,17 +190,30 @@
     }
 
     // ── Sign in form ──────────────────────────────────────────────────────────
+    const savedEmail = localStorage.getItem("tb_remembered_email");
+    if (savedEmail) {
+      document.getElementById("signin-email").value = savedEmail;
+      document.getElementById("signin-remember").checked = true;
+    }
+
     document.getElementById("signin-form").addEventListener("submit", async function (e) {
       e.preventDefault();
       const email    = document.getElementById("signin-email").value.trim();
       const password = document.getElementById("signin-password").value;
+      const remember = document.getElementById("signin-remember").checked;
       setStatus("signin-status", "Signing in…", false);
+
+      if (remember) {
+        localStorage.setItem("tb_remembered_email", email);
+      } else {
+        localStorage.removeItem("tb_remembered_email");
+      }
 
       try {
         const res  = await fetch("/.netlify/functions/verify-email", {
           method: "POST", credentials: "same-origin",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email, password, remember }),
         });
         const data = await res.json().catch(() => null);
 
@@ -233,6 +257,7 @@
       const email           = document.getElementById("setup-email").value;
       const password        = document.getElementById("setup-password").value;
       const confirmPassword = document.getElementById("setup-confirm").value;
+      const remember        = document.getElementById("setup-remember").checked;
       setStatus("setup-status", "Setting password…", false);
 
       if (password !== confirmPassword) {
@@ -248,7 +273,7 @@
         const res  = await fetch("/.netlify/functions/set-password", {
           method: "POST", credentials: "same-origin",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ email, password, confirmPassword }),
+          body: JSON.stringify({ email, password, confirmPassword, remember }),
         });
         const data = await res.json().catch(() => null);
 

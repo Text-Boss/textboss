@@ -1,15 +1,5 @@
 [
   {
-    "id": "post-001",
-    "platform": "linkedin",
-    "pillar": "soft-reply-tax",
-    "audience": "consultants-agency",
-    "copy": "One sentence cost a $14,000 project its margin.\n\nNot the proposal. Not the contract. The reply to the first 'small addition' request.\n\nThe client asked. The reply hedged. Six weeks later, the scope had grown by 40%. Nothing additional was billed.\n\nThe cost of that sentence wasn't measured until the final invoice.\n\nYour language is your pricing. Every imprecise reply is a discount you never agreed to give.",
-    "hashtags": ["freelanceconsulting", "clientmanagement", "scopecreep", "agencylife"],
-    "scheduled_time": "2026-04-28T22:00:00Z",
-    "status": "draft"
-  },
-  {
     "id": "post-002",
     "platform": "x",
     "pillar": "language-problem",
@@ -18,18 +8,6 @@
     "hashtags": ["trades", "smallbusiness", "pricing"],
     "scheduled_time": "2026-04-30T02:00:00Z",
     "status": "draft"
-  },
-  {
-    "id": "post-003",
-    "platform": "reddit",
-    "pillar": "soft-reply-tax",
-    "audience": "freelancers-contractors",
-    "copy": "Worth adding: the moment you start justifying your price is the moment the negotiation starts.\n\nMost scope creep doesn't begin with a bold request — it starts with a soft reply. Something like 'I can look into it' or 'let me see what I can do.' The client heard yes. You thought you were being polite.\n\nOne-sentence replies do more work than paragraphs of explanation. 'That's outside our agreed scope — happy to quote it separately' is the whole answer.",
-    "hashtags": ["freelance", "scopecreep", "clientcommunication"],
-    "scheduled_time": "2026-05-01T09:00:00Z",
-    "status": "draft",
-    "subreddit": "r/freelance",
-    "reddit_type": "comment"
   },
   {
     "id": "post-004",
@@ -43,16 +21,6 @@
     "instagram_layout_brief": "Split-panel quote tile: left panel dark terminal background with 'BEFORE' header and the weak reply in muted text; right panel with 'AFTER' header and the controlled reply in white. Text Boss wordmark bottom right."
   },
   {
-    "id": "post-005",
-    "platform": "linkedin",
-    "pillar": "before-after",
-    "audience": "freelancers-contractors",
-    "copy": "The scope creep didn't start with the client. It started with the reply.\n\nTwo versions of the same scenario:\n\nCLIENT: 'Can you just add one more thing while you're in there?'\n\nVersion A: 'Sure, I'll see what I can do, it shouldn't take too long'\nVersion B: 'That's outside the agreed scope. I can add it as a separate line item if you'd like.'\n\nVersion A opened three follow-up requests. Version B closed the conversation in one exchange.\n\nNeither version changed the client. Only the language changed.",
-    "hashtags": ["freelance", "projectmanagement", "clientrelations", "scopecreep"],
-    "scheduled_time": "2026-05-02T22:00:00Z",
-    "status": "draft"
-  },
-  {
     "id": "post-006",
     "platform": "x",
     "pillar": "no-show-chaos",
@@ -60,28 +28,6 @@
     "copy": "Unconfirmed DM bookings are not bookings. They're intentions.\n\nThe no-show was always going to happen.\n\n// textboss.com.au",
     "hashtags": ["trades", "scheduling", "noshows"],
     "scheduled_time": "2026-05-04T02:00:00Z",
-    "status": "draft"
-  },
-  {
-    "id": "post-007",
-    "platform": "reddit",
-    "pillar": "language-problem",
-    "audience": "tradespeople-service",
-    "copy": "Something I've seen come up repeatedly: the assumption that saying no to a client has to sound like a rejection.\n\nIt doesn't. 'That's not something I offer' is a complete sentence. 'My rates don't change for that' is a complete sentence.\n\nThe customer who leaves after a clear boundary wasn't a good fit. The one who stays after hearing it clearly? That's actually your client.",
-    "hashtags": ["smallbusiness", "trades", "clientcommunication"],
-    "scheduled_time": "2026-05-05T09:00:00Z",
-    "status": "draft",
-    "subreddit": "r/smallbusiness",
-    "_type": "comment"
-  },
-  {
-    "id": "post-008",
-    "platform": "linkedin",
-    "pillar": "no-show-chaos",
-    "audience": "consultants-agency",
-    "copy": "Three hours lost last Tuesday. Not to the no-show. To what surrounded it.\n\nThe back-and-forth DM that confirmed nothing. The gap it created in the afternoon. The awkward follow-up message that came after.\n\nThe no-show was 30 minutes. The problem around it was the rest of the day.\n\nUnconfirmed bookings aren't a client problem. They're a system problem. Every business running on DM scheduling is one soft reply away from a ruined day.",
-    "hashtags": ["consulting", "clientmanagement", "scheduling", "businessoperations"],
-    "scheduled_time": "2026-05-05T22:00:00Z",
     "status": "draft"
   },
   {
@@ -104,18 +50,6 @@
     "scheduled_time": "2026-05-08T08:00:00Z",
     "status": "draft",
     "instagram_layout_brief": "Full-bleed dark background. Single bold statement in large terminal-style monospace font: 'The quote was right. The reply lowered it.' Subtext in smaller muted font: 'Lock the sentence. Lock the price.' Text Boss wordmark bottom right. Minimal layout, no imagery."
-  },
-  {
-    "id": "post-011",
-    "platform": "reddit",
-    "pillar": "no-show-chaos",
-    "audience": "freelancers-contractors",
-    "copy": "No-shows on Upwork are almost always preceded by the same thing: an unconfirmed booking.\n\n'Sounds good, I'll message you closer to the time' is not a confirmed appointment. Neither is 'yeah let's do that.'\n\nWritten confirmation with a time, date, and explicit reply creates a real record when something goes wrong — and filters out the time-wasters early, before they cost you a slot.",
-    "hashtags": ["freelance", "Upwork", "scheduling", "noshows"],
-    "scheduled_time": "2026-05-09T09:00:00Z",
-    "status": "draft",
-    "subreddit": "r/Upwork",
-    "reddit_type": "comment"
   },
   {
     "id": "post-012",
@@ -513,18 +447,6 @@
     "instagram_layout_brief": "Flowchart style on dark background. Icons for different tiers. Clean terminal aesthetics."
   },
   {
-    "id": "post-049",
-    "platform": "reddit",
-    "pillar": "language-problem",
-    "audience": "law-firms",
-    "copy": "To the Solo Practitioners: Your intake is your bottleneck. You can't be in court and on the phone at the same time. Automated SMS allows you to capture every PI inquiry without ever picking up the phone. 'Thanks for reaching out. We've received your inquiry—reply with your case type to start intake.' It’s professional, it’s HIPAA-compliant, and it works while you’re in front of a judge.",
-    "hashtags": ["lawyer", "soloattorney", "legalmarketing"],
-    "scheduled_time": "2026-06-20T14:00:00Z",
-    "status": "draft",
-    "subreddit": "r/lawfirm",
-    "reddit_type": "post"
-  },
-  {
     "id": "post-050",
     "platform": "x",
     "pillar": "no-show-chaos",
@@ -532,16 +454,6 @@
     "copy": "FITNESS STUDIOS: Member churn is a communication failure.\n\nIf a member misses 3 sessions without a text, they’re already gone.\n\nAccountability isn't 'support.' It's a system.",
     "hashtags": ["fitness", "gymowner", "retention"],
     "scheduled_time": "2026-06-21T09:00:00Z",
-    "status": "draft"
-  },
-  {
-    "id": "post-051",
-    "platform": "linkedin",
-    "pillar": "language-problem",
-    "audience": "tradespeople-service",
-    "copy": "The financial impact of ghosting in fitness studios isn't the lost session—it's the lost LTV.\n\nA member who skips without a follow-up is a member who cancels next month. Use automated 'Accountability Texts' to close the loop. Not 'We miss you!', but 'You missed your 6am. When are you making it up?'\n\nDirect language drives retention.",
-    "hashtags": ["fitnessbusiness", "retention", "automation", "gymlife"],
-    "scheduled_time": "2026-06-22T10:00:00Z",
     "status": "draft"
   },
   {
@@ -556,18 +468,6 @@
     "instagram_layout_brief": "Clean monospace typography. Large 'SYSTEM OVERRIDE' graphic overlay. Visualizing the shift from passive to active language."
   },
   {
-    "id": "post-053",
-    "platform": "reddit",
-    "pillar": "soft-reply-tax",
-    "audience": "tradespeople-service",
-    "copy": "Fitness Studio Owners: Stop being 'too nice' about late cancels. Your 'it's okay this time' is a soft-reply tax that devalues your trainers' time. If your system doesn't automatically trigger a 'Late Cancel Fee Applied' text, you're training your members to disrespect your schedule. Rules aren't mean; they're the foundation of a professional studio.",
-    "hashtags": ["gymowner", "fitness", "businesshacks"],
-    "scheduled_time": "2026-06-24T14:00:00Z",
-    "status": "draft",
-    "subreddit": "r/gymowners",
-    "reddit_type": "post"
-  },
-  {
     "id": "post-054",
     "platform": "x",
     "pillar": "soft-reply-tax",
@@ -575,16 +475,6 @@
     "copy": "AUTO REPAIR: Authorization lag is killing your tech utilization.\n\nEvery hour a car sits on a lift waiting for a 'sure, go ahead' text is lost profit.\n\nAutomate the auth. Clear the bays.",
     "hashtags": ["autobody", "mechanic", "efficiency"],
     "scheduled_time": "2026-06-25T09:00:00Z",
-    "status": "draft"
-  },
-  {
-    "id": "post-055",
-    "platform": "linkedin",
-    "pillar": "language-problem",
-    "audience": "tradespeople-service",
-    "copy": "In Auto Repair, the 'Communication Gap' is where profit goes to die.\n\nMechanics finish a diag, then the service writer spends 3 hours trying to reach the customer. If you're not using SMS for repair authorizations, you're running a 1990s business in 2026.\n\nSYSTEM: Diag Complete -> SMS Auth Link -> Instant Approval -> Tech Starts Work.",
-    "hashtags": ["autorepair", "mechaniclife", "operations", "smallbusiness"],
-    "scheduled_time": "2026-06-26T10:00:00Z",
     "status": "draft"
   },
   {
@@ -599,18 +489,6 @@
     "instagram_layout_brief": "Two-panel terminal. Panel A: 'Phone Tag (3 hours)'. Panel B: 'SMS Auth (2 mins)'. Footer: 'The variable is the system.'"
   },
   {
-    "id": "post-057",
-    "platform": "reddit",
-    "pillar": "tier-awareness",
-    "audience": "tradespeople-service",
-    "copy": "Shop owners: Are you still doing 'estimate follow-ups' by hand? You're wasting your service writer's talent. Tiered SMS follow-ups for high-ticket repairs (transmissions, engines) should be automatic. Tier 1: Auth requested. Tier 2 (2 hours later): 'Need that lift space, can we move forward?' Tier 3 (4 hours later): 'Car will be moved to lot if no reply.' Stop the authorization lag.",
-    "hashtags": ["mechanic", "shopowner", "businessops"],
-    "scheduled_time": "2026-06-28T14:00:00Z",
-    "status": "draft",
-    "subreddit": "r/MechanicAdvice",
-    "reddit_type": "post"
-  },
-  {
     "id": "post-058",
     "platform": "x",
     "pillar": "no-show-chaos",
@@ -618,16 +496,6 @@
     "copy": "DENTAL: A hygiene hole is a $250/hr leak.\n\nIf your 'reminder' doesn't require a 'C' to confirm, it's just a suggestion.\n\nFill the schedule. Fix the system.",
     "hashtags": ["dentistry", "dentaloffice", "roi"],
     "scheduled_time": "2026-06-29T09:00:00Z",
-    "status": "draft"
-  },
-  {
-    "id": "post-059",
-    "platform": "linkedin",
-    "pillar": "before-after",
-    "audience": "tradespeople-service",
-    "copy": "Dental Practices: The cost of a no-show isn't just the missed cleaning—it's the tech and chair time you can never get back.\n\nMost offices use 'passive reminders.' Text Boss uses 'active confirmations.' If the patient doesn't confirm via text, the system automatically alerts your waitlist. No holes. No waste.\n\nPrecision language for precision practices.",
-    "hashtags": ["dentist", "medicalbilling", "operations", "efficiency"],
-    "scheduled_time": "2026-06-30T10:00:00Z",
     "status": "draft"
   },
   {
@@ -642,18 +510,6 @@
     "instagram_layout_brief": "Minimalist blue/white terminal aesthetics. Bold text: 'CONFIRM OR RELEASE'. Dental chair icon in ASCII art."
   },
   {
-    "id": "post-061",
-    "platform": "reddit",
-    "pillar": "soft-reply-tax",
-    "audience": "tradespeople-service",
-    "copy": "Office managers: Stop the manual confirmation calls. 80% of patients prefer text, and 100% of your staff hates the phone. The 'soft' approach of calling 'just to remind them' takes 10x longer and has a lower success rate than a mandatory SMS confirmation loop. If your schedule has holes, your language is the problem. Automate the confirmation and let your staff focus on patient care.",
-    "hashtags": ["dentist", "officemanagement", "productivity"],
-    "scheduled_time": "2026-07-02T14:00:00Z",
-    "status": "draft",
-    "subreddit": "r/Dentistry",
-    "reddit_type": "post"
-  },
-  {
     "id": "post-062",
     "platform": "x",
     "pillar": "language-problem",
@@ -661,16 +517,6 @@
     "copy": "MENTAL HEALTH: Admin burnout starts with the telephone.\n\nIf you're still doing intake calls, you're losing clinical time.\n\nHIPAA-safe SMS is the system your practice needs.",
     "hashtags": ["therapy", "mentalhealth", "practicemanagement"],
     "scheduled_time": "2026-07-03T09:00:00Z",
-    "status": "draft"
-  },
-  {
-    "id": "post-063",
-    "platform": "linkedin",
-    "pillar": "soft-reply-tax",
-    "audience": "consultants-agency",
-    "copy": "The 'Politeness Trap' in Therapy Practice:\n\n'I'll see if I can fit you in next week' creates a burden for the therapist and uncertainty for the client. A structured SMS system that offers two specific slots and requires a 'YES' to lock eliminates the mental load.\n\nProtect your energy. Automate the admin.",
-    "hashtags": ["psychology", "practicemanagement", "burnout", "automation"],
-    "scheduled_time": "2026-07-04T10:00:00Z",
     "status": "draft"
   },
   {
@@ -685,18 +531,6 @@
     "instagram_layout_brief": "Soothing dark background. Terminal font. 'ADMIN OVERHEAD: REDUCED 80%'. Minimalist aesthetic."
   },
   {
-    "id": "post-065",
-    "platform": "reddit",
-    "pillar": "tier-awareness",
-    "audience": "consultants-agency",
-    "copy": "To the therapists: How much 'administrative friction' are you carrying? Every 'soft' email about scheduling is a micro-task that drains your focus. Tiered SMS automation allows you to sort clients by urgency and confirmation status without opening your inbox. HIPAA-compliant, secure, and binary. If they don't confirm, they don't get the link. Simple.",
-    "hashtags": ["therapy", "privatepractice", "mentalhealth"],
-    "scheduled_time": "2026-07-06T14:00:00Z",
-    "status": "draft",
-    "subreddit": "r/psychotherapy",
-    "reddit_type": "post"
-  },
-  {
     "id": "post-066",
     "platform": "x",
     "pillar": "soft-reply-tax",
@@ -704,16 +538,6 @@
     "copy": "PHOTOGRAPHY: Ghosting after pricing is a language failure.\n\n'Let me know what you think' is an invitation to ignore you.\n\n'Booking link expires in 24 hours' is a system.",
     "hashtags": ["photography", "freelance", "saleshacks"],
     "scheduled_time": "2026-07-07T09:00:00Z",
-    "status": "draft"
-  },
-  {
-    "id": "post-067",
-    "platform": "linkedin",
-    "pillar": "before-after",
-    "audience": "freelancers-contractors",
-    "copy": "Photographers: The 'Ghosting' problem isn't your price. It's your friction.\n\nIf a client has to email you to book after seeing a quote, you've added 5 steps they don't want to take. An instant SMS with a 'Pay to Secure' link closes the deal while the emotion is high.\n\nDon't send quotes. Send commitments.",
-    "hashtags": ["photographybusiness", "freelance", "sales", "efficiency"],
-    "scheduled_time": "2026-07-08T10:00:00Z",
     "status": "draft"
   },
   {
@@ -728,18 +552,6 @@
     "instagram_layout_brief": "High-fashion photography background with heavy dark overlay. Monospaced 'GHOSTING: DETECTED. REMEDY: SYSTEM LOCK.' text."
   },
   {
-    "id": "post-069",
-    "platform": "reddit",
-    "pillar": "no-show-chaos",
-    "audience": "freelancers-contractors",
-    "copy": "Photographers, stop letting 'soft leads' take up your weekend slots. If they aren't willing to reply to a confirmation text 48 hours before the shoot, they aren't going to show up with their deposit. Use an automated 'Confirm or Forfeit' loop to protect your golden hours. Your talent deserves a system that respects it.",
-    "hashtags": ["photography", "freelance", "businesshacks"],
-    "scheduled_time": "2026-07-10T14:00:00Z",
-    "status": "draft",
-    "subreddit": "r/photography",
-    "reddit_type": "post"
-  },
-  {
     "id": "post-070",
     "platform": "x",
     "pillar": "no-show-chaos",
@@ -747,16 +559,6 @@
     "copy": "TUTORING: Parent/Student sync is the bottleneck.\n\nIf the parent didn't text 'YES' to the reminder, the student isn't showing up.\n\nAutomate the loop. Save the session.",
     "hashtags": ["tutoring", "education", "productivity"],
     "scheduled_time": "2026-07-11T09:00:00Z",
-    "status": "draft"
-  },
-  {
-    "id": "post-071",
-    "platform": "linkedin",
-    "pillar": "language-problem",
-    "audience": "freelancers-contractors",
-    "copy": "Tutoring businesses: You're managing three schedules—the parent's, the student's, and yours. Friction is inevitable without a system.\n\nUse SMS to bridge the gap. Not 'Just reminding you about math tomorrow,' but 'Math session at 4pm. Parent reply P to confirm, Student reply S to confirm.'\n\nTriple-lock the schedule.",
-    "hashtags": ["tutoring", "edtech", "businessgrowth", "automation"],
-    "scheduled_time": "2026-07-12T10:00:00Z",
     "status": "draft"
   },
   {
@@ -770,16 +572,4 @@
     "status": "draft",
     "instagram_layout_brief": "Academic aesthetics (ruler, notebook) but with a sharp terminal interface overlay. 'STATUS: SESSION SECURED'."
   },
-  {
-    "id": "post-073",
-    "platform": "reddit",
-    "pillar": "tier-awareness",
-    "audience": "freelancers-contractors",
-    "copy": "Tutors, how much time do you spend on 'where are you?' texts? If your system doesn't automatically ping both the parent and student 15 minutes before the start time, you're doing too much manual labor. Tiered reminders: 24h (Confirm), 1h (Prepare), 15m (Link/Arrival). If they don't confirm the 24h, you fill the slot from the waitlist. Stop the no-show chaos.",
-    "hashtags": ["tutoring", "freelance", "productivity"],
-    "scheduled_time": "2026-07-14T14:00:00Z",
-    "status": "draft",
-    "subreddit": "r/TutorsHelpingTutors",
-    "reddit_type": "post"
-  }
   ]

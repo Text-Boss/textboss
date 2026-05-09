@@ -8,7 +8,7 @@ const calendar = JSON.parse(fs.readFileSync(calendarPath, 'utf8'));
 const REQUIRED_FIELDS = ['id', 'platform', 'pillar', 'audience', 'copy', 'hashtags', 'scheduled_time', 'status'];
 const VALID_PLATFORMS = ['reddit', 'linkedin', 'x', 'instagram'];
 const VALID_PILLARS = ['soft-reply-tax', 'before-after', 'language-problem', 'no-show-chaos', 'tier-awareness'];
-const VALID_AUDIENCES = ['freelancers-contractors', 'tradespeople-service', 'consultants-agency'];
+const VALID_AUDIENCES = ['freelancers-contractors', 'tradespeople-service', 'consultants-agency', 'med-spas', 'real-estate', 'law-firms'];
 const VALID_STATUSES = ['draft', 'approved', 'posted', 'failed'];
 
 const errors = [];

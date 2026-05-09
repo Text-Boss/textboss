@@ -19,12 +19,14 @@ async function testSignedCookieRoundTrip() {
   const sessionLib = require("../netlify/functions/_lib/session");
 
   await withEnv("TEXTBOSS_SESSION_SECRET", "test-secret", () => {
+    // Default (remember = true)
     const cookie = sessionLib.createSessionCookie({
       email: "core@example.com",
       tier: "Core",
     });
 
     assert.match(cookie, /^textboss_session=/);
+    assert.match(cookie, /Max-Age=2592000/); // 30 days
 
     const verification = sessionLib.verifySessionCookie({
       cookie,
@@ -33,6 +35,28 @@ async function testSignedCookieRoundTrip() {
     assert.equal(verification.ok, true);
     assert.equal(verification.session.email, "core@example.com");
     assert.equal(verification.session.tier, "Core");
+  });
+}
+
+async function testSessionOnlyCookie() {
+  const sessionLib = require("../netlify/functions/_lib/session");
+
+  await withEnv("TEXTBOSS_SESSION_SECRET", "test-secret", () => {
+    // Explicit remember = false
+    const cookie = sessionLib.createSessionCookie({
+      email: "guest@example.com",
+      tier: "Core",
+    }, false);
+
+    assert.match(cookie, /^textboss_session=/);
+    assert.ok(!cookie.includes("Max-Age="), "Session-only cookie should not have Max-Age");
+
+    const verification = sessionLib.verifySessionCookie({
+      cookie,
+    });
+
+    assert.equal(verification.ok, true);
+    assert.equal(verification.session.email, "guest@example.com");
   });
 }
 
@@ -63,6 +87,7 @@ async function testTamperedCookieDenied() {
 
 async function run() {
   await testSignedCookieRoundTrip();
+  await testSessionOnlyCookie();
   await testTamperedCookieDenied();
   console.log("session helper tests passed");
 }

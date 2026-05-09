@@ -33,6 +33,7 @@ function createHandler(deps) {
 
       const email    = normalizeEmail(body.email);
       const password = body.password || null;
+      const remember = !!body.remember;
 
       if (!email) return json(400, { ok: false, denied: true, reason: "missing_email" });
 
@@ -60,7 +61,7 @@ function createHandler(deps) {
         return json(403, { ok: false, denied: true, reason: "wrong_password" });
       }
 
-      const setCookie = createSessionCookie({ email, tier });
+      const setCookie = createSessionCookie({ email, tier }, remember);
       return json(200, { ok: true, tier, redirectTo: getRedirectForTier(tier) }, { "set-cookie": setCookie });
 
     } catch {

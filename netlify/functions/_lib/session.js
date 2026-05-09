@@ -24,13 +24,14 @@ function sign(value) {
   return crypto.createHmac("sha256", getSecret()).update(value).digest("base64url");
 }
 
-function serializeCookieValue(session) {
+function serializeCookieValue(session, remember = true) {
   const now = Date.now();
+  const ttl = remember ? THIRTY_DAYS_MS : 24 * 60 * 60 * 1000; // 24 hours if not remembered
   return JSON.stringify({
     email: session.email,
     tier: session.tier,
     iat: now,
-    exp: now + THIRTY_DAYS_MS,
+    exp: now + ttl,
   });
 }
 
@@ -48,10 +49,16 @@ function extractCookieValue(headers) {
   return "";
 }
 
-function createSessionCookie(session) {
-  const payload = base64UrlEncode(serializeCookieValue(session));
+function createSessionCookie(session, remember = true) {
+  const payload = base64UrlEncode(serializeCookieValue(session, remember));
   const signature = sign(payload);
-  return `${COOKIE_NAME}=${payload}.${signature}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${Math.floor(THIRTY_DAYS_MS / 1000)}`;
+  let cookie = `${COOKIE_NAME}=${payload}.${signature}; Path=/; HttpOnly; SameSite=Lax; Secure`;
+  
+  if (remember) {
+    cookie += `; Max-Age=${Math.floor(THIRTY_DAYS_MS / 1000)}`;
+  }
+  
+  return cookie;
 }
 
 function verifySessionCookie(headers) {

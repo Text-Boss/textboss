@@ -21,22 +21,43 @@ async function testActiveCoreEntitlement() {
         assert.equal(stored, "salt:hash");
         return true;
       },
-      createSessionCookie: (session) => {
+      createSessionCookie: (session, remember) => {
         assert.equal(session.email, "core@example.com");
         assert.equal(session.tier, "Core");
-        return "textboss_session=signed-cookie; Path=/; HttpOnly; SameSite=Lax";
+        assert.equal(remember, true);
+        return "textboss_session=signed-cookie; Max-Age=2592000";
       },
     }
   );
 
   const response = await handler({
     httpMethod: "POST",
-    body: JSON.stringify({ email: "Core@Example.com", password: "my-pass" }),
+    body: JSON.stringify({ email: "Core@Example.com", password: "my-pass", remember: true }),
   });
 
   assert.equal(response.statusCode, 200);
   assert.deepEqual(JSON.parse(response.body), { ok: true, tier: "Core", redirectTo: "/app.html" });
-  assert.equal(response.headers["set-cookie"], "textboss_session=signed-cookie; Path=/; HttpOnly; SameSite=Lax");
+  assert.equal(response.headers["set-cookie"], "textboss_session=signed-cookie; Max-Age=2592000");
+}
+
+async function testSessionOnlyLogin() {
+  const handler = makeHandler(
+    { email: "guest@example.com", entitled_tier: "Core", subscription_status: "active", password_hash: "s:h" },
+    {
+      createSessionCookie: (session, remember) => {
+        assert.equal(remember, false);
+        return "textboss_session=signed-cookie";
+      },
+    }
+  );
+
+  const response = await handler({
+    httpMethod: "POST",
+    body: JSON.stringify({ email: "guest@example.com", password: "any", remember: false }),
+  });
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.headers["set-cookie"], "textboss_session=signed-cookie");
 }
 
 async function testInactiveEntitlementDenied() {
@@ -162,6 +183,7 @@ async function testNotFoundReturnsDenied() {
 
 async function run() {
   await testActiveCoreEntitlement();
+  await testSessionOnlyLogin();
   await testInactiveEntitlementDenied();
   await testActiveEntitlementNormalizesTierAndStatus();
   await testDependencyFailureReturnsJsonError();
