@@ -158,9 +158,9 @@ if (arg === '--help' || arg === '-h') {
       `    ${f(...C.muted)}textboss --help${RST}       Show usage`,
       '',
       `  ${f(...C.cyan)}Access your tier${RST}`,
-      `    ${f(...C.amber)}Core${RST}   ${f(...C.muted)}https://textboss.co/access.html${RST}`,
-      `    ${f(...C.cyan)}Pro${RST}    ${f(...C.muted)}https://textboss.co/access.html${RST}`,
-      `    ${f(...C.purple)}Black${RST}  ${f(...C.muted)}https://textboss.co/access.html${RST}`,
+      `    ${f(...C.amber)}Core${RST}   ${f(...C.muted)}https://textboss.com.au/access.html${RST}`,
+      `    ${f(...C.cyan)}Pro${RST}    ${f(...C.muted)}https://textboss.com.au/access.html${RST}`,
+      `    ${f(...C.purple)}Black${RST}  ${f(...C.muted)}https://textboss.com.au/access.html${RST}`,
       '',
     ].join('\n')
   );
